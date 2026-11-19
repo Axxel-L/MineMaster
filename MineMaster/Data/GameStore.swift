@@ -8,9 +8,11 @@ import SwiftData
 @Observable
 @MainActor
 final class GameStore {
+    typealias DrawProvider = @MainActor (Booster, [CatalogItem]) -> [CatalogItem]
+
     private let container: ModelContainer
     private let context: ModelContext
-    private let engine = LootEngine()
+    private let drawProvider: DrawProvider
 
     private(set) var catalog: [CatalogItem] = []
     private(set) var owned: [String: Int] = [:]
@@ -20,10 +22,13 @@ final class GameStore {
     private(set) var isLoading = false
     private(set) var isOffline = false
     private(set) var loadError: AppError?
+    private(set) var isOpening = false
 
-    init(container: ModelContainer) {
+    init(container: ModelContainer, drawProvider: @escaping DrawProvider = GameStore.randomDraw) {
         self.container = container
         self.context = container.mainContext
+        self.drawProvider = drawProvider
+        reloadFromStore()
     }
 
     /// Nombre d'items distincts possédés.
@@ -48,10 +53,8 @@ final class GameStore {
     /// - Authors: Axel L.
     func bootstrap() async {
         reloadFromStore()
-        if catalog.isEmpty {
-            apply(remote: [:])
-            reloadFromStore()
-        }
+        apply(remote: [:])
+        reloadFromStore()
         if catalog.isEmpty {
             loadError = .decoding
             return
@@ -87,21 +90,26 @@ final class GameStore {
 
     /// Ouvre un booster, enregistre les résultats et retourne les tirages.
     ///
+    /// Une seule ouverture est acceptée tant que la session courante n'est pas
+    /// terminée par `endOpening()`.
+    ///
     /// - Parameter booster: Booster à ouvrir.
-    /// - Returns: Les cinq tirages, avec poussière gagnée et statut de nouveauté.
+    /// - Returns: Les cartes tirées, avec poussière gagnée et statut de nouveauté.
+    ///   Retourne `[]` si une ouverture est déjà en cours ou si le catalogue est vide.
     /// - Authors: Axel L.
     func open(_ booster: Booster) -> [DrawResult] {
-        guard !catalog.isEmpty else { return [] }
+        guard !isOpening, !catalog.isEmpty else { return [] }
 
-        var generator = SystemRandomNumberGenerator()
-        let drawn = engine.draw(from: catalog, booster: booster, using: &generator)
+        let drawn = drawProvider(booster, catalog)
         guard !drawn.isEmpty else { return [] }
+        isOpening = true
 
         let player = currentPlayer()
         var results: [DrawResult] = []
 
         for item in drawn {
-            let isNew = (owned[item.id] ?? 0) == 0
+            let previous = owned[item.id] ?? 0
+            let isNew = previous == 0
             if let record = collectionRecord(for: item.id) {
                 record.quantity += 1
                 record.lastObtainedAt = .now
@@ -109,6 +117,7 @@ final class GameStore {
                 context.insert(CollectionRecord(itemID: item.id))
             }
 
+            owned[item.id] = previous + 1
             let gained = isNew ? 0 : item.rarity.dustValue
             if gained > 0 {
                 player.dust += gained
@@ -122,21 +131,11 @@ final class GameStore {
         return results
     }
 
-    /// Fabrique un item absent de la collection en dépensant de la poussière.
+    /// Termine la session d'ouverture courante et autorise la suivante.
     ///
-    /// - Parameter item: Item à fabriquer.
-    /// - Returns: `true` si la fabrication a abouti.
     /// - Authors: Axel L.
-    @discardableResult
-    func craft(_ item: CatalogItem) -> Bool {
-        guard ownedCount(for: item) == 0, dust >= item.rarity.craftCost else { return false }
-
-        let player = currentPlayer()
-        player.dust -= item.rarity.craftCost
-        context.insert(CollectionRecord(itemID: item.id))
-        save()
-        reloadFromStore()
-        return true
+    func endOpening() {
+        isOpening = false
     }
 
     /// Efface la progression locale sans toucher au catalogue.
@@ -149,6 +148,7 @@ final class GameStore {
         player.dust = 0
         player.lastSyncAt = nil
         save()
+        isOpening = false
         reloadFromStore()
     }
 
@@ -221,6 +221,14 @@ final class GameStore {
 
     private func save() {
         try? context.save()
+    }
+
+    private static func randomDraw(
+        _ booster: Booster,
+        _ items: [CatalogItem]
+    ) -> [CatalogItem] {
+        var generator = SystemRandomNumberGenerator()
+        return LootEngine().draw(from: items, booster: booster, using: &generator)
     }
 
     private func prefixImages() {
