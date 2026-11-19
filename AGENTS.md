@@ -11,10 +11,12 @@ Avant de répondre ou de modifier quoi que ce soit :
 1. Lire et appliquer `.kilo/skills/caveman/SKILL.md` à chaque réponse.
    La voix caveman est le mode de communication par défaut, sans exception,
    jusqu'à ce que l'utilisateur écrive « stop caveman » ou « normal mode ».
-2. Lire `README.md` pour la stack et l'architecture.
-3. Lire `docs/CAHIER_DES_CHARGES.md` si la demande touche une fonctionnalité,
+2. Lire et appliquer `.kilo/skills/swiftui-design-skill/SKILL.md` avant toute
+   création ou refonte d'interface, puis respecter `docs/DESIGN_SYSTEM.md`.
+3. Lire `README.md` pour la stack et l'architecture.
+4. Lire `docs/CAHIER_DES_CHARGES.md` si la demande touche une fonctionnalité,
    une règle de jeu, la sécurité ou les données.
-4. Lire les fichiers concernés avant de les modifier.
+5. Lire les fichiers concernés avant de les modifier.
 
 Deux publics, deux documents :
 
@@ -51,6 +53,8 @@ résultat faux.
 - Toute entrée externe est validée : schéma, hôte, chemin, type MIME, taille.
 - Aucun secret, jeton ou donnée personnelle dans le code, les logs ou le dépôt.
 - Réseau : HTTPS uniquement, allowlist d'hôtes, charges utiles bornées.
+- Toute image distante affiche un squelette de chargement avant décodage.
+  Aucune zone d'image vide, même sans réponse du CDN.
 
 ### Commentaires
 
@@ -66,13 +70,12 @@ résultat faux.
 Exemple conforme :
 
 ```swift
-/// Fabrique un item absent de la collection en dépensant de la poussière.
+/// Ouvre un booster et retourne les cartes tirées.
 ///
-/// - Parameter item: Item à fabriquer.
-/// - Returns: `true` si la fabrication a abouti.
+/// - Parameter booster: Booster à ouvrir.
+/// - Returns: Les cartes tirées avec leur poussière.
 /// - Authors: Axel L.
-@discardableResult
-func craft(_ item: CatalogItem) -> Bool
+func open(_ booster: Booster) -> [DrawResult]
 ```
 
 ## 3. Git
@@ -92,7 +95,7 @@ Exemples :
 feat: verrouiller l'ouverture à un booster à la fois
 fix: empêcher le double gain de poussière sur un doublon
 core: injecter la session réseau dans ImagePipeline
-test: couvrir les invariants de poussière et de fabrication
+test: couvrir les invariants de poussière et d'ouverture
 ```
 
 ## 4. Tests
@@ -135,7 +138,7 @@ MineMasterTests/
 ├─ Support/     générateur déterministe, fixtures, URLProtocol de test, makeStore()
 ├─ Domain/      LootEngine, Rarity, Booster, ImagePolicy, SeedCatalog
 ├─ Data/        GameStore, ImagePipeline, CatalogAPI, Records
-└─ Features/    verrous d'ouverture et de fabrication
+└─ Features/    verrou d'ouverture, accueil, collection
 ```
 
 Conventions :
@@ -144,7 +147,7 @@ Conventions :
 - Nom de test : phrase française décrivant l'invariant, pas le nom de la méthode.
 - Structure : Arrange, Act, Assert.
 - Un test vérifie un invariant. Plusieurs `#expect` acceptés si le même scénario.
-- Les fixtures sont minimales et nommées. Pas de JSON de 99 items si 3 suffisent.
+- Les fixtures sont minimales et nommées. Pas de JSON de 230 items si 3 suffisent.
 - Chaque test doit échouer si l'invariant est cassé. Vérifier ce point en cassant
   volontairement le code une fois, localement.
 
@@ -181,14 +184,14 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 
 **CDN et images**
 
-- `ImagePolicy.url(for:)` accepte uniquement `item/<nom>.png` et
-  `block/<nom>.png`, en minuscules, chiffres et underscore.
+- `ImagePolicy.url(for:)` accepte `item/<nom>.png`, `block/<nom>.png` et
+  `entity/[<dossier>/]<nom>.png`, en minuscules, chiffres et underscore.
 - `ImagePolicy.url(for:)` refuse la traversée de chemin, les schémas, les hôtes,
   les requêtes, les majuscules et les extensions autres que `.png`.
 - `ImagePolicy.isAllowed(_:)` accepte uniquement HTTPS, l'hôte du CDN, le préfixe
   de version figée et aucune query.
 - Toutes les textures du catalogue embarqué produisent une URL autorisée.
-- Le catalogue embarqué charge ses 99 items et aucun item n'est perdu au décodage.
+- Le catalogue embarqué charge ses 230 items et aucun item n'est perdu au décodage.
 - `ImagePipeline` coalesce les requêtes simultanées sur la même URL en un seul
   appel réseau, puis sert le cache sans second appel.
 - `ImagePipeline` rejette un type MIME non image, un statut hors `200...299`,
@@ -204,37 +207,20 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 - Un doublon rapporte exactement `Rarity.dustValue` de sa rareté, une seule fois.
 - Plusieurs doublons dans une même ouverture cumulent exactement leurs valeurs.
 - La poussière ne devient jamais négative.
-- Une fabrication réussie retire exactement `Rarity.craftCost`, une seule fois.
-- Une fabrication refusée, item déjà possédé ou poussière insuffisante, ne change
-  ni la poussière ni la collection.
-- Deux fabrications simultanées du même item produisent un seul succès, un seul
-  enregistrement et un seul débit.
 
-**Fabrication**
+### 4.6 Prérequis et limites connues
 
-- Un seul item peut être fabriqué à la fois. Quatre appuis rapides produisent une
-  seule fabrication tant que la précédente n'est pas terminée.
-- Après la fin d'une fabrication, une nouvelle fabrication valide réussit.
-- Un item possédé ne peut pas être fabriqué.
-- Le coût est vérifié avant toute écriture.
+Le verrou d'ouverture vit dans `GameStore`. Les vues lisent `isOpening` ; elles
+ne portent jamais la règle métier.
 
-### 4.6 Prérequis connus
+Points restant à instrumenter avant d'ajouter les tests correspondants :
 
-Certains invariants ne sont pas testables sur le code actuel. Le test doit être
-écrit avec le contrat cible, puis le code corrigé dans le même travail.
-
-- `GameStore` n'a aucun verrou d'ouverture ni de fabrication. Les verrous vont
-  dans `GameStore` ou dans un contrôleur de session testable, pas dans la vue.
-- `BoostersView` déclenche `store.open` à chaque appui. La garde doit être
-  métier, pas seulement visuelle.
-- `OpeningView` ne notifie pas la fermeture de la session au store. Ajouter un
-  contrat de fin de session.
-- `ImagePipeline` a un `init` privé et une session fixe. Rendre l'initialisation
-  injectable pour les tests.
-- `CatalogAPI` utilise une session statique. Injecter la session ou un client.
-- `SeedCatalog.load()` lit `Bundle.main`. Accepter un `Bundle` en paramètre.
-- `GameStore.currentPlayer()` peut créer plusieurs enregistrements si l'appel est
-  concurrent. Le test de concurrence doit couvrir ce cas.
+- `CatalogAPI` utilise une session statique. Injecter la session ou un client
+  avant de tester les statuts, la taille et les erreurs réseau.
+- `GameStore.currentPlayer()` crée un enregistrement si aucun joueur n'existe.
+  Un test multi-instances sur le même conteneur doit couvrir l'unicité.
+- Le chargement des images est vérifié par les tests de `ImagePipeline`.
+  Le rendu SwiftUI du squelette n'est pas couvert par un test unitaire.
 
 ## 5. Definition of done
 

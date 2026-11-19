@@ -1,6 +1,6 @@
 # MineMaster
 
-Application iOS native de collection : ouvre des boosters, découvre des items Minecraft, complète ta collection et fabrique les pièces manquantes avec la poussière gagnée sur les doublons.
+Application iOS native de collection : ouvre des packs, découvre des items Minecraft et complète ta collection. La poussière gagnée sur les doublons servira plus tard.
 
 | Boosters | Ouverture | Collection | Profil |
 |---|---|---|---|
@@ -31,12 +31,12 @@ xcodebuild -project MineMaster.xcodeproj -scheme MineMaster \
 
 ## Fonctionnalités
 
-- 3 boosters (Commun, Rare, Légendaire), 5 cartes par ouverture, garanties par rareté
-- 5 raretés, 6 catégories, 99 items
-- Révélation animée carte par carte, option « Tout révéler », haptiques
+- 3 packs (Commun, Rare, Légendaire), 5 cartes par ouverture, garanties par rareté
+- 5 raretés, 7 catégories, 230 items (blocs, outils, livres enchantés, créatures)
+- Pack scellé à déchirer au doigt, révélation carte par carte au toucher, particules selon la rareté, haptiques
 - Collection avec recherche, filtres rareté/catégorie et filtre « possédés »
-- Fiche détail avec transition zoom
-- Doublons convertis en poussière, fabrication d'items manquants
+- Fiche détail en modal
+- Doublons convertis en poussière
 - Statistiques locales, réinitialisation, mentions légales
 - Skeletons de chargement, mode hors ligne avec catalogue en cache
 - Accessibilité : VoiceOver, Dynamic Type, Reduce Motion
@@ -68,6 +68,17 @@ MineMaster/
 - `ImagePipeline` coalesce les requêtes, valide les réponses (MIME, taille), met en cache mémoire et disque.
 - Le catalogue distant est fusionné avec les définitions locales, puis persisté.
 
+## Tests
+
+La cible `MineMasterTests` utilise Swift Testing, un conteneur SwiftData en mémoire et des sessions réseau de test.
+
+```bash
+xcodebuild test -project MineMaster.xcodeproj -scheme MineMaster \
+  -destination 'platform=iOS Simulator,name=<simulateur installé>'
+```
+
+Les conventions et les invariants obligatoires sont décrits dans [`AGENTS.md`](AGENTS.md).
+
 ## Sécurité et vie privée
 
 - HTTPS uniquement, ATS par défaut, aucune exception
@@ -82,11 +93,13 @@ MineMaster/
 - Pas de compte ni de synchronisation : la progression est locale
 - Économie non sécurisée côté serveur (projet pédagogique)
 - Français uniquement pour l'instant, chaînes prêtes pour un String Catalog
-- Pas encore de cible de tests automatisés
 
 ## Licences
 
+- Swift 6.0, Apache License 2.0, Apple
+- SwiftUI, SwiftData, Foundation, SDK iOS 26, Apple
 - Heroicons 2.2.0, MIT, © Tailwind Labs
+- minecraft-data 1.21.4, MIT, PrismarineJS
 - Textures et noms Minecraft, © Mojang Studios / Microsoft — projet non commercial et non affilié, assets non redistribués
 - SF Symbols, Apple
 
