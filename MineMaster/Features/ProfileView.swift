@@ -1,13 +1,17 @@
 import SwiftUI
 
-/// Profil : passeport de collection, raretés et réglages.
+/// Profil : collection, titres, raretés et réglages.
 ///
 /// - Authors: Axel L.
 struct ProfileView: View {
     @Environment(GameStore.self) private var store
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var showLegal = false
+    @State private var showTitles = false
+    @State private var showTutorial = false
     @State private var confirmReset = false
+    @State private var revealed = false
 
     var body: some View {
         NavigationStack {
@@ -18,19 +22,41 @@ struct ProfileView: View {
                     VStack(spacing: Theme.spaceM) {
                         header
                         passport
+                        titleCard
+                        categoryChart
                         rarityLedger
                         settings
                     }
                     .padding(.horizontal, Theme.spaceM)
                     .padding(.top, Theme.spaceM)
                     .padding(.bottom, 170)
+                    .animation(reduceMotion ? nil : .easeOut(duration: 0.7), value: revealed)
+                    .animation(reduceMotion ? nil : .snappy, value: store.uniqueCount)
                 }
                 .scrollIndicators(.hidden)
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(.hidden, for: .navigationBar)
+            .onAppear {
+                guard !revealed else { return }
+                revealed = true
+            }
             .sheet(isPresented: $showLegal) {
                 LegalView()
+            }
+            .sheet(isPresented: $showTitles) {
+                TitlesView()
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
+                    .presentationBackground(Theme.background)
+            }
+            .sheet(isPresented: $showTutorial) {
+                TutorialView {
+                    showTutorial = false
+                }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(Theme.background)
             }
             .confirmationDialog(
                 "Réinitialiser la collection ?",
@@ -41,7 +67,7 @@ struct ProfileView: View {
                     store.reset()
                 }
             } message: {
-                Text("Toute la progression et la poussière seront perdues. Cette action est irréversible.")
+                Text("La collection et la poussière seront effacées. Cette action est définitive.")
             }
         }
     }
@@ -49,16 +75,33 @@ struct ProfileView: View {
     private var header: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("PASSEPORT")
-                    .font(Theme.mono(9, weight: .bold))
-                    .tracking(1.8)
+                Text("Profil")
+                    .font(.footnote.weight(.semibold))
                     .foregroundStyle(Theme.textSecondary)
-                Text("Explorateur")
-                    .font(Theme.display(34, weight: .heavy))
-                    .foregroundStyle(Theme.textPrimary)
-                Text("Collectionneur de blocs, de bêtes et de reliques.")
+                HStack(spacing: 8) {
+                    Text(store.explorerTitle.displayName)
+                        .font(Theme.display(34, weight: .heavy))
+                        .foregroundStyle(Theme.textPrimary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .contentTransition(.interpolate)
+                    Button {
+                        showTitles = true
+                    } label: {
+                        Image(systemName: "questionmark")
+                            .font(.system(size: 12, weight: .black, design: .rounded))
+                            .frame(width: 28, height: 28)
+                            .background(Theme.surfaceRaised, in: Circle())
+                            .overlay(Circle().strokeBorder(Theme.stroke, lineWidth: 0.6))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.textSecondary)
+                    .accessibilityLabel("Expliquer les titres")
+                }
+                Text(store.explorerTitle.subtitle)
                     .font(.footnote)
                     .foregroundStyle(Theme.textSecondary)
+                    .contentTransition(.opacity)
             }
             Spacer()
             PixelAvatar()
@@ -71,10 +114,17 @@ struct ProfileView: View {
                 Circle()
                     .stroke(Theme.surfaceRaised, lineWidth: 9)
                 Circle()
-                    .trim(from: 0, to: store.progress)
+                    .trim(from: 0, to: revealed ? store.progress : 0)
                     .stroke(Theme.accent, style: StrokeStyle(lineWidth: 9, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                    .animation(.spring(response: 0.7, dampingFraction: 0.8), value: store.progress)
+                    .animation(
+                        reduceMotion ? nil : .spring(response: 0.9, dampingFraction: 0.85),
+                        value: revealed
+                    )
+                    .animation(
+                        reduceMotion ? nil : .spring(response: 0.7, dampingFraction: 0.8),
+                        value: store.progress
+                    )
                 VStack(spacing: 1) {
                     Text("\(Int(store.progress * 100))")
                         .font(Theme.display(25, weight: .heavy))
@@ -115,38 +165,176 @@ struct ProfileView: View {
         }
     }
 
-    private var rarityLedger: some View {
-        VStack(alignment: .leading, spacing: Theme.spaceM) {
+    private var titleCard: some View {
+        let current = store.explorerTitle
+        let next = store.nextExplorerTitle
+        let base = current.requiredItems
+        let target = next?.requiredItems ?? max(store.catalog.count, base)
+        let span = max(target - base, 1)
+        let filled = min(max(Double(store.uniqueCount - base) / Double(span), 0), 1)
+
+        return HStack(spacing: 12) {
+            Image(systemName: current.systemImage)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(current.tint)
+                .frame(width: 42, height: 42)
+                .background(current.tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 6) {
+                    Text("Titre")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Theme.textSecondary)
+                    Spacer()
+                    Text("\(store.uniqueCount) items")
+                        .font(.footnote)
+                        .foregroundStyle(Theme.textSecondary.opacity(0.7))
+                }
+                Text(current.displayName)
+                    .font(.headline)
+                    .foregroundStyle(current.tint)
+                if let next {
+                    ProgressView(value: revealed ? filled : 0)
+                        .tint(current.tint)
+                    Text("Plus que \(next.requiredItems - store.uniqueCount) items pour devenir \(next.displayName)")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                } else {
+                    Text("Tous les titres sont débloqués.")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                }
+            }
+        }
+        .padding(Theme.spaceM)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous)
+                .strokeBorder(current.tint.opacity(0.28), lineWidth: 0.6)
+        }
+    }
+
+    private var categoryChart: some View {
+        let stats = categoryStats
+
+        return VStack(alignment: .leading, spacing: Theme.spaceM) {
             HStack {
-                Text("RARETÉS")
-                    .font(Theme.mono(9, weight: .bold))
-                    .tracking(1.5)
+                Text("Par catégorie")
+                    .font(.footnote.weight(.semibold))
                     .foregroundStyle(Theme.textSecondary)
                 Spacer()
-                Text("POSSÉDÉ / TOTAL")
-                    .font(Theme.mono(8, weight: .bold))
-                    .tracking(0.8)
+                Text("Possédés")
+                    .font(.caption)
                     .foregroundStyle(Theme.textSecondary.opacity(0.7))
             }
 
-            ForEach(Rarity.allCases) { rarity in
-                let total = store.catalog.filter { $0.rarity == rarity }.count
-                let owned = store.catalog.filter {
-                    $0.rarity == rarity && store.ownedCount(for: $0) > 0
-                }.count
+            ForEach(Array(stats.enumerated()), id: \.element.id) { index, stat in
+                HStack(spacing: 10) {
+                    Image(systemName: stat.category.systemImage)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(stat.category.tint)
+                        .frame(width: 16)
+                    Text(stat.category.displayName)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(width: 92, alignment: .leading)
+                    ProgressView(value: revealed ? stat.fraction : 0)
+                        .tint(stat.category.tint)
+                        .animation(
+                            reduceMotion ? nil : .easeOut(duration: 0.55).delay(Double(index) * 0.045),
+                            value: revealed
+                        )
+                    Text("\(stat.owned)/\(stat.total)")
+                        .font(Theme.mono(9, weight: .bold))
+                        .foregroundStyle(Theme.textPrimary)
+                        .frame(width: 48, alignment: .trailing)
+                }
+            }
+        }
+        .padding(Theme.spaceM)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous)
+                .strokeBorder(Theme.stroke, lineWidth: 0.6)
+        }
+    }
+
+    private var categoryStats: [CategoryStat] {
+        var totals: [ItemCategory: Int] = [:]
+        var owned: [ItemCategory: Int] = [:]
+        for item in store.catalog {
+            totals[item.category, default: 0] += 1
+            if (store.owned[item.id] ?? 0) > 0 {
+                owned[item.category, default: 0] += 1
+            }
+        }
+        return ItemCategory.allCases.map { category in
+            let total = totals[category] ?? 0
+            let count = owned[category] ?? 0
+            return CategoryStat(
+                category: category,
+                owned: count,
+                total: total,
+                fraction: total == 0 ? 0 : Double(count) / Double(total)
+            )
+        }
+    }
+
+    private var rarityStats: [RarityStat] {
+        var totals: [Rarity: Int] = [:]
+        var owned: [Rarity: Int] = [:]
+        for item in store.catalog {
+            totals[item.rarity, default: 0] += 1
+            if (store.owned[item.id] ?? 0) > 0 {
+                owned[item.rarity, default: 0] += 1
+            }
+        }
+        return Rarity.allCases.map { rarity in
+            let total = totals[rarity] ?? 0
+            let count = owned[rarity] ?? 0
+            return RarityStat(
+                rarity: rarity,
+                owned: count,
+                total: total,
+                fraction: total == 0 ? 0 : Double(count) / Double(total)
+            )
+        }
+    }
+
+    private var rarityLedger: some View {
+        let stats = rarityStats
+
+        return VStack(alignment: .leading, spacing: Theme.spaceM) {
+            HStack {
+                Text("Par rareté")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Theme.textSecondary)
+                Spacer()
+                Text("Possédés")
+                    .font(.caption)
+                    .foregroundStyle(Theme.textSecondary.opacity(0.7))
+            }
+
+            ForEach(Array(stats.enumerated()), id: \.element.id) { index, stat in
                 HStack(spacing: 10) {
                     Circle()
-                        .fill(rarity.color)
+                        .fill(stat.rarity.color)
                         .frame(width: 7, height: 7)
-                    Text(rarity.displayName)
+                    Text(stat.rarity.displayName)
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                         .frame(width: 104, alignment: .leading)
-                    ProgressView(value: total == 0 ? 0 : Double(owned) / Double(total))
-                        .tint(rarity.color)
-                    Text("\(owned)/\(total)")
+                    ProgressView(value: revealed ? stat.fraction : 0)
+                        .tint(stat.rarity.color)
+                        .animation(
+                            reduceMotion ? nil : .easeOut(duration: 0.55).delay(Double(index) * 0.05),
+                            value: revealed
+                        )
+                    Text("\(stat.owned)/\(stat.total)")
                         .font(Theme.mono(9, weight: .bold))
                         .foregroundStyle(Theme.textPrimary)
                         .frame(width: 48, alignment: .trailing)
@@ -163,7 +351,11 @@ struct ProfileView: View {
 
     private var settings: some View {
         VStack(spacing: 0) {
-            settingsRow(title: "Mentions légales et licences", icon: "doc.text.fill") {
+            settingsRow(title: "Revoir le tutoriel", icon: "questionmark.circle.fill") {
+                showTutorial = true
+            }
+            divider
+            settingsRow(title: "Licences et crédits", icon: "doc.text.fill") {
                 showLegal = true
             }
             divider
@@ -209,10 +401,10 @@ struct ProfileView: View {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .frame(width: 24)
-                    .foregroundStyle(isDestructive ? .red : Theme.textSecondary)
+                    .foregroundStyle(isDestructive ? Theme.danger : Theme.textSecondary)
                 Text(title)
                     .font(.subheadline)
-                    .foregroundStyle(isDestructive ? .red : Theme.textPrimary)
+                    .foregroundStyle(isDestructive ? Theme.danger : Theme.textPrimary)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.bold))
@@ -222,6 +414,143 @@ struct ProfileView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+    }
+}
+
+private struct CategoryStat: Identifiable {
+    let category: ItemCategory
+    let owned: Int
+    let total: Int
+    let fraction: Double
+
+    var id: ItemCategory { category }
+}
+
+private struct RarityStat: Identifiable {
+    let rarity: Rarity
+    let owned: Int
+    let total: Int
+    let fraction: Double
+
+    var id: Rarity { rarity }
+}
+
+/// Explication des titres d'explorateur et de leurs seuils.
+///
+/// - Authors: Axel L.
+struct TitlesView: View {
+    @Environment(GameStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                ScreenBackground()
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: Theme.spaceM) {
+                        intro
+                        titleList
+                        note
+                    }
+                    .padding(Theme.spaceM)
+                    .padding(.bottom, Theme.spaceL)
+                }
+                .scrollIndicators(.hidden)
+            }
+            .navigationTitle("Titres")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Fermer") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+
+    private var intro: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Comment ça marche")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Theme.textSecondary)
+            Text("Les titres")
+                .font(Theme.display(27, weight: .heavy))
+                .foregroundStyle(Theme.textPrimary)
+            Text("Chaque titre se débloque avec un nombre d'items différents dans ta collection. Les doublons donnent de la poussière, mais ne font pas avancer le titre.")
+                .font(.footnote)
+                .foregroundStyle(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var titleList: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(ExplorerTitle.allCases.enumerated()), id: \.element.id) { index, title in
+                row(title)
+                if index < ExplorerTitle.allCases.count - 1 {
+                    Rectangle()
+                        .fill(Theme.stroke)
+                        .frame(height: 0.5)
+                        .padding(.leading, 64)
+                }
+            }
+        }
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous)
+                .strokeBorder(Theme.stroke, lineWidth: 0.6)
+        }
+    }
+
+    private func row(_ title: ExplorerTitle) -> some View {
+        let isCurrent = title == store.explorerTitle
+        let isUnlocked = store.uniqueCount >= title.requiredItems
+        let tint = isUnlocked ? title.tint : Theme.textSecondary
+
+        return HStack(spacing: 12) {
+            Image(systemName: isUnlocked ? title.systemImage : "lock.fill")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(tint)
+                .frame(width: 40, height: 40)
+                .background(tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title.displayName)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(isUnlocked ? Theme.textPrimary : Theme.textSecondary)
+                Text(title.requiredItems == 0 ? "Dès le premier item" : "\(title.requiredItems) items différents")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.textSecondary)
+            }
+
+            Spacer(minLength: 8)
+
+            if isCurrent {
+                Text("Actuel")
+                    .font(Theme.mono(8, weight: .bold))
+                    .tracking(0.8)
+                    .foregroundStyle(Theme.background)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(title.tint, in: Capsule())
+            } else if isUnlocked {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(title.tint)
+            }
+        }
+        .padding(12)
+        .background(isCurrent ? title.tint.opacity(0.08) : .clear)
+        .accessibilityElement(children: .combine)
+        .accessibilityValue(isCurrent ? "Titre actuel" : isUnlocked ? "Débloqué" : "Verrouillé")
+    }
+
+    private var note: some View {
+        Text("Les titres restent enregistrés sur cet appareil.")
+            .font(.caption2)
+            .foregroundStyle(Theme.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -362,14 +691,13 @@ struct LegalView: View {
 
     private var masthead: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("CRÉDITS & OPEN SOURCE")
-                .font(.system(size: 9, weight: .bold, design: .rounded))
-                .tracking(1.3)
+            Text("Crédits")
+                .font(.footnote.weight(.semibold))
                 .foregroundStyle(Theme.textSecondary)
-            Text("Sous le capot")
+            Text("Licences")
                 .font(Theme.display(30, weight: .heavy))
                 .foregroundStyle(Theme.textPrimary)
-            Text("MineMaster est un projet pédagogique non commercial, non affilié à Mojang Studios ni à Microsoft. Aucune bibliothèque tierce n'est liée au binaire.")
+            Text("MineMaster est un projet étudiant, sans lien avec Mojang ou Microsoft. L'application n'embarque aucune bibliothèque tierce.")
                 .font(.footnote)
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -378,9 +706,8 @@ struct LegalView: View {
 
     private var dependenciesSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("DÉPENDANCES & VERSIONS")
-                .font(.system(size: 9, weight: .bold, design: .rounded))
-                .tracking(1.2)
+            Text("Composants")
+                .font(.footnote.weight(.semibold))
                 .foregroundStyle(Theme.textSecondary)
 
             VStack(spacing: 0) {
@@ -433,11 +760,10 @@ struct LegalView: View {
 
     private var notice: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("MENTIONS")
-                .font(.system(size: 9, weight: .bold, design: .rounded))
-                .tracking(1.2)
+            Text("Mentions")
+                .font(.footnote.weight(.semibold))
                 .foregroundStyle(Theme.textSecondary)
-            Text("Minecraft, les noms d'items et les textures associées appartiennent à Mojang Studios et Microsoft. Les textures sont chargées à l'exécution depuis un CDN public et ne sont pas redistribuées dans l'application. Heroicons est distribué sous licence MIT par Tailwind Labs. Les icônes Apple et SF Symbols sont fournies par le SDK Apple. Aucune donnée personnelle n'est collectée.")
+            Text("Les noms et textures Minecraft appartiennent à Mojang et Microsoft. Les textures sont chargées depuis un CDN public, jamais copiées dans l'application. Heroicons est sous licence MIT. Aucune donnée personnelle n'est collectée.")
                 .font(.footnote)
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)

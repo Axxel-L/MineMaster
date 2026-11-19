@@ -48,6 +48,16 @@ final class GameStore {
         catalog.isEmpty ? 0 : Double(uniqueCount) / Double(catalog.count)
     }
 
+    /// Titre d'explorateur courant.
+    var explorerTitle: ExplorerTitle {
+        .current(for: uniqueCount)
+    }
+
+    /// Prochain titre à débloquer.
+    var nextExplorerTitle: ExplorerTitle? {
+        .next(for: uniqueCount)
+    }
+
     /// Quantité possédée pour un item donné.
     ///
     /// - Parameter item: Item évalué.

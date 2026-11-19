@@ -117,6 +117,37 @@ extension BoosterKind {
     }
 }
 
+extension ItemCategory {
+    /// Couleur d'accent de la catégorie.
+    var tint: Color {
+        switch self {
+        case .block: Color(red: 0.60, green: 0.62, blue: 0.62)
+        case .tool: Theme.copper
+        case .weapon: Theme.danger
+        case .armor: Color(red: 0.52, green: 0.68, blue: 0.84)
+        case .food: Color(red: 0.78, green: 0.70, blue: 0.28)
+        case .material: Theme.moss
+        case .special: Theme.accent
+        case .mob: Color(red: 0.34, green: 0.74, blue: 0.48)
+        }
+    }
+}
+
+extension ExplorerTitle {
+    /// Couleur d'accent du titre.
+    var tint: Color {
+        switch self {
+        case .novice: Theme.textSecondary
+        case .explorer: Color(red: 0.52, green: 0.68, blue: 0.84)
+        case .prospector: Theme.moss
+        case .collector: Color(red: 0.78, green: 0.70, blue: 0.28)
+        case .artisan: Theme.copper
+        case .legend: Color(red: 0.88, green: 0.28, blue: 0.25)
+        case .worldMaster: Theme.accent
+        }
+    }
+}
+
 /// Fond principal de l'application.
 ///
 /// - Authors: Axel L.

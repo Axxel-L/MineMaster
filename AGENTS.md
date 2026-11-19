@@ -215,6 +215,13 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 - Plusieurs doublons dans une même ouverture cumulent exactement leurs valeurs.
 - La poussière ne devient jamais négative.
 
+**Profil**
+
+- Les seuils de titres sont strictement croissants.
+- Le titre courant est le plus haut seuil atteint par les items uniques.
+- Le prochain titre est le premier seuil non atteint ; le titre maximal n'a pas
+  de suivant.
+
 ### 4.6 Prérequis et limites connues
 
 Le verrou d'ouverture vit dans `GameStore`. Les vues lisent `isOpening` ; elles
