@@ -68,6 +68,35 @@ struct GameStoreTests {
         #expect(try count(CollectionRecord.self, in: fixture.container) == 1)
     }
 
+    @Test("Un pack aléatoire respecte le type tiré")
+    func randomPackFiltersKind() throws {
+        let panda = Fixtures.item("panda", rarity: .rare, category: .mob)
+        let diamond = Fixtures.item("diamond", rarity: .rare)
+        let fixture = try makeStore(
+            items: [panda, diamond],
+            draw: { _, items in items },
+            boosterProvider: { _ in (.rare, .creatures) }
+        )
+
+        let open = try #require(fixture.store.openRandom())
+
+        #expect(open.kind == .creatures)
+        #expect(open.results.count == 1)
+        #expect(open.results.allSatisfy { $0.item.category == .mob })
+    }
+
+    @Test("Les tirages locaux sont comptés par item")
+    func localPullCountIsTracked() throws {
+        let item = Fixtures.item("diamond", rarity: .rare)
+        let fixture = try makeStore(items: [item], draw: { _, _ in [item] })
+
+        _ = fixture.store.open(.rare)
+        fixture.store.endOpening()
+        _ = fixture.store.open(.rare)
+
+        #expect(fixture.store.pullCount(for: item) == 2)
+    }
+
     @Test("Les items possédés restent récupérables après rechargement")
     func ownedItemsSurviveReload() throws {
         let item = Fixtures.item("diamond", rarity: .rare)

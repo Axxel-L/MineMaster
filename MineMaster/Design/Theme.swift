@@ -73,6 +73,50 @@ extension Booster {
     }
 }
 
+extension BoosterKind {
+    /// Couleur d'accent du type de pack, utilisée pour la lueur et les boutons.
+    var tint: Color {
+        switch self {
+        case .mixed: Theme.accent
+        case .creatures: Color(red: 0.34, green: 0.74, blue: 0.48)
+        case .weapons: Color(red: 0.88, green: 0.28, blue: 0.25)
+        case .armor: Color(red: 0.52, green: 0.68, blue: 0.84)
+        case .consumables: Color(red: 0.70, green: 0.46, blue: 0.92)
+        case .food: Color(red: 0.78, green: 0.70, blue: 0.28)
+        case .blocks: Color(red: 0.60, green: 0.62, blue: 0.62)
+        case .tools: Theme.copper
+        }
+    }
+
+    /// Libellé imprimé sur le pack pour annoncer son type.
+    var packLabel: String {
+        switch self {
+        case .mixed: "TOUS TYPES"
+        case .creatures: "CRÉATURES"
+        case .weapons: "ARMES"
+        case .armor: "ARMURES"
+        case .consumables: "CONSOMMABLES"
+        case .food: "NOURRITURE"
+        case .blocks: "BLOCS"
+        case .tools: "OUTILS"
+        }
+    }
+
+    /// Couleurs de feuille propres au type, du plus sombre au plus lumineux.
+    var foilColors: [Color] {
+        switch self {
+        case .mixed: [Color(red: 0.32, green: 0.17, blue: 0.04), Color(red: 0.76, green: 0.48, blue: 0.14), Color(red: 0.99, green: 0.83, blue: 0.45)]
+        case .creatures: [Color(red: 0.04, green: 0.20, blue: 0.14), Color(red: 0.12, green: 0.46, blue: 0.30), Color(red: 0.48, green: 0.84, blue: 0.55)]
+        case .weapons: [Color(red: 0.24, green: 0.04, blue: 0.07), Color(red: 0.58, green: 0.10, blue: 0.16), Color(red: 0.94, green: 0.40, blue: 0.30)]
+        case .armor: [Color(red: 0.10, green: 0.14, blue: 0.20), Color(red: 0.32, green: 0.42, blue: 0.54), Color(red: 0.78, green: 0.86, blue: 0.92)]
+        case .consumables: [Color(red: 0.16, green: 0.05, blue: 0.24), Color(red: 0.40, green: 0.16, blue: 0.56), Color(red: 0.80, green: 0.52, blue: 0.96)]
+        case .food: [Color(red: 0.16, green: 0.16, blue: 0.04), Color(red: 0.46, green: 0.42, blue: 0.10), Color(red: 0.90, green: 0.82, blue: 0.38)]
+        case .blocks: [Color(red: 0.09, green: 0.10, blue: 0.11), Color(red: 0.34, green: 0.36, blue: 0.38), Color(red: 0.72, green: 0.74, blue: 0.74)]
+        case .tools: [Color(red: 0.22, green: 0.10, blue: 0.04), Color(red: 0.58, green: 0.30, blue: 0.12), Color(red: 0.96, green: 0.64, blue: 0.30)]
+        }
+    }
+}
+
 /// Fond principal de l'application.
 ///
 /// - Authors: Axel L.

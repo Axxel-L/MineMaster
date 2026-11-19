@@ -1,12 +1,11 @@
 import SwiftUI
 
-/// Accueil : choix du pack, pack scellé et progression.
+/// Accueil : pack mystère, types possibles et progression.
 ///
 /// - Authors: Axel L.
 struct BoostersView: View {
     @Environment(GameStore.self) private var store
 
-    @State private var selected: Booster = .common
     @State private var isPresentingPack = false
 
     var body: some View {
@@ -22,8 +21,8 @@ struct BoostersView: View {
                     } else if let error = store.loadError {
                         errorCard(error)
                     } else {
-                        selector
                         hero
+                        typesPreview
                         collectionLedger
                     }
                     if store.isOffline {
@@ -40,7 +39,7 @@ struct BoostersView: View {
             }
         }
         .fullScreenCover(isPresented: $isPresentingPack) {
-            PackOpeningView(booster: selected)
+            PackOpeningView()
         }
     }
 
@@ -59,7 +58,7 @@ struct BoostersView: View {
                 Spacer()
                 dustPill
             }
-            Text("Ouvre un pack. Révèle cinq pièces. Complète le monde.")
+            Text("Un pack mystère. Cinq pièces. Le monde décide de ta rareté.")
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -86,11 +85,11 @@ struct BoostersView: View {
         VStack(spacing: Theme.spaceL) {
             ZStack {
                 Circle()
-                    .fill(selected.tint.opacity(0.18))
+                    .fill(BoosterKind.mixed.tint.opacity(0.18))
                     .frame(width: 250, height: 250)
                     .blur(radius: 38)
 
-                BoosterPackArt(booster: selected)
+                BoosterPackArt(booster: .rare, kind: .mixed, title: "Pack Mystère")
                     .scaleEffect(0.82)
                     .frame(width: 214, height: 296)
                     .rotation3DEffect(.degrees(-5), axis: (x: 0, y: 1, z: 0))
@@ -99,7 +98,7 @@ struct BoostersView: View {
                         isPresentingPack = true
                     }
                     .accessibilityAddTraits(.isButton)
-                    .accessibilityHint("Ouvre l'écran de dézippage")
+                    .accessibilityHint("Ouvre l'écran de déchirure")
 
             }
             .frame(height: 306)
@@ -117,9 +116,9 @@ struct BoostersView: View {
                 .padding(.vertical, 13)
             }
             .buttonStyle(.glassProminent)
-            .tint(selected.tint)
+            .tint(BoosterKind.mixed.tint)
             .disabled(store.isOpening)
-            .accessibilityHint("Ouvre \(selected.displayName)")
+            .accessibilityHint("Ouvre un pack mystère")
         }
         .padding(Theme.spaceM)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous))
@@ -129,27 +128,58 @@ struct BoostersView: View {
         }
     }
 
-    private var selector: some View {
+    private var typesPreview: some View {
         VStack(alignment: .leading, spacing: Theme.spaceS) {
-            Text("CHOISIS TON PACK")
-                .font(Theme.mono(10, weight: .bold))
-                .tracking(1.5)
-                .foregroundStyle(Theme.textSecondary)
-
-            HStack(spacing: Theme.spaceS) {
-                ForEach(Booster.allCases) { booster in
-                    Button {
-                        withAnimation(.spring(response: 0.38, dampingFraction: 0.82)) {
-                            selected = booster
-                        }
-                    } label: {
-                        MiniBooster(booster: booster, isSelected: selected == booster)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(selected == booster ? .isSelected : [])
-                }
+            HStack {
+                Text("PACKS PAR TYPE")
+                    .font(Theme.mono(10, weight: .bold))
+                    .tracking(1.5)
+                    .foregroundStyle(Theme.textSecondary)
+                Spacer()
+                Text("TIRAGE ALÉATOIRE")
+                    .font(Theme.mono(8, weight: .bold))
+                    .tracking(0.8)
+                    .foregroundStyle(Theme.textSecondary.opacity(0.6))
             }
+
+            ScrollView(.horizontal) {
+                HStack(spacing: 10) {
+                    ForEach(BoosterKind.allCases.filter { $0 != .mixed }) { kind in
+                        kindCard(kind)
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+            .scrollIndicators(.hidden)
         }
+    }
+
+    private func kindCard(_ kind: BoosterKind) -> some View {
+        VStack(spacing: 10) {
+            BoosterPackArt(booster: .rare, kind: kind)
+                .scaleEffect(0.43)
+                .frame(width: 108, height: 151)
+                .accessibilityHidden(true)
+
+            HStack(spacing: 5) {
+                Image(systemName: kind.systemImage)
+                    .font(.system(size: 10, weight: .bold))
+                Text(kind.packLabel)
+                    .font(Theme.mono(9, weight: .bold))
+                    .tracking(0.8)
+            }
+            .foregroundStyle(kind.tint)
+        }
+        .frame(width: 128)
+        .padding(.vertical, 12)
+        .background(kind.tint.opacity(0.08), in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
+                .strokeBorder(kind.tint.opacity(0.30), lineWidth: 0.6)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Pack \(kind.displayName)")
+        .accessibilityValue(kind.subtitle)
     }
 
     private var collectionLedger: some View {
@@ -260,49 +290,6 @@ struct BoostersView: View {
         .overlay {
             RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous)
                 .strokeBorder(Theme.stroke, lineWidth: 0.6)
-        }
-    }
-}
-
-private struct MiniBooster: View {
-    let booster: Booster
-    let isSelected: Bool
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: booster.foilColors,
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                CrimpedEdge()
-                    .frame(width: 46, height: 8)
-                    .clipped()
-                    .offset(y: -18)
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(.black.opacity(0.5))
-                    .frame(width: 28, height: 4)
-                    .offset(y: 20)
-            }
-            .frame(height: 62)
-
-            Text(booster.displayName)
-                .font(Theme.mono(9, weight: .bold))
-                .tracking(0.6)
-                .foregroundStyle(isSelected ? Theme.textPrimary : Theme.textSecondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-        }
-        .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(isSelected ? Theme.surfaceRaised : Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
-                .strokeBorder(isSelected ? booster.tint.opacity(0.8) : Theme.stroke, lineWidth: isSelected ? 1.2 : 0.5)
         }
     }
 }

@@ -59,7 +59,8 @@ struct StoreFixture {
 func makeStore(
     items: [CatalogItem] = [],
     dust: Int = 0,
-    draw: @escaping GameStore.DrawProvider = { _, _ in [] }
+    draw: @escaping GameStore.DrawProvider = { _, _ in [] },
+    boosterProvider: @escaping GameStore.BoosterProvider = { _ in (.common, .mixed) }
 ) throws -> StoreFixture {
     let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
     let container = try ModelContainer(
@@ -82,7 +83,11 @@ func makeStore(
     try context.save()
 
     return StoreFixture(
-        store: GameStore(container: container, drawProvider: draw),
+        store: GameStore(
+            container: container,
+            drawProvider: draw,
+            boosterProvider: boosterProvider
+        ),
         container: container
     )
 }

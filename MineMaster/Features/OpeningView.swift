@@ -3,6 +3,7 @@ import SwiftUI
 struct OpeningSession: Identifiable {
     let id = UUID()
     let booster: Booster
+    let kind: BoosterKind
     let results: [DrawResult]
 }
 
@@ -10,8 +11,6 @@ struct OpeningSession: Identifiable {
 ///
 /// - Authors: Axel L.
 struct PackOpeningView: View {
-    let booster: Booster
-
     @Environment(GameStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var session: OpeningSession?
@@ -44,7 +43,7 @@ struct PackOpeningView: View {
                         .font(Theme.mono(9, weight: .bold))
                         .tracking(1.6)
                         .foregroundStyle(Theme.textSecondary)
-                    Text(booster.displayName)
+                    Text("Pack Mystère")
                         .font(Theme.display(27))
                         .foregroundStyle(Theme.textPrimary)
                 }
@@ -66,7 +65,7 @@ struct PackOpeningView: View {
 
             Spacer(minLength: Theme.spaceS)
 
-            InteractiveBoosterPack(booster: booster, onOpened: openPack)
+            InteractiveBoosterPack(booster: .rare, kind: .mixed, title: "Pack Mystère", onOpened: openPack)
                 .padding(.horizontal, 32)
 
             if let errorMessage {
@@ -82,12 +81,11 @@ struct PackOpeningView: View {
     }
 
     private func openPack() {
-        let results = store.open(booster)
-        guard !results.isEmpty else {
+        guard let open = store.openRandom() else {
             errorMessage = "Impossible d'ouvrir ce pack. Vérifie que le catalogue est chargé."
             return
         }
-        session = OpeningSession(booster: booster, results: results)
+        session = OpeningSession(booster: open.booster, kind: open.kind, results: open.results)
     }
 }
 
@@ -166,10 +164,14 @@ struct OpeningView: View {
     private var topBar: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("RÉVÉLATION")
-                    .font(Theme.mono(9, weight: .bold))
-                    .tracking(1.6)
-                    .foregroundStyle(Theme.textSecondary)
+                HStack(spacing: 5) {
+                    Image(systemName: session.kind.systemImage)
+                        .font(.system(size: 9, weight: .bold))
+                    Text("RÉVÉLATION · \(session.kind.displayName.uppercased())")
+                        .font(Theme.mono(9, weight: .bold))
+                        .tracking(1.6)
+                }
+                .foregroundStyle(session.kind.tint)
                 Text("CARTE \(index + 1) / \(session.results.count)")
                     .font(Theme.display(24))
                     .foregroundStyle(Theme.textPrimary)

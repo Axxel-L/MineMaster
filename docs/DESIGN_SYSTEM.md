@@ -31,12 +31,33 @@ Espacement : 4, 8, 16, 24, 32, 48. Rayons : 10, 16, 24.
 
 ## Anatomie du pack
 
-1. Corps foil avec dégradé propre à la rareté du pack.
+1. Corps foil avec dégradé propre au type du pack, ou à la rareté si le type
+   n'est pas connu (pack mystère).
 2. Grain pixel discret, jamais une illustration générique.
 3. Bande crantée en haut et en bas, comme un sachet scellé.
 4. Ligne de perforation et languette « Tire ici ».
 5. Le pack se déchire au doigt ou via le bouton explicite.
 6. Le pack s'ouvre uniquement après un geste explicite.
+
+## Identité des packs par type
+
+Chaque `BoosterKind` porte sa propre identité visuelle, exposée dans
+`Theme.swift` :
+
+| Propriété | Rôle |
+|---|---|
+| `foilColors` | Dégradé foil du corps du pack, trois teintes |
+| `tint` | Lueur, boutons et accents du type |
+| `systemImage` | Icône imprimée sur le pack et dans l'en-tête de révélation |
+| `packLabel` | Bande de type imprimée sous le titre du pack |
+
+Palettes : créatures vert forêt, armes rouge brique, armures acier bleuté,
+consommables violet-magenta, nourriture blé olive, blocs pierre, outils cuivre,
+pack mystère ambre. Chaque teinte reste distincte des voisines et lisible avec
+le texte noir du pack.
+
+La galerie de l'accueil affiche un mini pack par type. L'icône et le libellé
+restent lisibles hors du pack réduit. Le pack mystère affiche `TOUS TYPES`.
 
 ## Révélation
 

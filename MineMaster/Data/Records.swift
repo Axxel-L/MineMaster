@@ -83,12 +83,14 @@ final class PlayerRecord {
 final class OpeningRecord {
     var id: UUID
     var boosterRaw: String
+    var kindRaw: String = BoosterKind.mixed.rawValue
     var openedAt: Date
     var itemIDs: [String]
 
-    init(booster: Booster, itemIDs: [String]) {
+    init(booster: Booster, kind: BoosterKind = .mixed, itemIDs: [String]) {
         id = UUID()
         boosterRaw = booster.rawValue
+        kindRaw = kind.rawValue
         openedAt = .now
         self.itemIDs = itemIDs
     }

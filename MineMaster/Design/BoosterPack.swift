@@ -5,7 +5,17 @@ import SwiftUI
 /// - Authors: Axel L.
 struct BoosterPackArt: View {
     let booster: Booster
+    var kind: BoosterKind? = nil
     var tearProgress: CGFloat = 0
+    var title: String? = nil
+
+    private var tint: Color {
+        kind?.tint ?? booster.tint
+    }
+
+    private var foilColors: [Color] {
+        kind?.foilColors ?? booster.foilColors
+    }
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -33,7 +43,7 @@ struct BoosterPackArt: View {
         }
         .frame(width: 260, height: 352)
         .rotationEffect(.degrees(-1.5))
-        .shadow(color: booster.tint.opacity(0.35), radius: 28, y: 18)
+        .shadow(color: tint.opacity(0.35), radius: 28, y: 18)
     }
 
     private var packBody: some View {
@@ -41,7 +51,7 @@ struct BoosterPackArt: View {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(
                     LinearGradient(
-                        colors: booster.foilColors,
+                        colors: foilColors,
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -69,12 +79,12 @@ struct BoosterPackArt: View {
                 }
                 .foregroundStyle(.black.opacity(0.52))
                 .padding(.horizontal, 20)
-                .padding(.top, 26)
+                .padding(.top, 44)
 
                 Spacer(minLength: 8)
 
-                PackMotif()
-                    .frame(height: 120)
+                PackMotif(systemImage: kind?.systemImage ?? "cube.fill")
+                    .frame(height: 108)
 
                 Text("MINE")
                     .font(.system(size: 44, weight: .black, design: .rounded))
@@ -86,6 +96,29 @@ struct BoosterPackArt: View {
                     .tracking(2.2)
                     .foregroundStyle(.black.opacity(0.72))
                     .padding(.top, -4)
+
+                if let kind {
+                    HStack(spacing: 5) {
+                        Image(systemName: kind.systemImage)
+                            .font(.system(size: 9, weight: .black))
+                        Text(kind.packLabel)
+                            .font(.system(size: 9, weight: .black, design: .rounded))
+                            .tracking(1.2)
+                    }
+                    .foregroundStyle(.black.opacity(0.74))
+                    .padding(.horizontal, 11)
+                    .padding(.vertical, 5)
+                    .background(.white.opacity(0.42), in: Capsule())
+                    .overlay(Capsule().strokeBorder(.black.opacity(0.18), lineWidth: 0.6))
+                    .padding(.top, 6)
+                    .accessibilityLabel("Type \(kind.displayName)")
+                }
+
+                Text((title ?? booster.displayName).uppercased())
+                    .font(.system(size: 9, weight: .black, design: .rounded))
+                    .tracking(1.3)
+                    .foregroundStyle(.black.opacity(0.52))
+                    .padding(.top, 2)
 
                 Spacer(minLength: 8)
 
@@ -164,18 +197,20 @@ struct TearStrip: View {
 }
 
 private struct PackMotif: View {
+    var systemImage: String = "cube.fill"
+
     var body: some View {
         ZStack {
             Circle()
                 .fill(Color.black.opacity(0.13))
                 .frame(width: 130, height: 130)
 
-            Image(systemName: "cube.fill")
+            Image(systemName: systemImage)
                 .font(.system(size: 52, weight: .bold))
                 .foregroundStyle(.white.opacity(0.88))
                 .shadow(color: .black.opacity(0.35), radius: 0, x: 3, y: 3)
 
-            Image(systemName: "hammer.fill")
+            Image(systemName: systemImage == "cube.fill" ? "hammer.fill" : "cube.fill")
                 .font(.system(size: 25, weight: .bold))
                 .foregroundStyle(.black.opacity(0.62))
                 .rotationEffect(.degrees(-28))
@@ -219,6 +254,8 @@ private struct PixelFoil: View {
 /// - Authors: Axel L.
 struct InteractiveBoosterPack: View {
     let booster: Booster
+    var kind: BoosterKind? = nil
+    var title: String? = nil
     let onOpened: () -> Void
 
     @State private var tear: CGFloat = 0
@@ -226,7 +263,7 @@ struct InteractiveBoosterPack: View {
 
     var body: some View {
         VStack(spacing: 18) {
-            BoosterPackArt(booster: booster, tearProgress: tear)
+            BoosterPackArt(booster: booster, kind: kind, tearProgress: tear, title: title)
                 .scaleEffect(isOpened ? 1.04 : 1)
                 .opacity(isOpened ? 0 : 1)
                 .contentShape(Rectangle())
@@ -247,7 +284,7 @@ struct InteractiveBoosterPack: View {
                 .padding(.vertical, 13)
             }
             .buttonStyle(.glassProminent)
-            .tint(booster.tint)
+            .tint(kind?.tint ?? booster.tint)
             .accessibilityHint("Ouvre le pack et révèle les cartes")
 
             Text("GLISSE LE PACK VERS LE BAS POUR DÉCHIRER")

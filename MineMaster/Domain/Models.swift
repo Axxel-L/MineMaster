@@ -205,6 +205,93 @@ enum Booster: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+/// Type de contenu ciblé par un booster.
+///
+/// - Authors: Axel L.
+enum BoosterKind: String, CaseIterable, Codable, Sendable, Identifiable {
+    case mixed
+    case creatures
+    case weapons
+    case armor
+    case consumables
+    case food
+    case blocks
+    case tools
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .mixed: "Mélangé"
+        case .creatures: "Créatures"
+        case .weapons: "Armes"
+        case .armor: "Armures"
+        case .consumables: "Consommables"
+        case .food: "Nourriture"
+        case .blocks: "Blocs"
+        case .tools: "Outils"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .mixed: "Un peu de tout le monde."
+        case .creatures: "Des spécimens à collectionner."
+        case .weapons: "Des lames et des projectiles."
+        case .armor: "De quoi survivre au premier coup."
+        case .consumables: "Des potions et des objets à usage unique."
+        case .food: "De quoi tenir jusqu'au prochain biome."
+        case .blocks: "Les matériaux du monde."
+        case .tools: "Les outils qui font avancer la collection."
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .mixed: "sparkles"
+        case .creatures: "pawprint.fill"
+        case .weapons: "shield.fill"
+        case .armor: "shield.lefthalf.filled"
+        case .consumables: "flask.fill"
+        case .food: "leaf.fill"
+        case .blocks: "cube.fill"
+        case .tools: "hammer.fill"
+        }
+    }
+
+    /// Filtre le catalogue sur le contenu de ce booster.
+    ///
+    /// - Parameter items: Catalogue complet.
+    /// - Returns: Les items compatibles, ou le catalogue complet pour `.mixed`.
+    /// - Authors: Axel L.
+    func filter(_ items: [CatalogItem]) -> [CatalogItem] {
+        guard let categories = categories else { return items }
+        return items.filter { categories.contains($0.category) }
+    }
+
+    private var categories: Set<ItemCategory>? {
+        switch self {
+        case .mixed: nil
+        case .creatures: [.mob]
+        case .weapons: [.weapon]
+        case .armor: [.armor]
+        case .consumables: [.food, .special]
+        case .food: [.food]
+        case .blocks: [.block]
+        case .tools: [.tool]
+        }
+    }
+}
+
+/// Résultat complet d'une ouverture aléatoire.
+///
+/// - Authors: Axel L.
+struct BoosterOpen: Sendable {
+    let booster: Booster
+    let kind: BoosterKind
+    let results: [DrawResult]
+}
+
 /// Erreur applicative exposable à l'interface.
 ///
 /// - Authors: Axel L.

@@ -9,10 +9,12 @@ import SwiftData
 @MainActor
 final class GameStore {
     typealias DrawProvider = @MainActor (Booster, [CatalogItem]) -> [CatalogItem]
+    typealias BoosterProvider = @MainActor ([CatalogItem]) -> (Booster, BoosterKind)
 
     private let container: ModelContainer
     private let context: ModelContext
     private let drawProvider: DrawProvider
+    private let boosterProvider: BoosterProvider
 
     private(set) var catalog: [CatalogItem] = []
     private(set) var owned: [String: Int] = [:]
@@ -23,11 +25,18 @@ final class GameStore {
     private(set) var isOffline = false
     private(set) var loadError: AppError?
     private(set) var isOpening = false
+    private(set) var isBootstrapped = false
+    private(set) var pullsByItem: [String: Int] = [:]
 
-    init(container: ModelContainer, drawProvider: @escaping DrawProvider = GameStore.randomDraw) {
+    init(
+        container: ModelContainer,
+        drawProvider: @escaping DrawProvider = GameStore.randomDraw,
+        boosterProvider: @escaping BoosterProvider = GameStore.randomBooster
+    ) {
         self.container = container
         self.context = container.mainContext
         self.drawProvider = drawProvider
+        self.boosterProvider = boosterProvider
         reloadFromStore()
     }
 
@@ -97,10 +106,11 @@ final class GameStore {
     /// - Returns: Les cartes tirées, avec poussière gagnée et statut de nouveauté.
     ///   Retourne `[]` si une ouverture est déjà en cours ou si le catalogue est vide.
     /// - Authors: Axel L.
-    func open(_ booster: Booster) -> [DrawResult] {
+    func open(_ booster: Booster, kind: BoosterKind = .mixed) -> [DrawResult] {
         guard !isOpening, !catalog.isEmpty else { return [] }
 
-        let drawn = drawProvider(booster, catalog)
+        let pool = kind.filter(catalog)
+        let drawn = drawProvider(booster, pool)
         guard !drawn.isEmpty else { return [] }
         isOpening = true
 
@@ -125,10 +135,23 @@ final class GameStore {
             results.append(DrawResult(item: item, dust: gained, isNew: isNew))
         }
 
-        context.insert(OpeningRecord(booster: booster, itemIDs: drawn.map(\.id)))
+        context.insert(OpeningRecord(booster: booster, kind: kind, itemIDs: drawn.map(\.id)))
         save()
         reloadFromStore()
         return results
+    }
+
+    /// Ouvre un booster aléatoire, avec un type et une rareté tirés.
+    ///
+    /// - Returns: Le booster choisi, son type et les cartes, ou `nil` si une
+    ///   ouverture est déjà en cours ou si le tirage est vide.
+    /// - Authors: Axel L.
+    func openRandom() -> BoosterOpen? {
+        guard !isOpening, !catalog.isEmpty else { return nil }
+        let pick = boosterProvider(catalog)
+        let results = open(pick.0, kind: pick.1)
+        guard !results.isEmpty else { return nil }
+        return BoosterOpen(booster: pick.0, kind: pick.1, results: results)
     }
 
     /// Termine la session d'ouverture courante et autorise la suivante.
@@ -221,6 +244,19 @@ final class GameStore {
 
     private func save() {
         try? context.save()
+    }
+
+    private static func randomBooster(_ catalog: [CatalogItem]) -> (Booster, BoosterKind) {
+        let kinds = BoosterKind.allCases.filter { $0.filter(catalog).count >= 5 }
+        let kind = kinds.randomElement() ?? .mixed
+        let roll = Int.random(in: 0..<100)
+        let booster: Booster
+        switch roll {
+        case ..<60: booster = .common
+        case ..<90: booster = .rare
+        default: booster = .legendary
+        }
+        return (booster, kind)
     }
 
     private static func randomDraw(
