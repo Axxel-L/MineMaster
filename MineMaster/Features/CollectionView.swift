@@ -7,8 +7,7 @@ struct CollectionView: View {
     @State private var rarity: Rarity?
     @State private var category: ItemCategory?
     @State private var ownedOnly = false
-
-    @Namespace private var zoom
+    @State private var selectedItem: CatalogItem?
 
     private let columns = [GridItem(.adaptive(minimum: 104), spacing: 12)]
 
@@ -57,9 +56,14 @@ struct CollectionView: View {
             }
             .navigationTitle("Collection")
             .navigationBarTitleDisplayMode(.large)
-            .navigationDestination(for: CatalogItem.self) { item in
-                ItemDetailView(item: item)
-                    .navigationTransition(.zoom(sourceID: item.id, in: zoom))
+            .sheet(item: $selectedItem) { item in
+                NavigationStack {
+                    ItemDetailView(item: item)
+                }
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(32)
+                .presentationBackground(Theme.background)
             }
         }
     }
@@ -101,7 +105,8 @@ struct CollectionView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
-        .glassEffect(.regular, in: Capsule())
+        .background(Theme.surface, in: Capsule())
+        .overlay(Capsule().strokeBorder(Theme.stroke, lineWidth: 0.5))
     }
 
     private var filters: some View {
@@ -143,11 +148,13 @@ struct CollectionView: View {
 
     private func cell(_ item: CatalogItem) -> some View {
         let count = store.ownedCount(for: item)
-        return NavigationLink(value: item) {
+        return Button {
+            selectedItem = item
+        } label: {
             VStack(spacing: 8) {
                 ItemImageView(item: item, size: 58)
                 Text(item.displayName)
-                    .font(.caption.weight(.semibold))
+                    .font(Theme.mono(9, weight: .semibold))
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
                     .foregroundStyle(Theme.textPrimary)
@@ -165,14 +172,17 @@ struct CollectionView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(12)
-            .glassEffect(
-                .regular.tint(item.rarity.color.opacity(count > 0 ? 0.16 : 0.05)),
-                in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-            )
-            .opacity(count > 0 ? 1 : 0.5)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
+                    .strokeBorder(
+                        count > 0 ? item.rarity.color.opacity(0.34) : Theme.stroke,
+                        lineWidth: count > 0 ? 0.9 : 0.5
+                    )
+            }
+            .opacity(count > 0 ? 1 : 0.55)
         }
         .buttonStyle(.plain)
-        .matchedTransitionSource(id: item.id, in: zoom)
         .accessibilityLabel("\(item.displayName), \(item.rarity.displayName), \(count) possédés")
     }
 }

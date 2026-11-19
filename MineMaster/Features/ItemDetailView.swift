@@ -4,10 +4,9 @@ struct ItemDetailView: View {
     let item: CatalogItem
 
     @Environment(GameStore.self) private var store
-    @State private var crafted = false
+    @Environment(\.dismiss) private var dismiss
 
     private var count: Int { store.ownedCount(for: item) }
-    private var shortfall: Int { max(0, item.rarity.craftCost - store.dust) }
 
     var body: some View {
         ZStack {
@@ -17,7 +16,6 @@ struct ItemDetailView: View {
                 VStack(spacing: 18) {
                     hero
                     infoCard
-                    craftSection
                 }
                 .padding(20)
                 .padding(.bottom, 24)
@@ -26,21 +24,32 @@ struct ItemDetailView: View {
         }
         .navigationTitle(item.displayName)
         .navigationBarTitleDisplayMode(.inline)
-        .sensoryFeedback(.success, trigger: crafted)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Fermer") {
+                    dismiss()
+                }
+            }
+        }
     }
 
     private var hero: some View {
         VStack(spacing: 10) {
-            ItemImageView(item: item, size: 150)
-                .shadow(color: item.rarity.color.opacity(0.4), radius: 24)
+            if item.category == .mob {
+                MobSpecimen(item: item, size: 230)
+            } else {
+                ItemImageView(item: item, size: 150)
+                    .shadow(color: item.rarity.color.opacity(0.4), radius: 24)
+            }
             RarityBadge(rarity: item.rarity)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 28)
-        .glassEffect(
-            .regular.tint(item.rarity.color.opacity(0.20)),
-            in: RoundedRectangle(cornerRadius: 32, style: .continuous)
-        )
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous)
+                .strokeBorder(item.rarity.color.opacity(0.34), lineWidth: 0.8)
+        }
     }
 
     private var infoCard: some View {
@@ -54,7 +63,11 @@ struct ItemDetailView: View {
             infoRow("Possédés", value: "\(count)", icon: "square.stack.3d.up.fill")
         }
         .padding(16)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
+                .strokeBorder(Theme.stroke, lineWidth: 0.6)
+        }
     }
 
     private var divider: some View {
@@ -77,39 +90,5 @@ struct ItemDetailView: View {
                 .foregroundStyle(Theme.textPrimary)
         }
         .padding(.vertical, 11)
-    }
-
-    @ViewBuilder
-    private var craftSection: some View {
-        if count > 0 {
-            Label("Déjà dans ta collection", systemImage: "checkmark.seal.fill")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Theme.accent)
-                .frame(maxWidth: .infinity)
-                .padding(16)
-                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        } else {
-            VStack(spacing: 10) {
-                Button {
-                    crafted = store.craft(item)
-                } label: {
-                    Label("Fabriquer · \(item.rarity.craftCost) poussière", systemImage: "hammer.fill")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.glassProminent)
-                .tint(item.rarity.color)
-                .controlSize(.large)
-                .disabled(shortfall > 0)
-
-                if shortfall > 0 {
-                    Text("Il te manque \(shortfall) poussière. Ouvre des boosters pour en gagner.")
-                        .font(.caption)
-                        .foregroundStyle(Theme.textSecondary)
-                        .multilineTextAlignment(.center)
-                }
-            }
-            .padding(16)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-        }
     }
 }
