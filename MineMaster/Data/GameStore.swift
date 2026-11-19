@@ -57,6 +57,15 @@ final class GameStore {
         owned[item.id] ?? 0
     }
 
+    /// Nombre de tirages locaux de cet item.
+    ///
+    /// - Parameter item: Item évalué.
+    /// - Returns: Le nombre de fois où l'item est apparu dans un booster.
+    /// - Authors: Axel L.
+    func pullCount(for item: CatalogItem) -> Int {
+        pullsByItem[item.id] ?? 0
+    }
+
     /// Démarre l'application : catalogue local, puis synchronisation distante.
     ///
     /// - Authors: Axel L.
@@ -188,7 +197,16 @@ final class GameStore {
         let player = currentPlayer()
         dust = player.dust
         lastSync = player.lastSyncAt
-        totalOpened = (try? context.fetchCount(FetchDescriptor<OpeningRecord>())) ?? 0
+
+        let openings = (try? context.fetch(FetchDescriptor<OpeningRecord>())) ?? []
+        totalOpened = openings.count
+        var pulls: [String: Int] = [:]
+        for opening in openings {
+            for id in opening.itemIDs {
+                pulls[id, default: 0] += 1
+            }
+        }
+        pullsByItem = pulls
     }
 
     private func apply(remote: [String: RemoteItem]) {

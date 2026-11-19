@@ -16,6 +16,7 @@ struct ItemDetailView: View {
                 VStack(spacing: 18) {
                     hero
                     infoCard
+                    marketNote
                 }
                 .padding(20)
                 .padding(.bottom, 24)
@@ -58,7 +59,15 @@ struct ItemDetailView: View {
             divider
             infoRow("Rareté", value: item.rarity.displayName, icon: "sparkles")
             divider
-            infoRow("Chance de base", value: "\(Int(item.rarity.baseWeight)) %", icon: "percent")
+            infoRow("Taux de rareté", value: String(format: "%.0f %%", item.rarity.baseWeight), icon: "percent")
+            divider
+            infoRow("Tes tirages", value: "\(store.pullCount(for: item))", icon: "hand.tap")
+            divider
+            infoRow("Tirages joueurs", value: "—", icon: "globe")
+            divider
+            infoRow("Prix marché", value: "Bientôt", icon: "tag")
+            divider
+            infoRow("Poussière doublon", value: "+\(item.rarity.dustValue)", icon: "circle.hexagongrid.fill")
             divider
             infoRow("Possédés", value: "\(count)", icon: "square.stack.3d.up.fill")
         }
@@ -67,6 +76,23 @@ struct ItemDetailView: View {
         .overlay {
             RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
                 .strokeBorder(Theme.stroke, lineWidth: 0.6)
+        }
+    }
+
+    private var marketNote: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "chart.line.uptrend.xyaxis")
+                .foregroundStyle(Theme.copper)
+            Text("Les tirages mondiaux et le prix du marché seront branchés avec le marché global. En attendant, « Tes tirages » reste local.")
+                .font(.caption)
+                .foregroundStyle(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(Theme.spaceM)
+        .background(Theme.surface.opacity(0.7), in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
+                .strokeBorder(Theme.stroke, lineWidth: 0.5)
         }
     }
 
