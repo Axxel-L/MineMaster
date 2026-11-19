@@ -4,15 +4,16 @@ import SwiftUI
 ///
 /// - Authors: Axel L.
 enum Theme {
-    static let accent = Color(red: 0.95, green: 0.66, blue: 0.24)
-    static let moss = Color(red: 0.42, green: 0.72, blue: 0.42)
-    static let copper = Color(red: 0.86, green: 0.47, blue: 0.26)
-    static let background = Color(red: 0.055, green: 0.05, blue: 0.04)
-    static let surface = Color(red: 0.085, green: 0.078, blue: 0.062)
-    static let surfaceRaised = Color(red: 0.12, green: 0.108, blue: 0.086)
-    static let textPrimary = Color(red: 0.96, green: 0.93, blue: 0.85)
-    static let textSecondary = Color(red: 0.68, green: 0.64, blue: 0.55)
-    static let stroke = Color(red: 0.92, green: 0.78, blue: 0.48).opacity(0.18)
+    static let accent = Color(red: 0.36, green: 0.84, blue: 0.58)
+    static let moss = Color(red: 0.29, green: 0.66, blue: 0.55)
+    static let copper = Color(red: 0.93, green: 0.63, blue: 0.32)
+    static let background = Color(red: 0.043, green: 0.067, blue: 0.078)
+    static let surface = Color(red: 0.071, green: 0.106, blue: 0.118)
+    static let surfaceRaised = Color(red: 0.102, green: 0.145, blue: 0.157)
+    static let textPrimary = Color(red: 0.94, green: 0.94, blue: 0.90)
+    static let textSecondary = Color(red: 0.62, green: 0.68, blue: 0.67)
+    static let stroke = Color(red: 0.72, green: 0.85, blue: 0.80).opacity(0.16)
+    static let danger = Color(red: 0.88, green: 0.36, blue: 0.33)
     static let spaceXS: CGFloat = 4
     static let spaceS: CGFloat = 8
     static let spaceM: CGFloat = 16
@@ -36,11 +37,11 @@ extension Rarity {
     /// Couleur d'accent de la rareté.
     var color: Color {
         switch self {
-        case .common: Color(red: 0.60, green: 0.63, blue: 0.65)
-        case .uncommon: Color(red: 0.30, green: 0.69, blue: 0.31)
-        case .rare: Color(red: 0.23, green: 0.51, blue: 0.96)
-        case .epic: Color(red: 0.66, green: 0.33, blue: 0.97)
-        case .legendary: Color(red: 0.96, green: 0.70, blue: 0.00)
+        case .common: Color(red: 0.54, green: 0.58, blue: 0.59)
+        case .uncommon: Color(red: 0.40, green: 0.79, blue: 0.48)
+        case .rare: Color(red: 0.36, green: 0.62, blue: 1.00)
+        case .epic: Color(red: 0.71, green: 0.48, blue: 1.00)
+        case .legendary: Color(red: 0.95, green: 0.79, blue: 0.41)
         }
     }
 
@@ -77,9 +78,9 @@ extension BoosterKind {
     /// Couleur d'accent du type de pack, utilisée pour la lueur et les boutons.
     var tint: Color {
         switch self {
-        case .mixed: Theme.accent
+        case .mixed: Theme.copper
         case .creatures: Color(red: 0.34, green: 0.74, blue: 0.48)
-        case .weapons: Color(red: 0.88, green: 0.28, blue: 0.25)
+        case .weapons: Theme.danger
         case .armor: Color(red: 0.52, green: 0.68, blue: 0.84)
         case .consumables: Color(red: 0.70, green: 0.46, blue: 0.92)
         case .food: Color(red: 0.78, green: 0.70, blue: 0.28)
