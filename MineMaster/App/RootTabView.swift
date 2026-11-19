@@ -5,21 +5,32 @@ struct RootTabView: View {
     @State private var selection = "packs"
 
     var body: some View {
-        TabView(selection: $selection) {
-            Tab("Packs", systemImage: "shippingbox.fill", value: "packs") {
-                BoostersView()
-            }
-            Tab("Collection", systemImage: "square.grid.2x2.fill", value: "collection") {
-                CollectionView()
-            }
-            Tab("Profil", systemImage: "chart.bar.fill", value: "profile") {
-                ProfileView()
+        ZStack {
+            if store.isBootstrapped {
+                TabView(selection: $selection) {
+                    Tab("Packs", systemImage: "shippingbox.fill", value: "packs") {
+                        BoostersView()
+                    }
+                    Tab("Collection", systemImage: "square.grid.2x2.fill", value: "collection") {
+                        CollectionView()
+                    }
+                    Tab("Profil", systemImage: "chart.bar.fill", value: "profile") {
+                        ProfileView()
+                    }
+                }
+                .tabBarMinimizeBehavior(.onScrollDown)
+                .tint(Theme.accent)
+                .transition(.opacity)
+            } else {
+                LaunchLoadingView()
+                    .transition(.opacity)
             }
         }
-        .tabBarMinimizeBehavior(.onScrollDown)
-        .tint(Theme.accent)
+        .animation(.easeInOut(duration: 0.28), value: store.isBootstrapped)
         .task {
-            await store.bootstrap()
+            if !store.isBootstrapped {
+                await store.bootstrap()
+            }
         }
     }
 }

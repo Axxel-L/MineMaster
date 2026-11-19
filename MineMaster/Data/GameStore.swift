@@ -64,7 +64,8 @@ final class GameStore {
         reloadFromStore()
         apply(remote: [:])
         reloadFromStore()
-        if catalog.isEmpty {
+        isBootstrapped = true
+        guard !catalog.isEmpty else {
             loadError = .decoding
             return
         }
