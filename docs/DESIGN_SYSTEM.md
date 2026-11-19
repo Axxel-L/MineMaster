@@ -5,27 +5,29 @@ français dans les fichiers Swift, avec les commentaires DocC.
 
 ## Direction
 
-**Coffre éditorial.** Un objet de collection chaleureux, dense mais respirant.
-Le pack est le héros. Le reste de l'écran est une planche de collection imprimée :
-titres SF Pro, étiquettes monospace, filets fins, papier sombre.
+**Atelier minier.** Un fond ardoise profond, un vert émeraude franc pour les
+actions, un ambre réservé aux raretés et aux accents. Le pack reste le héros.
+L'interface est plus directe qu'un carnet : police système Apple partout,
+étiquettes courtes, filets discrets, aucune surcharge décorative.
 
-Références visuelles : boîte de cartes premium, carnet d'explorateur, papier
-craft, foil de booster.
+Les icônes de navigation et d'illustration viennent du jeu Heroicons déjà
+embarqué. SF Symbols reste utilisé pour les pictogrammes système secondaires.
 
 ## Tokens
 
 | Token | Valeur | Usage |
 |---|---|---|
-| `Theme.accent` | ambre chaud | action principale, progression |
-| `Theme.moss` | vert mousse | packs communs, collection |
-| `Theme.copper` | cuivre | packs rares, fabrication |
-| `Theme.background` | brun-noir | fond global |
-| `Theme.surface` | brun profond | cartes et panneaux |
-| `Theme.surfaceRaised` | brun relevé | états sélectionnés |
-| `Theme.textPrimary` | parchemin | titres et valeurs |
-| `Theme.textSecondary` | sable éteint | légendes et métadonnées |
+| `Theme.accent` | émeraude | action principale, progression |
+| `Theme.moss` | vert-bleu | collection, packs communs |
+| `Theme.copper` | ambre | accents, packs mixtes |
+| `Theme.background` | ardoise très sombre | fond global |
+| `Theme.surface` | ardoise | cartes et panneaux |
+| `Theme.surfaceRaised` | ardoise claire | états sélectionnés |
+| `Theme.textPrimary` | blanc chaud | titres et valeurs |
+| `Theme.textSecondary` | gris-vert | légendes et métadonnées |
+| `Theme.danger` | rouge brique | suppression, erreurs |
 | `Theme.display` | SF Pro / système | titres |
-| `Theme.mono` | SF Mono / monospace | étiquettes techniques |
+| `Theme.mono` | SF Mono / monospace | chiffres et codes seulement |
 
 Espacement : 4, 8, 16, 24, 32, 48. Rayons : 10, 16, 24.
 
@@ -36,7 +38,7 @@ Espacement : 4, 8, 16, 24, 32, 48. Rayons : 10, 16, 24.
 2. Grain pixel discret, jamais une illustration générique.
 3. Bande crantée en haut et en bas, comme un sachet scellé.
 4. Ligne de perforation et languette « Tire ici ».
-5. Le pack se déchire au doigt ou via le bouton explicite.
+5. Le pack s'ouvre au doigt ou via le bouton explicite.
 6. Le pack s'ouvre uniquement après un geste explicite.
 
 ## Identité des packs par type
@@ -56,8 +58,18 @@ consommables violet-magenta, nourriture blé olive, blocs pierre, outils cuivre,
 pack mystère ambre. Chaque teinte reste distincte des voisines et lisible avec
 le texte noir du pack.
 
-La galerie de l'accueil affiche un mini pack par type. L'icône et le libellé
-restent lisibles hors du pack réduit. Le pack mystère affiche `TOUS TYPES`.
+Le pack scellé affiche le type tiré avant la déchirure : couleur, icône et bande
+correspondent au tirage réel. L'accueil ne charge aucune galerie de packs. Le
+pack mystère affiche `TOUS TYPES` uniquement tant que le plan n'est pas prêt.
+
+## Profil
+
+- Anneau de progression animé à l'apparition, chiffres en transition numérique.
+- Répartition par catégorie et par rareté : barres animées une seule fois, une
+  passe sur le catalogue pour calculer possédés et totaux.
+- Titres d'explorateur : sept paliers fondés sur les items différents. Le titre
+  courant, le prochain seuil et un bouton `?` ouvrent l'explication complète.
+- Les animations respectent Reduce Motion.
 
 ## Révélation
 
@@ -66,8 +78,12 @@ restent lisibles hors du pack réduit. Le pack mystère affiche `TOUS TYPES`.
 - Le dos de carte reste lisible : pas de texte en miroir.
 - Plus la rareté monte, plus la lumière, l'échelle et le nombre de particules
   augmentent.
-- Particules : `rare` 18, `epic` 34, `legendary` 56. `common` et `uncommon`
-  n'émettent pas de particules.
+- `rare` : onde de choc et 22 étincelles avec traînée.
+- `epic` : deux ondes, 10 rayons rotatifs, 40 étincelles, balayage lumineux.
+- `legendary` : trois ondes, 16 rayons, 68 étincelles, balayage et impact
+  haptique lourd.
+- `common` et `uncommon` n'émettent pas de particules.
+- La célébration s'arrête seule après 1,7 à 2,8 s et ne tourne pas hors écran.
 
 ## Règles anti-slop
 
@@ -76,7 +92,13 @@ restent lisibles hors du pack réduit. Le pack mystère affiche `TOUS TYPES`.
 - Pas de grille de trois cartes identiques.
 - Pas de fond néon.
 - Pas de titre centré sur un dégradé générique.
-- Une seule signature par écran : pack foil, tampon de passeport, ou rareté.
+- Une seule signature par écran : pack foil, titre de profil, ou rareté.
+
+## Navigation et tutoriel
+
+Trois onglets seulement : Boosters, Collection, Profil. Le tutoriel de premier
+lancement tient en trois écrans courts et reste accessible par le bouton `?` de
+l'accueil ou depuis Profil.
 
 ## Chargement
 

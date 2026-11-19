@@ -31,14 +31,17 @@ xcodebuild -project MineMaster.xcodeproj -scheme MineMaster \
 
 ## Fonctionnalités
 
-- Pack mystère unique : rareté et type tirés à l'ouverture, 5 cartes par pack, garanties par rareté
+- Pack mystère unique : rareté et type tirés avant la déchirure, type affiché sur le pack scellé, 5 cartes par pack, garanties par rareté
 - 5 raretés, 8 catégories, 254 items (blocs, outils, armes, armures, livres enchantés, créatures)
 - Types de packs : créatures, armes, armures, consommables, nourriture, blocs, outils
 - Chaque type possède sa couleur, son icône et sa bande de type sur le pack
-- Pack scellé à déchirer au doigt, révélation en carrousel au toucher, particules selon la rareté, haptiques
+- Pack scellé à ouvrir au doigt, révélation en carrousel, ondes et rayons renforcés pour les cartes rares, épiques et légendaires
 - Écran de chargement avec skeleton, rendus 3D des créatures depuis Minecraft Wiki
+- Thème ardoise et émeraude, police système Apple, icônes Heroicons
+- Tutoriel de premier lancement en trois étapes, accessible depuis l'accueil et le profil
 - Collection avec recherche, filtres rareté/catégorie et filtre « possédés »
-- Fiche détail en modal avec taux de rareté, tirages locaux, prix marché à venir
+- Profil animé : anneau de progression, répartitions par catégorie et rareté, sept titres d'explorateur expliqués en modal
+- Fiche détail en modal avec chance de tirage, tirages locaux et prix du marché à venir
 - Doublons convertis en poussière
 - Statistiques locales, réinitialisation, mentions légales
 - Skeletons de chargement, mode hors ligne avec catalogue en cache
