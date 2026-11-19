@@ -12,7 +12,7 @@ Application iOS native de collection : ouvre des boosters, découvre des items M
 - SwiftUI + Liquid Glass natif (`glassEffect`, `GlassEffectContainer`, `.buttonStyle(.glass)`, `tabBarMinimizeBehavior`, transitions zoom)
 - SwiftData pour le catalogue, la collection et l'historique
 - `URLSession` + pipeline d'images maison (aucune dépendance tierce)
-- Cible : iOS 27.2, Xcode 27.2
+- Cible : iOS 26.0, Xcode 26.6 ou plus récent (projet au format `project.pbxproj`)
 
 ## Lancer le projet
 
