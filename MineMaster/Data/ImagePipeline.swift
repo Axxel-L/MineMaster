@@ -15,7 +15,7 @@ enum ImagePolicy {
     /// - Returns: URL absolue validée, ou `nil` si le chemin est hors contrat.
     /// - Authors: Axel L.
     nonisolated static func url(for path: String) -> URL? {
-        let pattern = #"^(item|block)/[a-z0-9_]+\.png$"#
+        let pattern = #"^(item|block)/[a-z0-9_]+\.png$|^entity/([a-z0-9_]+/)?[a-z0-9_]+\.png$"#
         guard path.range(of: pattern, options: .regularExpression) != nil else { return nil }
         return base.appending(path: path)
     }
@@ -26,10 +26,19 @@ enum ImagePolicy {
     /// - Returns: `true` si le schéma, l'hôte et le préfixe sont autorisés.
     /// - Authors: Axel L.
     nonisolated static func isAllowed(_ url: URL) -> Bool {
-        url.scheme == "https"
-            && url.host == host
-            && url.path.hasPrefix(pathPrefix)
-            && url.query == nil
+        guard url.scheme == "https",
+              url.host == host,
+              url.user == nil,
+              url.password == nil,
+              url.port == nil || url.port == 443,
+              url.path.hasPrefix(pathPrefix),
+              url.query == nil,
+              url.fragment == nil else {
+            return false
+        }
+        let relative = String(url.path.dropFirst(pathPrefix.count))
+        let pattern = #"^(item|block)/[a-z0-9_]+\.png$|^entity/([a-z0-9_]+/)?[a-z0-9_]+\.png$"#
+        return relative.range(of: pattern, options: .regularExpression) != nil
     }
 }
 
@@ -45,11 +54,27 @@ actor ImagePipeline {
     private let cache = NSCache<NSString, NSData>()
     private var inFlight: [String: Task<Data, Error>] = [:]
     private let session: URLSession
-    private let maxPayload = 2 * 1024 * 1024
+    private let maxPayload: Int
 
     private init() {
+        session = Self.makeSession()
+        maxPayload = 2 * 1024 * 1024
         cache.totalCostLimit = 64 * 1024 * 1024
+    }
 
+    /// Crée un pipeline avec une session injectée.
+    ///
+    /// - Parameters:
+    ///   - session: Session réseau utilisée pour les téléchargements.
+    ///   - maxPayload: Taille maximale acceptée, en octets.
+    /// - Authors: Axel L.
+    init(session: URLSession, maxPayload: Int = 2 * 1024 * 1024) {
+        self.session = session
+        self.maxPayload = maxPayload
+        cache.totalCostLimit = 64 * 1024 * 1024
+    }
+
+    private static func makeSession() -> URLSession {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.timeoutIntervalForRequest = 10
         configuration.timeoutIntervalForResource = 20
@@ -64,7 +89,7 @@ actor ImagePipeline {
                 directory: directory
             )
         }
-        session = URLSession(configuration: configuration)
+        return URLSession(configuration: configuration)
     }
 
     /// Télécharge la texture d'une URL autorisée.

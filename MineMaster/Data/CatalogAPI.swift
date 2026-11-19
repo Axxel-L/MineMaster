@@ -86,10 +86,11 @@ enum SeedCatalog {
 
     /// Charge le catalogue embarqué et le convertit en items de domaine.
     ///
+    /// - Parameter bundle: Bundle contenant `ItemCatalog.json`.
     /// - Returns: La liste des items, vide si la ressource est absente ou invalide.
     /// - Authors: Axel L.
-    static func load() -> [CatalogItem] {
-        guard let url = Bundle.main.url(forResource: "ItemCatalog", withExtension: "json"),
+    static func load(bundle: Bundle = .main) -> [CatalogItem] {
+        guard let url = bundle.url(forResource: "ItemCatalog", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let file = try? JSONDecoder().decode(File.self, from: data) else {
             return []
