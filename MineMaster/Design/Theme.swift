@@ -333,9 +333,14 @@ struct ItemImageView: View {
         ].compactMap { $0 }
 
         for url in candidates {
+            if let cached = ImageMemoryCache.shared.image(for: url) {
+                state = .loaded(cached)
+                return
+            }
             do {
                 let data = try await ImagePipeline.shared.data(for: url)
                 if let decoded = UIImage(data: data) {
+                    ImageMemoryCache.shared.insert(decoded, for: url)
                     state = .loaded(decoded)
                     return
                 }

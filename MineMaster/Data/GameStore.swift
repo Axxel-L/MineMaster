@@ -302,7 +302,7 @@ final class GameStore {
     }
 
     private func prefixImages() {
-        for item in catalog where item.rarity >= .epic {
+        for item in catalog where item.rarity >= .epic && MobRenderAPI.url(for: item.id) == nil {
             guard let url = ImagePolicy.url(for: item.texturePath) else { continue }
             Task { _ = try? await ImagePipeline.shared.data(for: url) }
         }

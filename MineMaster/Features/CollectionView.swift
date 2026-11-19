@@ -23,7 +23,9 @@ struct CollectionView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        let items = filtered
+
+        return NavigationStack {
             ZStack {
                 ScreenBackground()
 
@@ -35,15 +37,15 @@ struct CollectionView: View {
 
                         if store.catalog.isEmpty && store.isLoading {
                             SkeletonGrid()
-                        } else if filtered.isEmpty {
+                        } else if items.isEmpty {
                             EmptyStateView(
                                 icon: "magnifying-glass",
-                                title: "Aucun item",
-                                message: "Ajuste les filtres ou ouvre un booster pour compléter la collection."
+                                title: "Aucun résultat",
+                                message: "Modifie la recherche ou les filtres, ou ouvre un pack pour compléter ta collection."
                             )
                         } else {
                             LazyVGrid(columns: columns, spacing: 12) {
-                                ForEach(filtered) { item in
+                                ForEach(items) { item in
                                     cell(item)
                                 }
                             }
@@ -71,7 +73,7 @@ struct CollectionView: View {
     private var summary: some View {
         HStack(spacing: 12) {
             StatCard(
-                title: "Items uniques",
+                title: "Items découverts",
                 value: "\(store.uniqueCount)/\(store.catalog.count)",
                 systemImage: "square.grid.2x2.fill"
             )

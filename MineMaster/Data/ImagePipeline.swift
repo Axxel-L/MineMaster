@@ -15,8 +15,7 @@ enum ImagePolicy {
     /// - Returns: URL absolue validée, ou `nil` si le chemin est hors contrat.
     /// - Authors: Axel L.
     nonisolated static func url(for path: String) -> URL? {
-        let pattern = #"^(item|block)/[a-z0-9_]+\.png$|^entity/([a-z0-9_]+/)?[a-z0-9_]+\.png$"#
-        guard path.range(of: pattern, options: .regularExpression) != nil else { return nil }
+        guard isTexturePath(path) else { return nil }
         return base.appending(path: path)
     }
 
@@ -47,8 +46,69 @@ enum ImagePolicy {
 
         guard url.host == host, url.path.hasPrefix(pathPrefix) else { return false }
         let relative = String(url.path.dropFirst(pathPrefix.count))
-        let pattern = #"^(item|block)/[a-z0-9_]+\.png$|^entity/([a-z0-9_]+/)?[a-z0-9_]+\.png$"#
-        return relative.range(of: pattern, options: .regularExpression) != nil
+        return isTexturePath(relative)
+    }
+
+    /// Vérifie un chemin de texture sans compiler d'expression régulière.
+    ///
+    /// - Parameter path: Chemin relatif à valider.
+    /// - Returns: `true` pour `item/<nom>.png`, `block/<nom>.png` ou
+    ///   `entity/[<dossier>/]<nom>.png`.
+    /// - Authors: Axel L.
+    nonisolated private static func isTexturePath(_ path: String) -> Bool {
+        let parts = path.split(separator: "/", omittingEmptySubsequences: false)
+        guard parts.count == 2 || (parts.count == 3 && parts[0] == "entity") else { return false }
+        guard parts[0] == "item" || parts[0] == "block" || parts[0] == "entity" else { return false }
+
+        let file = parts[parts.count - 1]
+        guard file.hasSuffix(".png"), isSafeName(file.dropLast(4)) else { return false }
+        return parts.count == 2 || isSafeName(parts[1])
+    }
+
+    /// Vérifie qu'un segment ne contient que minuscules, chiffres et underscore.
+    ///
+    /// - Parameter value: Segment à contrôler.
+    /// - Returns: `true` si le segment est non vide et sûr.
+    /// - Authors: Axel L.
+    nonisolated private static func isSafeName(_ value: Substring) -> Bool {
+        !value.isEmpty && value.allSatisfy { $0.isASCII && ($0.isLowercase || $0.isNumber || $0 == "_") }
+    }
+}
+
+/// Cache mémoire des images déjà décodées.
+///
+/// Le cache est borné et laissé à la gestion de `NSCache` sous pression mémoire.
+///
+/// - Authors: Axel L.
+@MainActor
+final class ImageMemoryCache {
+    static let shared = ImageMemoryCache()
+
+    private let cache = NSCache<NSString, UIImage>()
+
+    private init() {
+        cache.totalCostLimit = 64 * 1024 * 1024
+        cache.countLimit = 256
+    }
+
+    /// Retourne une image en cache.
+    ///
+    /// - Parameter url: URL de l'image.
+    /// - Returns: L'image décodée, ou `nil` si absente du cache.
+    /// - Authors: Axel L.
+    func image(for url: URL) -> UIImage? {
+        cache.object(forKey: url.absoluteString as NSString)
+    }
+
+    /// Ajoute une image décodée au cache.
+    ///
+    /// - Parameters:
+    ///   - image: Image décodée.
+    ///   - url: URL source de l'image.
+    /// - Authors: Axel L.
+    func insert(_ image: UIImage, for url: URL) {
+        let pixels = image.size.width * image.size.height * image.scale * image.scale
+        cache.setObject(image, forKey: url.absoluteString as NSString, cost: max(Int(pixels * 4), 1))
     }
 }
 
@@ -69,7 +129,7 @@ actor ImagePipeline {
     private init() {
         session = Self.makeSession()
         maxPayload = 2 * 1024 * 1024
-        cache.totalCostLimit = 64 * 1024 * 1024
+        cache.totalCostLimit = 32 * 1024 * 1024
     }
 
     /// Crée un pipeline avec une session injectée.
@@ -81,7 +141,7 @@ actor ImagePipeline {
     init(session: URLSession, maxPayload: Int = 2 * 1024 * 1024) {
         self.session = session
         self.maxPayload = maxPayload
-        cache.totalCostLimit = 64 * 1024 * 1024
+        cache.totalCostLimit = 32 * 1024 * 1024
     }
 
     private static func makeSession() -> URLSession {
