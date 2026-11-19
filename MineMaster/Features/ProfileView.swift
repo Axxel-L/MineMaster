@@ -1,13 +1,13 @@
 import SwiftUI
 
+/// Profil : passeport de collection, raretés et réglages.
+///
+/// - Authors: Axel L.
 struct ProfileView: View {
     @Environment(GameStore.self) private var store
 
-    @State private var showCraft = false
     @State private var showLegal = false
     @State private var confirmReset = false
-
-    private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
     var body: some View {
         NavigationStack {
@@ -15,21 +15,20 @@ struct ProfileView: View {
                 ScreenBackground()
 
                 ScrollView {
-                    VStack(spacing: 16) {
-                        stats
-                        craftButton
+                    VStack(spacing: Theme.spaceM) {
+                        header
+                        passport
+                        rarityLedger
                         settings
                     }
-                    .padding(16)
-                    .padding(.bottom, 100)
+                    .padding(.horizontal, Theme.spaceM)
+                    .padding(.top, Theme.spaceM)
+                    .padding(.bottom, 170)
                 }
                 .scrollIndicators(.hidden)
             }
-            .navigationTitle("Profil")
-            .navigationBarTitleDisplayMode(.large)
-            .sheet(isPresented: $showCraft) {
-                CraftView()
-            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showLegal) {
                 LegalView()
             }
@@ -47,45 +46,119 @@ struct ProfileView: View {
         }
     }
 
-    private var stats: some View {
-        LazyVGrid(columns: columns, spacing: 12) {
-            StatCard(title: "Items uniques", value: "\(store.uniqueCount)", systemImage: "square.grid.2x2.fill")
-            StatCard(title: "Ouvertures", value: "\(store.totalOpened)", systemImage: "shippingbox.fill", tint: Rarity.rare.color)
-            StatCard(title: "Poussière", value: "\(store.dust)", systemImage: "circle.hexagongrid.fill", tint: Rarity.epic.color)
-            StatCard(
-                title: "Progression",
-                value: "\(Int(store.progress * 100)) %",
-                systemImage: "chart.line.uptrend.xyaxis",
-                tint: Rarity.legendary.color
-            )
+    private var header: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("PASSEPORT")
+                    .font(Theme.mono(9, weight: .bold))
+                    .tracking(1.8)
+                    .foregroundStyle(Theme.textSecondary)
+                Text("Explorateur")
+                    .font(Theme.display(34, weight: .heavy))
+                    .foregroundStyle(Theme.textPrimary)
+                Text("Collectionneur de blocs, de bêtes et de reliques.")
+                    .font(.footnote)
+                    .foregroundStyle(Theme.textSecondary)
+            }
+            Spacer()
+            PixelAvatar()
         }
     }
 
-    private var craftButton: some View {
-        Button {
-            showCraft = true
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "hammer.fill")
-                    .font(.title3)
-                    .foregroundStyle(Rarity.epic.color)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Fabriquer un item")
-                        .font(.subheadline.weight(.semibold))
-                    Text("Dépense ta poussière pour compléter la collection")
-                        .font(.caption)
+    private var passport: some View {
+        HStack(spacing: Theme.spaceL) {
+            ZStack {
+                Circle()
+                    .stroke(Theme.surfaceRaised, lineWidth: 9)
+                Circle()
+                    .trim(from: 0, to: store.progress)
+                    .stroke(Theme.accent, style: StrokeStyle(lineWidth: 9, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .animation(.spring(response: 0.7, dampingFraction: 0.8), value: store.progress)
+                VStack(spacing: 1) {
+                    Text("\(Int(store.progress * 100))")
+                        .font(Theme.display(25, weight: .heavy))
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("%")
+                        .font(Theme.mono(9, weight: .bold))
                         .foregroundStyle(Theme.textSecondary)
-                        .multilineTextAlignment(.leading)
                 }
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(Theme.textSecondary)
             }
-            .padding(16)
-            .glassEffect(.regular.tint(Rarity.epic.color.opacity(0.14)), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .frame(width: 104, height: 104)
+
+            VStack(alignment: .leading, spacing: 12) {
+                passportStat("Items uniques", "\(store.uniqueCount) / \(store.catalog.count)")
+                passportStat("Ouvertures", "\(store.totalOpened)")
+                passportStat("Poussière", "\(store.dust)")
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .buttonStyle(.plain)
+        .padding(Theme.spaceM)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous)
+                .strokeBorder(Theme.stroke, lineWidth: 0.6)
+        }
+    }
+
+    private func passportStat(_ title: String, _ value: String) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title.uppercased())
+                .font(Theme.mono(8, weight: .bold))
+                .tracking(1.0)
+                .foregroundStyle(Theme.textSecondary)
+            Spacer(minLength: 8)
+            Text(value)
+                .font(Theme.mono(12, weight: .bold))
+                .foregroundStyle(Theme.textPrimary)
+                .contentTransition(.numericText())
+        }
+    }
+
+    private var rarityLedger: some View {
+        VStack(alignment: .leading, spacing: Theme.spaceM) {
+            HStack {
+                Text("RARETÉS")
+                    .font(Theme.mono(9, weight: .bold))
+                    .tracking(1.5)
+                    .foregroundStyle(Theme.textSecondary)
+                Spacer()
+                Text("POSSÉDÉ / TOTAL")
+                    .font(Theme.mono(8, weight: .bold))
+                    .tracking(0.8)
+                    .foregroundStyle(Theme.textSecondary.opacity(0.7))
+            }
+
+            ForEach(Rarity.allCases) { rarity in
+                let total = store.catalog.filter { $0.rarity == rarity }.count
+                let owned = store.catalog.filter {
+                    $0.rarity == rarity && store.ownedCount(for: $0) > 0
+                }.count
+                HStack(spacing: 10) {
+                    Circle()
+                        .fill(rarity.color)
+                        .frame(width: 7, height: 7)
+                    Text(rarity.displayName)
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(width: 104, alignment: .leading)
+                    ProgressView(value: total == 0 ? 0 : Double(owned) / Double(total))
+                        .tint(rarity.color)
+                    Text("\(owned)/\(total)")
+                        .font(Theme.mono(9, weight: .bold))
+                        .foregroundStyle(Theme.textPrimary)
+                        .frame(width: 48, alignment: .trailing)
+                }
+            }
+        }
+        .padding(Theme.spaceM)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous)
+                .strokeBorder(Theme.stroke, lineWidth: 0.6)
+        }
     }
 
     private var settings: some View {
@@ -93,25 +166,37 @@ struct ProfileView: View {
             settingsRow(title: "Mentions légales et licences", icon: "doc.text.fill") {
                 showLegal = true
             }
-            Rectangle().fill(Theme.stroke).frame(height: 0.5).padding(.leading, 44)
+            divider
             settingsRow(title: "Réinitialiser la collection", icon: "trash.fill", isDestructive: true) {
                 confirmReset = true
             }
-            Rectangle().fill(Theme.stroke).frame(height: 0.5).padding(.leading, 44)
+            divider
             HStack {
                 Image(systemName: "info.circle.fill")
                     .frame(width: 24)
                     .foregroundStyle(Theme.textSecondary)
                 Text("Version")
                     .font(.subheadline)
+                    .foregroundStyle(Theme.textPrimary)
                 Spacer()
                 Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")
-                    .font(.subheadline.monospacedDigit())
+                    .font(Theme.mono(11, weight: .medium))
                     .foregroundStyle(Theme.textSecondary)
             }
             .padding(16)
         }
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
+                .strokeBorder(Theme.stroke, lineWidth: 0.6)
+        }
+    }
+
+    private var divider: some View {
+        Rectangle()
+            .fill(Theme.stroke)
+            .frame(height: 0.5)
+            .padding(.leading, 48)
     }
 
     private func settingsRow(
@@ -140,147 +225,120 @@ struct ProfileView: View {
     }
 }
 
-struct CraftView: View {
-    @Environment(GameStore.self) private var store
-    @Environment(\.dismiss) private var dismiss
-
-    @State private var craftedTick = 0
-
-    private var available: [CatalogItem] {
-        store.catalog.filter { store.ownedCount(for: $0) == 0 }
-    }
-
+private struct PixelAvatar: View {
     var body: some View {
-        NavigationStack {
-            ZStack {
-                ScreenBackground()
-
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        balance
-
-                        if available.isEmpty {
-                            EmptyStateView(
-                                icon: "trophy",
-                                title: "Collection complète",
-                                message: "Tu possèdes déjà tous les items du catalogue."
-                            )
-                        } else {
-                            ForEach(Rarity.allCases) { rarity in
-                                let items = available.filter { $0.rarity == rarity }
-                                if !items.isEmpty {
-                                    section(rarity: rarity, items: items)
-                                }
-                            }
-                        }
-                    }
-                    .padding(16)
-                }
-                .scrollIndicators(.hidden)
-            }
-            .navigationTitle("Fabriquer")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Fermer") {
-                        dismiss()
-                    }
+        ZStack {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(Theme.surfaceRaised)
+            LazyVGrid(columns: Array(repeating: GridItem(.fixed(8), spacing: 4), count: 4), spacing: 4) {
+                ForEach(0..<16, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(index % 5 == 0 ? Theme.accent : Theme.textSecondary.opacity(0.35))
+                        .frame(width: 8, height: 8)
                 }
             }
-            .sensoryFeedback(.success, trigger: craftedTick)
         }
-    }
-
-    private var balance: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "circle.hexagongrid.fill")
-                .font(.title2)
-                .foregroundStyle(Rarity.epic.color)
-            VStack(alignment: .leading, spacing: 2) {
-                Text("\(store.dust) poussière")
-                    .font(.headline)
-                    .contentTransition(.numericText())
-                Text("Gagnée en obtenant des doublons")
-                    .font(.caption)
-                    .foregroundStyle(Theme.textSecondary)
-            }
-            Spacer()
+        .frame(width: 62, height: 62)
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(Theme.stroke, lineWidth: 0.6)
         }
-        .padding(16)
-        .glassEffect(.regular.tint(Rarity.epic.color.opacity(0.14)), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-    }
-
-    private func section(rarity: Rarity, items: [CatalogItem]) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                Circle().fill(rarity.color).frame(width: 8, height: 8)
-                Text(rarity.displayName)
-                    .font(.subheadline.weight(.bold))
-                Text("\(items.count)")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(Theme.textSecondary)
-            }
-
-            ForEach(items) { item in
-                row(item)
-            }
-        }
-    }
-
-    private func row(_ item: CatalogItem) -> some View {
-        let canAfford = store.dust >= item.rarity.craftCost
-        return HStack(spacing: 12) {
-            ItemImageView(item: item, size: 38)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(item.displayName)
-                    .font(.subheadline.weight(.semibold))
-                Text("\(item.rarity.craftCost) poussière")
-                    .font(.caption)
-                    .foregroundStyle(canAfford ? Theme.textSecondary : .red.opacity(0.8))
-            }
-            Spacer()
-            Button("Fabriquer") {
-                if store.craft(item) {
-                    craftedTick += 1
-                }
-            }
-            .buttonStyle(.glass)
-            .controlSize(.small)
-            .disabled(!canAfford)
-        }
-        .padding(12)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .accessibilityHidden(true)
     }
 }
 
 struct LegalView: View {
     @Environment(\.dismiss) private var dismiss
 
+    private let dependencies: [LegalDependency] = [
+        LegalDependency(
+            name: "MineMaster",
+            version: "1.0",
+            role: "Application",
+            license: "Projet pédagogique non commercial",
+            icon: "mojang",
+            tint: Theme.accent
+        ),
+        LegalDependency(
+            name: "Swift",
+            version: "6.0",
+            role: "Langage",
+            license: "Apache License 2.0 · Apple",
+            icon: "swift",
+            tint: Theme.copper
+        ),
+        LegalDependency(
+            name: "SwiftUI · SwiftData · Foundation",
+            version: "iOS 26 SDK",
+            role: "Frameworks système",
+            license: "Apple SDK · Apple",
+            icon: "apple",
+            tint: Theme.textSecondary
+        ),
+        LegalDependency(
+            name: "Heroicons",
+            version: "2.2.0",
+            role: "Icônes SVG",
+            license: "MIT · Tailwind Labs",
+            icon: "heroicons",
+            tint: Theme.moss
+        ),
+        LegalDependency(
+            name: "Tailwind CSS",
+            version: "3.x",
+            role: "Source des icônes Heroicons",
+            license: "MIT · Tailwind Labs",
+            icon: "tailwindcss",
+            tint: Color(red: 0.23, green: 0.76, blue: 0.85)
+        ),
+        LegalDependency(
+            name: "minecraft-data",
+            version: "1.21.4",
+            role: "Métadonnées d'items",
+            license: "MIT · PrismarineJS",
+            icon: "prismarine",
+            tint: Rarity.rare.color
+        ),
+        LegalDependency(
+            name: "minecraft-assets",
+            version: "1.21.4",
+            role: "Textures chargées depuis le CDN",
+            license: "Assets Mojang · InventivetalentDev",
+            icon: "mojang",
+            tint: Theme.accent
+        ),
+        LegalDependency(
+            name: "Mojang Studios",
+            version: "1.21.4",
+            role: "Marques et textures Minecraft",
+            license: "Mojang · Microsoft",
+            icon: "mojang",
+            tint: Theme.accent
+        ),
+        LegalDependency(
+            name: "SF Symbols",
+            version: "iOS 26",
+            role: "Icônes système",
+            license: "Apple",
+            icon: "apple",
+            tint: Theme.textSecondary
+        )
+    ]
+
     var body: some View {
         NavigationStack {
             ZStack {
                 ScreenBackground()
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        section(
-                            title: "MineMaster",
-                            text: "Application pédagogique de collection d'items Minecraft. Projet non commercial, non affilié à Mojang Studios ni à Microsoft."
-                        )
-                        section(
-                            title: "Icônes",
-                            text: "Heroicons 2.2.0, © Tailwind Labs, sous licence MIT. Les icônes système proviennent de SF Symbols (Apple)."
-                        )
-                        section(
-                            title: "Textures Minecraft",
-                            text: "Textures chargées à l'exécution depuis un CDN public, non redistribuées dans l'application. Minecraft est une marque de Mojang Studios."
-                        )
-                        section(
-                            title: "Données",
-                            text: "Aucune donnée personnelle n'est collectée ni transmise. La progression reste stockée localement sur l'appareil."
-                        )
+                    VStack(alignment: .leading, spacing: Theme.spaceL) {
+                        masthead
+                        dependenciesSection
+                        notice
                     }
-                    .padding(20)
+                    .padding(Theme.spaceM)
+                    .padding(.bottom, Theme.spaceL)
                 }
+                .scrollIndicators(.hidden)
             }
             .navigationTitle("Licences")
             .navigationBarTitleDisplayMode(.inline)
@@ -294,17 +352,119 @@ struct LegalView: View {
         }
     }
 
-    private func section(title: String, text: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.subheadline.weight(.bold))
-            Text(text)
+    private var masthead: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("CRÉDITS & OPEN SOURCE")
+                .font(.system(size: 9, weight: .bold, design: .rounded))
+                .tracking(1.3)
+                .foregroundStyle(Theme.textSecondary)
+            Text("Sous le capot")
+                .font(Theme.display(30, weight: .heavy))
+                .foregroundStyle(Theme.textPrimary)
+            Text("MineMaster est un projet pédagogique non commercial, non affilié à Mojang Studios ni à Microsoft. Aucune bibliothèque tierce n'est liée au binaire.")
                 .font(.footnote)
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+
+    private var dependenciesSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("DÉPENDANCES & VERSIONS")
+                .font(.system(size: 9, weight: .bold, design: .rounded))
+                .tracking(1.2)
+                .foregroundStyle(Theme.textSecondary)
+
+            VStack(spacing: 0) {
+                ForEach(Array(dependencies.enumerated()), id: \.element.id) { index, dependency in
+                    row(dependency)
+                    if index < dependencies.count - 1 {
+                        Rectangle()
+                            .fill(Theme.stroke)
+                            .frame(height: 0.5)
+                            .padding(.leading, 60)
+                    }
+                }
+            }
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
+                    .strokeBorder(Theme.stroke, lineWidth: 0.6)
+            }
+        }
+    }
+
+    private func row(_ dependency: LegalDependency) -> some View {
+        HStack(spacing: 12) {
+            BrandIcon(name: dependency.icon, tint: dependency.tint)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(dependency.name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.textPrimary)
+                Text(dependency.role)
+                    .font(.caption2)
+                    .foregroundStyle(Theme.textSecondary)
+                Text(dependency.license)
+                    .font(.system(size: 9, weight: .medium, design: .rounded))
+                    .foregroundStyle(Theme.textSecondary.opacity(0.76))
+            }
+
+            Spacer(minLength: 8)
+
+            Text(dependency.version)
+                .font(.system(size: 9, weight: .bold, design: .monospaced))
+                .foregroundStyle(dependency.tint)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 5)
+                .background(dependency.tint.opacity(0.10), in: Capsule())
+        }
+        .padding(12)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var notice: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("MENTIONS")
+                .font(.system(size: 9, weight: .bold, design: .rounded))
+                .tracking(1.2)
+                .foregroundStyle(Theme.textSecondary)
+            Text("Minecraft, les noms d'items et les textures associées appartiennent à Mojang Studios et Microsoft. Les textures sont chargées à l'exécution depuis un CDN public et ne sont pas redistribuées dans l'application. Heroicons est distribué sous licence MIT par Tailwind Labs. Les icônes Apple et SF Symbols sont fournies par le SDK Apple. Aucune donnée personnelle n'est collectée.")
+                .font(.footnote)
+                .foregroundStyle(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(Theme.spaceM)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
+                .strokeBorder(Theme.stroke, lineWidth: 0.6)
+        }
+    }
+}
+
+private struct LegalDependency: Identifiable {
+    let id = UUID()
+    let name: String
+    let version: String
+    let role: String
+    let license: String
+    let icon: String
+    let tint: Color
+}
+
+private struct BrandIcon: View {
+    let name: String
+    let tint: Color
+
+    var body: some View {
+        Image(name)
+            .renderingMode(.template)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 22, height: 22)
+            .foregroundStyle(tint)
+            .frame(width: 40, height: 40)
+            .background(tint.opacity(0.10), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }

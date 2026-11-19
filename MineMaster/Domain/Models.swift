@@ -55,17 +55,6 @@ enum Rarity: String, CaseIterable, Codable, Sendable, Comparable, Identifiable {
         }
     }
 
-    /// Coût en poussière pour fabriquer l'item.
-    var craftCost: Int {
-        switch self {
-        case .common: 15
-        case .uncommon: 30
-        case .rare: 70
-        case .epic: 150
-        case .legendary: 350
-        }
-    }
-
     static func < (lhs: Rarity, rhs: Rarity) -> Bool {
         lhs.rank < rhs.rank
     }
