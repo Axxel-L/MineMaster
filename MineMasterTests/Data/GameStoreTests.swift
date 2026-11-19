@@ -68,7 +68,7 @@ struct GameStoreTests {
         #expect(try count(CollectionRecord.self, in: fixture.container) == 1)
     }
 
-    @Test("Un pack aléatoire respecte le type tiré")
+    @Test("Un pack mystère planifie son type avant l'ouverture")
     func randomPackFiltersKind() throws {
         let panda = Fixtures.item("panda", rarity: .rare, category: .mob)
         let diamond = Fixtures.item("diamond", rarity: .rare)
@@ -78,11 +78,15 @@ struct GameStoreTests {
             boosterProvider: { _ in (.rare, .creatures) }
         )
 
-        let open = try #require(fixture.store.openRandom())
+        let plan = try #require(fixture.store.planOpening())
+        #expect(plan.kind == .creatures)
+        #expect(!fixture.store.isOpening)
 
-        #expect(open.kind == .creatures)
-        #expect(open.results.count == 1)
-        #expect(open.results.allSatisfy { $0.item.category == .mob })
+        let results = fixture.store.open(plan.booster, kind: plan.kind)
+
+        #expect(results.count == 1)
+        #expect(results.allSatisfy { $0.item.category == .mob })
+        #expect(fixture.store.isOpening)
     }
 
     @Test("Les tirages locaux sont comptés par item")

@@ -174,6 +174,8 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 - Quatre appuis rapides sur « Ouvrir » produisent une seule ouverture :
   un seul `OpeningRecord`, cinq items, poussière comptée une seule fois.
 - Le pack mystère tire une rareté de booster et un type de contenu.
+- Le type affiché sur le pack scellé est exactement celui passé à l'ouverture.
+  Planifier une ouverture ne consomme pas le verrou et n'enregistre rien.
 - Un seul booster peut être ouvert à la fois. Tant que la session courante
   n'est pas fermée, toute nouvelle ouverture est refusée. Après fermeture,
   l'ouverture suivante réussit.

@@ -14,7 +14,12 @@ struct PackOpeningView: View {
     @Environment(GameStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var session: OpeningSession?
+    @State private var plan: OpeningPlan?
     @State private var errorMessage: String?
+
+    init(plan: OpeningPlan? = nil) {
+        _plan = State(initialValue: plan)
+    }
 
     var body: some View {
         ZStack {
@@ -30,6 +35,10 @@ struct PackOpeningView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .animation(.easeInOut(duration: 0.35), value: session?.id)
+        .task {
+            guard plan == nil else { return }
+            plan = store.planOpening()
+        }
         .onDisappear {
             store.endOpening()
         }
@@ -39,11 +48,10 @@ struct PackOpeningView: View {
         VStack(spacing: Theme.spaceL) {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("PACK SCELLÉ")
-                        .font(Theme.mono(9, weight: .bold))
-                        .tracking(1.6)
+                    Text("Pack scellé")
+                        .font(.footnote.weight(.semibold))
                         .foregroundStyle(Theme.textSecondary)
-                    Text("Pack Mystère")
+                    Text("Pack mystère")
                         .font(Theme.display(27))
                         .foregroundStyle(Theme.textPrimary)
                 }
@@ -65,8 +73,13 @@ struct PackOpeningView: View {
 
             Spacer(minLength: Theme.spaceS)
 
-            InteractiveBoosterPack(booster: .rare, kind: .mixed, title: "Pack Mystère", onOpened: openPack)
-                .padding(.horizontal, 32)
+            InteractiveBoosterPack(
+                booster: plan?.booster ?? .rare,
+                kind: plan?.kind ?? .mixed,
+                title: "Pack Mystère",
+                onOpened: openPack
+            )
+            .padding(.horizontal, 32)
 
             if let errorMessage {
                 Text(errorMessage)
@@ -81,11 +94,16 @@ struct PackOpeningView: View {
     }
 
     private func openPack() {
-        guard let open = store.openRandom() else {
+        guard let plan = plan ?? store.planOpening() else {
             errorMessage = "Impossible d'ouvrir ce pack. Vérifie que le catalogue est chargé."
             return
         }
-        session = OpeningSession(booster: open.booster, kind: open.kind, results: open.results)
+        let results = store.open(plan.booster, kind: plan.kind)
+        guard !results.isEmpty else {
+            errorMessage = "Impossible d'ouvrir ce pack. Vérifie que le catalogue est chargé."
+            return
+        }
+        session = OpeningSession(booster: plan.booster, kind: plan.kind, results: results)
     }
 }
 

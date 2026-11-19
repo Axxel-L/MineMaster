@@ -1,12 +1,15 @@
 import SwiftUI
 
-/// Accueil : pack mystère, types possibles et progression.
+/// Accueil : ouverture de packs et progression.
 ///
 /// - Authors: Axel L.
 struct BoostersView: View {
     @Environment(GameStore.self) private var store
+    @AppStorage("hasSeenTutorial") private var hasSeenTutorial = false
 
     @State private var isPresentingPack = false
+    @State private var showHelp = false
+    @State private var plan: OpeningPlan?
 
     var body: some View {
         ZStack {
@@ -22,7 +25,6 @@ struct BoostersView: View {
                         errorCard(error)
                     } else {
                         hero
-                        typesPreview
                         collectionLedger
                     }
                     if store.isOffline {
@@ -39,26 +41,43 @@ struct BoostersView: View {
             }
         }
         .fullScreenCover(isPresented: $isPresentingPack) {
-            PackOpeningView()
+            PackOpeningView(plan: plan)
+        }
+        .sheet(isPresented: $showHelp) {
+            TutorialView {
+                hasSeenTutorial = true
+                showHelp = false
+            }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Theme.background)
         }
     }
 
     private var masthead: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("LE COFFRE")
-                        .font(Theme.mono(9, weight: .bold))
-                        .tracking(1.8)
-                        .foregroundStyle(Theme.textSecondary)
-                    Text("MineMaster")
-                        .font(Theme.display(38, weight: .heavy))
-                        .foregroundStyle(Theme.textPrimary)
-                }
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center) {
+                Text("MineMaster")
+                    .font(Theme.display(38, weight: .heavy))
+                    .foregroundStyle(Theme.textPrimary)
                 Spacer()
-                dustPill
+                HStack(spacing: 8) {
+                    dustPill
+                    Button {
+                        showHelp = true
+                    } label: {
+                        Image(systemName: "questionmark")
+                            .font(.system(size: 12, weight: .bold))
+                            .frame(width: 34, height: 34)
+                            .background(Theme.surface, in: Circle())
+                            .overlay(Circle().strokeBorder(Theme.stroke, lineWidth: 0.6))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.textSecondary)
+                    .accessibilityLabel("Aide")
+                }
             }
-            Text("Un pack mystère. Cinq pièces. Le monde décide de ta rareté.")
+            Text("Ouvre un pack, découvre 5 cartes et complète ta collection.")
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -81,6 +100,11 @@ struct BoostersView: View {
         .accessibilityLabel("\(store.dust) poussière")
     }
 
+    private func presentPack() {
+        plan = store.planOpening()
+        isPresentingPack = true
+    }
+
     private var hero: some View {
         VStack(spacing: Theme.spaceL) {
             ZStack {
@@ -95,7 +119,7 @@ struct BoostersView: View {
                     .rotation3DEffect(.degrees(-5), axis: (x: 0, y: 1, z: 0))
                     .rotationEffect(.degrees(-2))
                     .onTapGesture {
-                        isPresentingPack = true
+                        presentPack()
                     }
                     .accessibilityAddTraits(.isButton)
                     .accessibilityHint("Ouvre l'écran de déchirure")
@@ -104,13 +128,12 @@ struct BoostersView: View {
             .frame(height: 306)
 
             Button {
-                isPresentingPack = true
+                presentPack()
             } label: {
                 HStack(spacing: 10) {
-                    Image(systemName: "scissors")
-                    Text("Déchirer le pack")
-                        .font(Theme.mono(11, weight: .bold))
-                        .tracking(1.1)
+                    Image(systemName: "shippingbox.fill")
+                    Text("Ouvrir un pack")
+                        .font(.headline)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 13)
@@ -128,73 +151,19 @@ struct BoostersView: View {
         }
     }
 
-    private var typesPreview: some View {
-        VStack(alignment: .leading, spacing: Theme.spaceS) {
-            HStack {
-                Text("PACKS PAR TYPE")
-                    .font(Theme.mono(10, weight: .bold))
-                    .tracking(1.5)
-                    .foregroundStyle(Theme.textSecondary)
-                Spacer()
-                Text("TIRAGE ALÉATOIRE")
-                    .font(Theme.mono(8, weight: .bold))
-                    .tracking(0.8)
-                    .foregroundStyle(Theme.textSecondary.opacity(0.6))
-            }
-
-            ScrollView(.horizontal) {
-                HStack(spacing: 10) {
-                    ForEach(BoosterKind.allCases.filter { $0 != .mixed }) { kind in
-                        kindCard(kind)
-                    }
-                }
-                .padding(.vertical, 2)
-            }
-            .scrollIndicators(.hidden)
-        }
-    }
-
-    private func kindCard(_ kind: BoosterKind) -> some View {
-        VStack(spacing: 10) {
-            BoosterPackArt(booster: .rare, kind: kind)
-                .scaleEffect(0.43)
-                .frame(width: 108, height: 151)
-                .accessibilityHidden(true)
-
-            HStack(spacing: 5) {
-                Image(systemName: kind.systemImage)
-                    .font(.system(size: 10, weight: .bold))
-                Text(kind.packLabel)
-                    .font(Theme.mono(9, weight: .bold))
-                    .tracking(0.8)
-            }
-            .foregroundStyle(kind.tint)
-        }
-        .frame(width: 128)
-        .padding(.vertical, 12)
-        .background(kind.tint.opacity(0.08), in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
-                .strokeBorder(kind.tint.opacity(0.30), lineWidth: 0.6)
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Pack \(kind.displayName)")
-        .accessibilityValue(kind.subtitle)
-    }
-
     private var collectionLedger: some View {
         VStack(spacing: 0) {
             ledgerRow(
                 title: "Collection",
                 value: "\(store.uniqueCount) / \(store.catalog.count)",
-                icon: "square.grid.2x2.fill",
+                icon: "squares-2x2",
                 tint: Theme.moss
             )
             divider
             ledgerRow(
                 title: "Ouvertures",
                 value: "\(store.totalOpened)",
-                icon: "shippingbox.fill",
+                icon: "gift",
                 tint: Theme.copper
             )
             divider
@@ -209,8 +178,11 @@ struct BoostersView: View {
 
     private func ledgerRow(title: String, value: String, icon: String, tint: Color) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.caption.weight(.bold))
+            Image(icon)
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 17, height: 17)
                 .foregroundStyle(tint)
                 .frame(width: 22)
             Text(title)
@@ -218,7 +190,7 @@ struct BoostersView: View {
                 .foregroundStyle(Theme.textSecondary)
             Spacer()
             Text(value)
-                .font(Theme.mono(13, weight: .bold))
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Theme.textPrimary)
                 .contentTransition(.numericText())
         }
@@ -228,13 +200,12 @@ struct BoostersView: View {
     private var progressRow: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Progression du monde")
-                    .font(Theme.mono(9, weight: .bold))
-                    .tracking(1.1)
+                Text("Progression")
+                    .font(.subheadline)
                     .foregroundStyle(Theme.textSecondary)
                 Spacer()
                 Text("\(Int(store.progress * 100)) %")
-                    .font(Theme.mono(11, weight: .bold))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Theme.accent)
                     .contentTransition(.numericText())
             }
@@ -257,9 +228,9 @@ struct BoostersView: View {
     private var offlineBanner: some View {
         HStack(spacing: 8) {
             Image(systemName: "wifi.slash")
-            Text("MODE HORS LIGNE · CATALOGUE EN CACHE")
-                .font(Theme.mono(9, weight: .bold))
-                .tracking(1.1)
+            Text("Hors ligne · catalogue enregistré")
+                .font(.footnote.weight(.medium))
+                .foregroundStyle(Theme.textSecondary)
         }
         .foregroundStyle(Theme.textSecondary)
         .padding(.horizontal, 14)

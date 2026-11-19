@@ -283,13 +283,12 @@ enum BoosterKind: String, CaseIterable, Codable, Sendable, Identifiable {
     }
 }
 
-/// Résultat complet d'une ouverture aléatoire.
+/// Plan d'ouverture tiré avant la déchirure du pack.
 ///
 /// - Authors: Axel L.
-struct BoosterOpen: Sendable {
+struct OpeningPlan: Sendable {
     let booster: Booster
     let kind: BoosterKind
-    let results: [DrawResult]
 }
 
 /// Erreur applicative exposable à l'interface.

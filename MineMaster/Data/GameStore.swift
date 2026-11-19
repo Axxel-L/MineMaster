@@ -146,22 +146,27 @@ final class GameStore {
         }
 
         context.insert(OpeningRecord(booster: booster, kind: kind, itemIDs: drawn.map(\.id)))
+        totalOpened += 1
+        for item in drawn {
+            pullsByItem[item.id, default: 0] += 1
+        }
+        dust = player.dust
         save()
-        reloadFromStore()
         return results
     }
 
-    /// Ouvre un booster aléatoire, avec un type et une rareté tirés.
+    /// Prépare une ouverture sans consommer le verrou ni enregistrer de tirage.
     ///
-    /// - Returns: Le booster choisi, son type et les cartes, ou `nil` si une
-    ///   ouverture est déjà en cours ou si le tirage est vide.
+    /// Le type et la rareté sont tirés une seule fois, puis affichés sur le pack
+    /// scellé. L'ouverture réelle reste déclenchée par le geste de déchirure.
+    ///
+    /// - Returns: Le plan d'ouverture, ou `nil` si une ouverture est déjà en
+    ///   cours ou si le catalogue est vide.
     /// - Authors: Axel L.
-    func openRandom() -> BoosterOpen? {
+    func planOpening() -> OpeningPlan? {
         guard !isOpening, !catalog.isEmpty else { return nil }
         let pick = boosterProvider(catalog)
-        let results = open(pick.0, kind: pick.1)
-        guard !results.isEmpty else { return nil }
-        return BoosterOpen(booster: pick.0, kind: pick.1, results: results)
+        return OpeningPlan(booster: pick.0, kind: pick.1)
     }
 
     /// Termine la session d'ouverture courante et autorise la suivante.
