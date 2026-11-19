@@ -81,6 +81,7 @@ enum ItemCategory: String, CaseIterable, Codable, Sendable, Identifiable {
     case food
     case material
     case special
+    case mob
 
     var id: String { rawValue }
 
@@ -92,6 +93,7 @@ enum ItemCategory: String, CaseIterable, Codable, Sendable, Identifiable {
         case .food: "Nourriture"
         case .material: "Matériau"
         case .special: "Spécial"
+        case .mob: "Créature"
         }
     }
 
@@ -103,6 +105,7 @@ enum ItemCategory: String, CaseIterable, Codable, Sendable, Identifiable {
         case .food: "leaf.fill"
         case .material: "square.stack.3d.up.fill"
         case .special: "sparkles"
+        case .mob: "pawprint.fill"
         }
     }
 }
