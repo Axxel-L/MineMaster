@@ -304,10 +304,10 @@ enum AppError: Error, Sendable, LocalizedError, Equatable {
 
     var errorDescription: String? {
         switch self {
-        case .offline: "Aucune connexion disponible."
+        case .offline: "Tu es hors ligne."
         case .timeout: "Le serveur met trop de temps à répondre."
         case .invalidResponse: "Réponse invalide du serveur."
-        case .decoding: "Les données reçues sont illisibles."
+        case .decoding: "Impossible de charger le catalogue."
         case .imageUnavailable: "Image indisponible."
         case .rateLimited: "Trop de requêtes, réessaie dans un instant."
         }

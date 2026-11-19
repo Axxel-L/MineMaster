@@ -12,13 +12,12 @@ struct LaunchLoadingView: View {
                 Spacer()
 
                 VStack(spacing: 4) {
-                    Text("LE COFFRE")
-                        .font(.system(size: 9, weight: .bold, design: .rounded))
-                        .tracking(1.8)
-                        .foregroundStyle(Theme.textSecondary)
                     Text("MineMaster")
                         .font(Theme.display(42, weight: .heavy))
                         .foregroundStyle(Theme.textPrimary)
+                    Text("Ta collection se prépare")
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.textSecondary)
                 }
 
                 SkeletonBooster()
@@ -27,9 +26,8 @@ struct LaunchLoadingView: View {
                 HStack(spacing: 8) {
                     ProgressView()
                         .tint(Theme.accent)
-                    Text("CHARGEMENT DU MONDE")
-                        .font(.system(size: 9, weight: .bold, design: .rounded))
-                        .tracking(1.2)
+                    Text("Chargement du catalogue")
+                        .font(.footnote)
                         .foregroundStyle(Theme.textSecondary)
                 }
                 .accessibilityElement(children: .combine)

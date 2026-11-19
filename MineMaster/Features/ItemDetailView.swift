@@ -59,17 +59,17 @@ struct ItemDetailView: View {
             divider
             infoRow("Rareté", value: item.rarity.displayName, icon: "sparkles")
             divider
-            infoRow("Taux de rareté", value: String(format: "%.0f %%", item.rarity.baseWeight), icon: "percent")
+            infoRow("Chance de tirage", value: String(format: "%.0f %%", item.rarity.baseWeight), icon: "percent")
             divider
-            infoRow("Tes tirages", value: "\(store.pullCount(for: item))", icon: "hand.tap")
+            infoRow("Tirages sur cet appareil", value: "\(store.pullCount(for: item))", icon: "hand.tap")
             divider
-            infoRow("Tirages joueurs", value: "—", icon: "globe")
+            infoRow("Tirages mondiaux", value: "—", icon: "globe")
             divider
-            infoRow("Prix marché", value: "Bientôt", icon: "tag")
+            infoRow("Prix du marché", value: "Bientôt", icon: "tag")
             divider
-            infoRow("Poussière doublon", value: "+\(item.rarity.dustValue)", icon: "circle.hexagongrid.fill")
+            infoRow("Poussière par doublon", value: "+\(item.rarity.dustValue)", icon: "circle.hexagongrid.fill")
             divider
-            infoRow("Possédés", value: "\(count)", icon: "square.stack.3d.up.fill")
+            infoRow("Quantité possédée", value: "\(count)", icon: "square.stack.3d.up.fill")
         }
         .padding(16)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
@@ -83,7 +83,7 @@ struct ItemDetailView: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "chart.line.uptrend.xyaxis")
                 .foregroundStyle(Theme.copper)
-            Text("Les tirages mondiaux et le prix du marché seront branchés avec le marché global. En attendant, « Tes tirages » reste local.")
+            Text("Le marché arrive dans une prochaine version. Pour l'instant, tes tirages sont enregistrés sur cet appareil.")
                 .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)

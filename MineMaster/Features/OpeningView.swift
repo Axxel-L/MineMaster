@@ -192,18 +192,17 @@ struct OpeningView: View {
                 HStack(spacing: 5) {
                     Image(systemName: session.kind.systemImage)
                         .font(.system(size: 9, weight: .bold))
-                    Text("RÉVÉLATION · \(session.kind.displayName.uppercased())")
-                        .font(Theme.mono(9, weight: .bold))
-                        .tracking(1.6)
+                    Text("Révélation · \(session.kind.displayName)")
+                        .font(.footnote.weight(.semibold))
                 }
                 .foregroundStyle(session.kind.tint)
-                Text("CARTE \(index + 1) / \(session.results.count)")
+                Text("Carte \(index + 1) sur \(session.results.count)")
                     .font(Theme.display(24))
                     .foregroundStyle(Theme.textPrimary)
                     .contentTransition(.numericText())
             }
             Spacer()
-            Text(revealed.isEmpty ? "Aucune révélée" : revealed.count == 1 ? "1 révélée" : "\(revealed.count) révélées")
+            Text("Révélées : \(revealed.count) sur \(session.results.count)")
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                 .foregroundStyle(Theme.textSecondary)
             Button {
@@ -411,9 +410,8 @@ struct RevealCard: View {
             HStack {
                 RarityBadge(rarity: result.item.rarity)
                 Spacer()
-                Text(result.item.category.displayName.uppercased())
-                    .font(Theme.mono(9, weight: .bold))
-                    .tracking(0.8)
+                Text(result.item.category.displayName)
+                    .font(.footnote)
                     .foregroundStyle(Theme.textSecondary)
             }
 
@@ -461,9 +459,8 @@ struct RevealCard: View {
             )
             VStack(spacing: 14) {
                 HStack {
-                    Text("SCELLÉ")
-                        .font(Theme.mono(9, weight: .bold))
-                        .tracking(1.4)
+                    Text("Scellé")
+                        .font(.footnote.weight(.semibold))
                     Spacer()
                     Text("?")
                         .font(Theme.mono(11, weight: .bold))
@@ -486,9 +483,8 @@ struct RevealCard: View {
                         .foregroundStyle(Theme.textSecondary.opacity(0.7))
                 }
 
-                Text("TOUCHE POUR\nRÉVÉLER")
-                    .font(.system(size: width * 0.045, weight: .bold, design: .rounded))
-                    .tracking(1.4)
+                Text("Touche pour révéler")
+                    .font(.system(size: width * 0.05, weight: .semibold, design: .rounded))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Theme.textSecondary)
 
