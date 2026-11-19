@@ -147,7 +147,7 @@ Conventions :
 - Nom de test : phrase française décrivant l'invariant, pas le nom de la méthode.
 - Structure : Arrange, Act, Assert.
 - Un test vérifie un invariant. Plusieurs `#expect` acceptés si le même scénario.
-- Les fixtures sont minimales et nommées. Pas de JSON de 230 items si 3 suffisent.
+- Les fixtures sont minimales et nommées. Pas de JSON de 254 items si 3 suffisent.
 - Chaque test doit échouer si l'invariant est cassé. Vérifier ce point en cassant
   volontairement le code une fois, localement.
 

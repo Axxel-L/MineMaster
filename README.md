@@ -31,11 +31,14 @@ xcodebuild -project MineMaster.xcodeproj -scheme MineMaster \
 
 ## Fonctionnalités
 
-- 3 packs (Commun, Rare, Légendaire), 5 cartes par ouverture, garanties par rareté
-- 5 raretés, 7 catégories, 230 items (blocs, outils, livres enchantés, créatures)
-- Pack scellé à déchirer au doigt, révélation carte par carte au toucher, particules selon la rareté, haptiques
+- Pack mystère unique : rareté et type tirés à l'ouverture, 5 cartes par pack, garanties par rareté
+- 5 raretés, 8 catégories, 254 items (blocs, outils, armes, armures, livres enchantés, créatures)
+- Types de packs : créatures, armes, armures, consommables, nourriture, blocs, outils
+- Chaque type possède sa couleur, son icône et sa bande de type sur le pack
+- Pack scellé à déchirer au doigt, révélation en carrousel au toucher, particules selon la rareté, haptiques
+- Écran de chargement avec skeleton, rendus 3D des créatures depuis Minecraft Wiki
 - Collection avec recherche, filtres rareté/catégorie et filtre « possédés »
-- Fiche détail en modal
+- Fiche détail en modal avec taux de rareté, tirages locaux, prix marché à venir
 - Doublons convertis en poussière
 - Statistiques locales, réinitialisation, mentions légales
 - Skeletons de chargement, mode hors ligne avec catalogue en cache
@@ -101,6 +104,7 @@ Les conventions et les invariants obligatoires sont décrits dans [`AGENTS.md`](
 - Heroicons 2.2.0, MIT, © Tailwind Labs
 - minecraft-data 1.21.4, MIT, PrismarineJS
 - Textures et noms Minecraft, © Mojang Studios / Microsoft — projet non commercial et non affilié, assets non redistribués
+- Rendus de créatures, Minecraft Wiki, CC BY-NC-SA 3.0
 - SF Symbols, Apple
 
 Le cahier des charges complet est disponible dans [`docs/CAHIER_DES_CHARGES.md`](docs/CAHIER_DES_CHARGES.md).
