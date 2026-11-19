@@ -252,20 +252,23 @@ struct ItemImageView: View {
     }
 
     private func load() async {
-        guard let url = ImagePolicy.url(for: item.texturePath) else {
-            state = .failed
-            return
-        }
-        do {
-            let data = try await ImagePipeline.shared.data(for: url)
-            guard let decoded = UIImage(data: data) else {
-                state = .failed
-                return
+        let candidates = [
+            MobRenderAPI.url(for: item.id),
+            ImagePolicy.url(for: item.texturePath)
+        ].compactMap { $0 }
+
+        for url in candidates {
+            do {
+                let data = try await ImagePipeline.shared.data(for: url)
+                if let decoded = UIImage(data: data) {
+                    state = .loaded(decoded)
+                    return
+                }
+            } catch {
+                continue
             }
-            state = .loaded(decoded)
-        } catch {
-            state = .failed
         }
+        state = .failed
     }
 }
 

@@ -40,6 +40,20 @@ struct ImagePolicyTests {
         }
     }
 
+    @Test("Les rendus de créatures de Minecraft Wiki sont autorisés")
+    func acceptsMobRenders() {
+        let render = URL(string: "https://minecraft.wiki/images/Panda_JE1_BE1.png")!
+        let animated = URL(string: "https://minecraft.wiki/images/Warden.gif")!
+        let webp = URL(string: "https://minecraft.wiki/images/Breeze_BE1_JE2.webp")!
+
+        #expect(ImagePolicy.isAllowed(render))
+        #expect(ImagePolicy.isAllowed(animated))
+        #expect(ImagePolicy.isAllowed(webp))
+        #expect(!ImagePolicy.isAllowed(URL(string: "http://minecraft.wiki/images/Panda_JE1_BE1.png")!))
+        #expect(!ImagePolicy.isAllowed(URL(string: "https://minecraft.wiki/images/../secret.png")!))
+        #expect(!ImagePolicy.isAllowed(URL(string: "https://minecraft.wiki/images/Panda_JE1_BE1.png?x=1")!))
+    }
+
     @Test("Seules les URLs HTTPS du CDN sans query ni fragment sont autorisées")
     func rejectsForeignURLs() {
         let valid = ImagePolicy.url(for: "item/diamond.png")!

@@ -22,6 +22,18 @@ struct SeedCatalogTests {
         #expect(items.contains { $0.id == "creaking" })
     }
 
+    @Test("Chaque créature possède un rendu autorisé")
+    func everyMobHasRender() {
+        let mobs = SeedCatalog.load(bundle: .main).filter { $0.category == .mob }
+
+        #expect(!mobs.isEmpty)
+        for mob in mobs {
+            let url = MobRenderAPI.url(for: mob.id)
+            #expect(url != nil, "Rendu absent: \(mob.id)")
+            #expect(url.map(ImagePolicy.isAllowed) == true)
+        }
+    }
+
     @Test("Chaque texture du catalogue produit une URL autorisée")
     func everyTextureIsAllowed() {
         let items = SeedCatalog.load(bundle: .main)

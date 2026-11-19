@@ -188,10 +188,14 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
   `entity/[<dossier>/]<nom>.png`, en minuscules, chiffres et underscore.
 - `ImagePolicy.url(for:)` refuse la traversée de chemin, les schémas, les hôtes,
   les requêtes, les majuscules et les extensions autres que `.png`.
-- `ImagePolicy.isAllowed(_:)` accepte uniquement HTTPS, l'hôte du CDN, le préfixe
-  de version figée et aucune query.
+- `ImagePolicy.isAllowed(_:)` accepte HTTPS, l'hôte du CDN avec le préfixe de
+  version figée, ou les rendus `minecraft.wiki/images/` en PNG, GIF ou WebP.
+- Toute URL refusée : query, fragment, traversée, hôte inconnu ou port non standard.
 - Toutes les textures du catalogue embarqué produisent une URL autorisée.
-- Le catalogue embarqué charge ses 230 items et aucun item n'est perdu au décodage.
+- Chaque créature du catalogue possède un rendu Minecraft Wiki autorisé.
+- Le catalogue embarqué charge ses 254 items et aucun item n'est perdu au décodage.
+- Le catalogue contient les catégories armure, créature, arme, outil, bloc,
+  nourriture, matériau et spécial.
 - `ImagePipeline` coalesce les requêtes simultanées sur la même URL en un seul
   appel réseau, puis sert le cache sans second appel.
 - `ImagePipeline` rejette un type MIME non image, un statut hors `200...299`,

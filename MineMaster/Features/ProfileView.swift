@@ -316,6 +316,14 @@ struct LegalView: View {
             tint: Theme.accent
         ),
         LegalDependency(
+            name: "Minecraft Wiki",
+            version: "1.21.4",
+            role: "Rendus de créatures",
+            license: "CC BY-NC-SA 3.0 · Minecraft Wiki",
+            icon: "mojang",
+            tint: Theme.moss
+        ),
+        LegalDependency(
             name: "SF Symbols",
             version: "iOS 26",
             role: "Icônes système",

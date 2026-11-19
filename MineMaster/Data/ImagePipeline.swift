@@ -27,15 +27,25 @@ enum ImagePolicy {
     /// - Authors: Axel L.
     nonisolated static func isAllowed(_ url: URL) -> Bool {
         guard url.scheme == "https",
-              url.host == host,
               url.user == nil,
               url.password == nil,
               url.port == nil || url.port == 443,
-              url.path.hasPrefix(pathPrefix),
               url.query == nil,
               url.fragment == nil else {
             return false
         }
+
+        if url.host == "minecraft.wiki" {
+            let path = url.path
+            guard path.hasPrefix("/images/"),
+                  !path.split(separator: "/").contains(".."),
+                  ["png", "gif", "webp"].contains(where: { path.lowercased().hasSuffix(".\($0)") }) else {
+                return false
+            }
+            return true
+        }
+
+        guard url.host == host, url.path.hasPrefix(pathPrefix) else { return false }
         let relative = String(url.path.dropFirst(pathPrefix.count))
         let pattern = #"^(item|block)/[a-z0-9_]+\.png$|^entity/([a-z0-9_]+/)?[a-z0-9_]+\.png$"#
         return relative.range(of: pattern, options: .regularExpression) != nil
