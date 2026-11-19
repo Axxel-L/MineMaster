@@ -249,7 +249,7 @@ private struct PixelFoil: View {
     }
 }
 
-/// Pack scellé à déchirer au doigt.
+/// Pack scellé à ouvrir au doigt.
 ///
 /// - Authors: Axel L.
 struct InteractiveBoosterPack: View {
@@ -268,7 +268,7 @@ struct InteractiveBoosterPack: View {
                 .opacity(isOpened ? 0 : 1)
                 .contentShape(Rectangle())
                 .gesture(tearGesture)
-                .accessibilityAction(named: "Déchirer le pack") {
+                .accessibilityAction(named: "Ouvrir le pack") {
                     open()
                 }
 
@@ -277,7 +277,7 @@ struct InteractiveBoosterPack: View {
             } label: {
                 HStack(spacing: 9) {
                     Image(systemName: "scissors")
-                    Text("Déchirer le pack")
+                    Text("Ouvrir le pack")
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                 }
                 .frame(maxWidth: .infinity)
@@ -287,7 +287,7 @@ struct InteractiveBoosterPack: View {
             .tint(kind?.tint ?? booster.tint)
             .accessibilityHint("Ouvre le pack et révèle les cartes")
 
-            Text("GLISSE LE PACK VERS LE BAS POUR DÉCHIRER")
+            Text("Glisse le pack vers le bas pour l'ouvrir")
                 .font(.system(size: 9, weight: .bold, design: .rounded))
                 .tracking(1.0)
                 .foregroundStyle(Theme.textSecondary)
@@ -321,52 +321,136 @@ struct InteractiveBoosterPack: View {
     }
 }
 
-/// Particules de célébration proportionnelles à la rareté.
+/// Célébration d'une carte rare, épique ou légendaire.
+///
+/// Une charge lumineuse précède une onde de choc, puis des étincelles avec
+/// traînée. Les cartes épiques ajoutent des rayons, les légendaires une seconde
+/// onde et davantage de particules. L'animation s'arrête d'elle-même.
 ///
 /// - Authors: Axel L.
 struct ParticleBurst: View {
     let rarity: Rarity
 
     @State private var start = Date()
+    @State private var finished = false
     private let particles: [CelebrationParticle]
-    private let duration: Double = 1.5
 
     init(rarity: Rarity) {
         self.rarity = rarity
         particles = CelebrationParticle.make(for: rarity)
     }
 
+    private var duration: Double {
+        switch rarity {
+        case .common, .uncommon: 0
+        case .rare: 1.7
+        case .epic: 2.2
+        case .legendary: 2.8
+        }
+    }
+
     var body: some View {
-        TimelineView(.animation) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: finished)) { timeline in
             let elapsed = timeline.date.timeIntervalSince(start)
             Canvas { context, size in
                 guard elapsed < duration else { return }
                 let center = CGPoint(x: size.width / 2, y: size.height * 0.46)
+                let radius = min(size.width, size.height) * 0.42
+
+                if rarity >= .epic {
+                    drawRays(in: &context, center: center, radius: radius, elapsed: elapsed)
+                }
+
+                drawRings(in: &context, center: center, radius: radius, elapsed: elapsed)
+
                 for particle in particles {
-                    let local = max(0, elapsed - particle.delay)
+                    let local = elapsed - particle.delay
                     guard local > 0 else { continue }
-                    let distance = particle.speed * local
-                    let fade = max(0, 1 - local / (duration - particle.delay))
-                    let point = CGPoint(
-                        x: center.x + cos(particle.angle) * distance,
-                        y: center.y + sin(particle.angle) * distance + 24 * local * local
+                    let fade = max(0, 1 - local / max(duration - particle.delay, 0.01))
+                    let point = particle.position(from: center, at: local)
+                    let tail = particle.position(from: center, at: max(local - 0.055, 0))
+                    var trail = Path()
+                    trail.move(to: tail)
+                    trail.addLine(to: point)
+                    context.stroke(
+                        trail,
+                        with: .color(particle.color.opacity(fade * 0.85)),
+                        style: StrokeStyle(lineWidth: particle.size * 0.55, lineCap: .round)
                     )
-                    let side = particle.size * (0.5 + fade)
+                    let side = particle.size * (0.35 + fade)
                     let rect = CGRect(
                         x: point.x - side / 2,
                         y: point.y - side / 2,
                         width: side,
                         height: side
                     )
-                    context.fill(
-                        Path(rect),
-                        with: .color(particle.color.opacity(fade))
-                    )
+                    context.fill(Path(rect), with: .color(particle.color.opacity(fade)))
                 }
             }
         }
+        .task {
+            try? await Task.sleep(for: .seconds(duration + 0.1))
+            finished = true
+        }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+
+    private func drawRays(
+        in context: inout GraphicsContext,
+        center: CGPoint,
+        radius: CGFloat,
+        elapsed: Double
+    ) {
+        let fade = max(0, 1 - elapsed / 0.85)
+        guard fade > 0 else { return }
+        let count = rarity == .legendary ? 16 : 10
+        var rays = Path()
+        for index in 0..<count {
+            let angle = elapsed * 0.7 + Double(index) / Double(count) * 2 * .pi
+            let spread = 0.035
+            rays.move(to: center)
+            rays.addLine(to: CGPoint(
+                x: center.x + cos(angle - spread) * radius * 1.8,
+                y: center.y + sin(angle - spread) * radius * 1.8
+            ))
+            rays.addLine(to: CGPoint(
+                x: center.x + cos(angle) * radius * 2.1,
+                y: center.y + sin(angle) * radius * 2.1
+            ))
+            rays.addLine(to: CGPoint(
+                x: center.x + cos(angle + spread) * radius * 1.8,
+                y: center.y + sin(angle + spread) * radius * 1.8
+            ))
+            rays.closeSubpath()
+        }
+        context.fill(rays, with: .color(rarity.color.opacity(0.09 * fade)))
+    }
+
+    private func drawRings(
+        in context: inout GraphicsContext,
+        center: CGPoint,
+        radius: CGFloat,
+        elapsed: Double
+    ) {
+        let count = rarity == .legendary ? 3 : rarity == .epic ? 2 : 1
+        for ring in 0..<count {
+            let local = elapsed - Double(ring) * 0.16
+            guard local > 0, local < 0.9 else { continue }
+            let progress = local / 0.9
+            let extent = radius * (0.25 + progress * 1.1)
+            let rect = CGRect(
+                x: center.x - extent,
+                y: center.y - extent,
+                width: extent * 2,
+                height: extent * 2
+            )
+            context.stroke(
+                Path(ellipseIn: rect),
+                with: .color(rarity.color.opacity(0.55 * (1 - progress))),
+                lineWidth: 0.6 + 3 * (1 - progress)
+            )
+        }
     }
 }
 
@@ -377,22 +461,30 @@ private struct CelebrationParticle: Sendable {
     let delay: Double
     let color: Color
 
+    func position(from center: CGPoint, at time: Double) -> CGPoint {
+        let distance = speed * time
+        return CGPoint(
+            x: center.x + cos(angle) * distance,
+            y: center.y + sin(angle) * distance + 32 * time * time
+        )
+    }
+
     static func make(for rarity: Rarity) -> [CelebrationParticle] {
         let count: Int
         switch rarity {
         case .common, .uncommon: count = 0
-        case .rare: count = 18
-        case .epic: count = 34
-        case .legendary: count = 56
+        case .rare: count = 22
+        case .epic: count = 40
+        case .legendary: count = 68
         }
         guard count > 0 else { return [] }
+        let palette = [rarity.color, Theme.accent, Color.white, Theme.copper]
         return (0..<count).map { index in
             let seed = UInt64(index + 1) &* 0x9E37_79B9_7F4A_7C15
             let angle = Double(seed % 360) * .pi / 180
-            let speed = 55 + Double((seed >> 8) % 110)
-            let size = 3 + Double((seed >> 16) % 6)
-            let delay = Double((seed >> 24) % 18) / 100
-            let palette = [rarity.color, Theme.accent, Color.white]
+            let speed = 60 + Double((seed >> 8) % 150)
+            let size = 3 + Double((seed >> 16) % 7)
+            let delay = Double((seed >> 24) % 22) / 100
             let color = palette[Int((seed >> 32) % UInt64(palette.count))]
             return CelebrationParticle(
                 angle: angle,

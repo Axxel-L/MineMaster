@@ -120,6 +120,7 @@ struct OpeningView: View {
     @State private var revealed: Set<Int> = []
     @State private var feedbackTick = 0
     @State private var index = 0
+    @State private var flash = false
 
     private var allRevealed: Bool {
         revealed.count == session.results.count
@@ -171,6 +172,12 @@ struct OpeningView: View {
                 }
                 .padding(.bottom, Theme.spaceL)
             }
+
+            Color.white
+                .opacity(flash ? 0.13 : 0)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+                .animation(flash ? .easeIn(duration: 0.08) : .easeOut(duration: 0.5), value: flash)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .sensoryFeedback(.success, trigger: feedbackTick)
@@ -282,6 +289,14 @@ struct OpeningView: View {
             _ = revealed.insert(index)
         }
         feedbackTick += 1
+
+        if !reduceMotion, session.results[index].item.rarity == .legendary {
+            flash = true
+            Task {
+                try? await Task.sleep(for: .milliseconds(120))
+                flash = false
+            }
+        }
     }
 }
 
@@ -295,6 +310,9 @@ struct RevealCard: View {
     var width: CGFloat = 238
     var height: CGFloat = 344
     let onTap: () -> Void
+
+    @State private var sweep: CGFloat = -1.4
+    @State private var impact = 0
 
     private var glow: CGFloat {
         switch result.item.rarity {
@@ -335,9 +353,9 @@ struct RevealCard: View {
                         perspective: 0.35
                     )
 
-                if isRevealed, result.item.rarity >= .rare {
+                if isRevealed, result.item.rarity >= .rare, !reduceMotion {
                     ParticleBurst(rarity: result.item.rarity)
-                        .frame(width: width * 1.5, height: height * 1.2)
+                        .frame(width: width * 1.6, height: height * 1.25)
                         .transition(.opacity)
                 }
             }
@@ -356,8 +374,33 @@ struct RevealCard: View {
                 color: result.item.rarity.color.opacity(isRevealed ? glow : 0.08),
                 radius: isRevealed ? 28 : 12
             )
+            .overlay {
+                if isRevealed, result.item.rarity >= .epic, !reduceMotion {
+                    LinearGradient(
+                        colors: [.clear, .white.opacity(0.38), .clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .rotationEffect(.degrees(18))
+                    .offset(x: sweep * width * 1.3)
+                    .mask(RoundedRectangle(cornerRadius: 26, style: .continuous))
+                    .allowsHitTesting(false)
+                }
+            }
         }
         .buttonStyle(.plain)
+        .onChange(of: isRevealed) { _, value in
+            guard value else { return }
+            if result.item.rarity == .legendary {
+                impact += 1
+            }
+            guard result.item.rarity >= .epic, !reduceMotion else { return }
+            sweep = -1.4
+            withAnimation(.easeInOut(duration: 0.75)) {
+                sweep = 1.4
+            }
+        }
+        .sensoryFeedback(.impact(weight: .heavy), trigger: impact)
         .accessibilityLabel(isRevealed ? result.item.displayName : "Carte non révélée")
         .accessibilityValue(isRevealed ? "\(result.item.rarity.displayName), \(result.dust) poussière" : "Touche pour révéler")
         .accessibilityHint(isRevealed ? "" : "Révèle cette carte")
