@@ -4,10 +4,32 @@ import SwiftUI
 ///
 /// - Authors: Axel L.
 enum Theme {
-    static let accent = Color(red: 0.36, green: 0.85, blue: 0.48)
-    static let textPrimary = Color.white
-    static let textSecondary = Color.white.opacity(0.62)
-    static let stroke = Color.white.opacity(0.10)
+    static let accent = Color(red: 0.95, green: 0.66, blue: 0.24)
+    static let moss = Color(red: 0.42, green: 0.72, blue: 0.42)
+    static let copper = Color(red: 0.86, green: 0.47, blue: 0.26)
+    static let background = Color(red: 0.055, green: 0.05, blue: 0.04)
+    static let surface = Color(red: 0.085, green: 0.078, blue: 0.062)
+    static let surfaceRaised = Color(red: 0.12, green: 0.108, blue: 0.086)
+    static let textPrimary = Color(red: 0.96, green: 0.93, blue: 0.85)
+    static let textSecondary = Color(red: 0.68, green: 0.64, blue: 0.55)
+    static let stroke = Color(red: 0.92, green: 0.78, blue: 0.48).opacity(0.18)
+    static let spaceXS: CGFloat = 4
+    static let spaceS: CGFloat = 8
+    static let spaceM: CGFloat = 16
+    static let spaceL: CGFloat = 24
+    static let spaceXL: CGFloat = 32
+    static let spaceXXL: CGFloat = 48
+    static let radiusS: CGFloat = 10
+    static let radiusM: CGFloat = 16
+    static let radiusL: CGFloat = 24
+
+    static func display(_ size: CGFloat, weight: Font.Weight = .bold) -> Font {
+        .system(size: size, weight: weight, design: .default)
+    }
+
+    static func mono(_ size: CGFloat, weight: Font.Weight = .medium) -> Font {
+        .system(size: size, weight: weight, design: .monospaced)
+    }
 }
 
 extension Rarity {
@@ -35,9 +57,18 @@ extension Rarity {
 extension Booster {
     var tint: Color {
         switch self {
-        case .common: Color(red: 0.45, green: 0.78, blue: 0.56)
-        case .rare: Rarity.rare.color
-        case .legendary: Rarity.legendary.color
+        case .common: Theme.moss
+        case .rare: Theme.copper
+        case .legendary: Theme.accent
+        }
+    }
+
+    /// Couleurs de feuille du pack, du plus sombre au plus lumineux.
+    var foilColors: [Color] {
+        switch self {
+        case .common: [Color(red: 0.10, green: 0.42, blue: 0.20), Color(red: 0.30, green: 0.68, blue: 0.34), Color(red: 0.78, green: 0.90, blue: 0.48)]
+        case .rare: [Color(red: 0.48, green: 0.16, blue: 0.07), Color(red: 0.88, green: 0.40, blue: 0.16), Color(red: 1.00, green: 0.68, blue: 0.28)]
+        case .legendary: [Color(red: 0.55, green: 0.30, blue: 0.03), Color(red: 0.95, green: 0.62, blue: 0.12), Color(red: 1.00, green: 0.86, blue: 0.42)]
         }
     }
 }
@@ -48,30 +79,47 @@ extension Booster {
 struct ScreenBackground: View {
     var body: some View {
         ZStack {
-            Color(red: 0.03, green: 0.05, blue: 0.04)
-            MeshGradient(
-                width: 3,
-                height: 3,
-                points: [
-                    .init(0, 0), .init(0.5, 0), .init(1, 0),
-                    .init(0, 0.5), .init(0.55, 0.5), .init(1, 0.5),
-                    .init(0, 1), .init(0.5, 1), .init(1, 1)
-                ],
-                colors: [
-                    Color(red: 0.05, green: 0.12, blue: 0.08),
-                    Color(red: 0.03, green: 0.08, blue: 0.06),
-                    Color(red: 0.02, green: 0.05, blue: 0.04),
-                    Color(red: 0.06, green: 0.16, blue: 0.10),
-                    Color(red: 0.10, green: 0.26, blue: 0.16),
-                    Color(red: 0.04, green: 0.10, blue: 0.07),
-                    Color(red: 0.02, green: 0.05, blue: 0.04),
-                    Color(red: 0.05, green: 0.14, blue: 0.09),
-                    Color(red: 0.03, green: 0.07, blue: 0.05)
-                ]
+            Theme.background
+            RadialGradient(
+                colors: [Theme.moss.opacity(0.18), .clear],
+                center: .topTrailing,
+                startRadius: 20,
+                endRadius: 520
             )
-            .overlay(Color.black.opacity(0.15))
+            RadialGradient(
+                colors: [Theme.accent.opacity(0.10), .clear],
+                center: .bottomLeading,
+                startRadius: 10,
+                endRadius: 480
+            )
+            GrainOverlay()
         }
         .ignoresSafeArea()
+    }
+}
+
+private struct GrainOverlay: View {
+    var body: some View {
+        Canvas { context, size in
+            let step: CGFloat = 26
+            let columns = Int(size.width / step) + 1
+            let rows = Int(size.height / step) + 1
+            for column in 0..<columns {
+                for row in 0..<rows {
+                    let seed = (column &* 73856093) ^ (row &* 19349663)
+                    guard seed % 11 == 0 else { continue }
+                    let rect = CGRect(
+                        x: CGFloat(column) * step,
+                        y: CGFloat(row) * step,
+                        width: 2,
+                        height: 2
+                    )
+                    context.fill(Path(rect), with: .color(.white.opacity(0.018)))
+                }
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 
@@ -100,17 +148,18 @@ struct RarityBadge: View {
 struct FilterChip: View {
     let title: String
     let isActive: Bool
-    var tint: Color = .white
+    var tint: Color = Theme.accent
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.caption.weight(.semibold))
+            Text(title.uppercased())
+                .font(Theme.mono(10, weight: .bold))
+                .tracking(0.8)
                 .padding(.horizontal, 12)
-                .padding(.vertical, 7)
-                .foregroundStyle(isActive ? Color.black.opacity(0.85) : Theme.textSecondary)
-                .background(isActive ? tint : Color.white.opacity(0.07), in: Capsule())
+                .padding(.vertical, 8)
+                .foregroundStyle(isActive ? Theme.background : Theme.textSecondary)
+                .background(isActive ? tint : Theme.surface, in: Capsule())
                 .overlay(Capsule().strokeBorder(isActive ? .clear : Theme.stroke, lineWidth: 0.5))
         }
         .buttonStyle(.plain)
@@ -168,30 +217,35 @@ struct ItemImageView: View {
     let item: CatalogItem
     var size: CGFloat = 56
 
-    @State private var image: UIImage?
-    @State private var failed = false
+    private enum LoadState {
+        case loading
+        case loaded(UIImage)
+        case failed
+    }
+
+    @State private var state: LoadState = .loading
 
     var body: some View {
         Group {
-            if let image {
+            switch state {
+            case let .loaded(image):
                 Image(uiImage: image)
                     .resizable()
                     .interpolation(.none)
                     .scaledToFit()
-            } else if failed {
+            case .failed:
                 Image(systemName: "cube.fill")
                     .resizable()
                     .scaledToFit()
                     .padding(size * 0.24)
                     .foregroundStyle(Theme.textSecondary)
-            } else {
-                RoundedRectangle(cornerRadius: size * 0.22, style: .continuous)
-                    .fill(Color.white.opacity(0.08))
-                    .shimmering()
+            case .loading:
+                SkeletonImage(size: size)
             }
         }
         .frame(width: size, height: size)
         .task(id: item.texturePath) {
+            state = .loading
             await load()
         }
         .accessibilityLabel(item.displayName)
@@ -199,20 +253,34 @@ struct ItemImageView: View {
 
     private func load() async {
         guard let url = ImagePolicy.url(for: item.texturePath) else {
-            failed = true
+            state = .failed
             return
         }
         do {
             let data = try await ImagePipeline.shared.data(for: url)
             guard let decoded = UIImage(data: data) else {
-                failed = true
+                state = .failed
                 return
             }
-            image = decoded
-            failed = false
+            state = .loaded(decoded)
         } catch {
-            failed = true
+            state = .failed
         }
+    }
+}
+
+/// Squelette rectangulaire d'une image en attente de téléchargement.
+///
+/// - Authors: Axel L.
+struct SkeletonImage: View {
+    let size: CGFloat
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: size * 0.22, style: .continuous)
+            .fill(Theme.surfaceRaised)
+            .frame(width: size, height: size)
+            .shimmering()
+            .accessibilityHidden(true)
     }
 }
 
@@ -270,21 +338,31 @@ struct StatCard: View {
     var tint: Color = Theme.accent
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: systemImage)
-                .font(.headline)
-                .foregroundStyle(tint)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text(title.uppercased())
+                    .font(Theme.mono(9, weight: .bold))
+                    .tracking(1.1)
+                    .foregroundStyle(Theme.textSecondary)
+                Spacer()
+                Image(systemName: systemImage)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(tint)
+            }
             Text(value)
-                .font(.title2.bold())
+                .font(Theme.display(30))
                 .foregroundStyle(Theme.textPrimary)
                 .contentTransition(.numericText())
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(Theme.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .glassEffect(.regular.tint(tint.opacity(0.12)), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
+                .strokeBorder(Theme.stroke, lineWidth: 0.5)
+        }
     }
 }
 
