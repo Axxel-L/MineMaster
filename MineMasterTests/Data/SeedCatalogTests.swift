@@ -5,11 +5,11 @@ import Testing
 @MainActor
 @Suite("Catalogue embarqué")
 struct SeedCatalogTests {
-    @Test("Le catalogue embarqué charge ses 230 items")
+    @Test("Le catalogue embarqué charge ses 254 items")
     func loadsAllItems() {
         let items = SeedCatalog.load(bundle: .main)
 
-        #expect(items.count == 230)
+        #expect(items.count == 254)
         #expect(Set(items.map(\.id)).count == items.count)
     }
 

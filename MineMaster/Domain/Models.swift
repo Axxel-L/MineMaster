@@ -71,6 +71,7 @@ enum ItemCategory: String, CaseIterable, Codable, Sendable, Identifiable {
     case material
     case special
     case mob
+    case armor
 
     var id: String { rawValue }
 
@@ -83,6 +84,7 @@ enum ItemCategory: String, CaseIterable, Codable, Sendable, Identifiable {
         case .material: "Matériau"
         case .special: "Spécial"
         case .mob: "Créature"
+        case .armor: "Armure"
         }
     }
 
@@ -95,6 +97,7 @@ enum ItemCategory: String, CaseIterable, Codable, Sendable, Identifiable {
         case .material: "square.stack.3d.up.fill"
         case .special: "sparkles"
         case .mob: "pawprint.fill"
+        case .armor: "shield.lefthalf.filled"
         }
     }
 }
