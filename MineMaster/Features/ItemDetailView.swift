@@ -6,7 +6,12 @@ struct ItemDetailView: View {
     @Environment(GameStore.self) private var store
     @Environment(\.dismiss) private var dismiss
 
+    @State private var errorMessage: String?
+
     private var count: Int { store.ownedCount(for: item) }
+    private var offer: MarketOffer? { store.marketOffer(for: item.id) }
+    private var canBuy: Bool { (offer?.stock ?? 0) > 0 }
+    private var affordable: Bool { store.dust >= MarketPrice.buy(for: item.rarity) }
 
     var body: some View {
         ZStack {
@@ -16,6 +21,7 @@ struct ItemDetailView: View {
                 VStack(spacing: 18) {
                     hero
                     infoCard
+                    actionBar
                     marketNote
                 }
                 .padding(20)
@@ -65,9 +71,11 @@ struct ItemDetailView: View {
             divider
             infoRow("Tirages mondiaux", value: "—", icon: "globe")
             divider
-            infoRow("Prix du marché", value: "Bientôt", icon: "tag")
+            infoRow("Prix d'achat", value: "\(MarketPrice.buy(for: item.rarity))", icon: "cart.fill")
             divider
-            infoRow("Poussière par doublon", value: "+\(item.rarity.dustValue)", icon: "circle.hexagongrid.fill")
+            infoRow("Prix de revente", value: "\(MarketPrice.sell(for: item.rarity))", icon: "cart.badge.plus")
+            divider
+            infoRow("Stock marché", value: "\(offer?.stock ?? 0)", icon: "shippingbox.fill")
             divider
             infoRow("Quantité possédée", value: "\(count)", icon: "square.stack.3d.up.fill")
         }
@@ -79,11 +87,78 @@ struct ItemDetailView: View {
         }
     }
 
+    @ViewBuilder
+    private var actionBar: some View {
+        if canBuy || count > 0 {
+            VStack(spacing: 10) {
+                if canBuy {
+                    actionButton(
+                        title: "Acheter · \(MarketPrice.buy(for: item.rarity))",
+                        systemImage: "cart.fill",
+                        tint: affordable ? Theme.accent : Theme.textSecondary,
+                        isEnabled: affordable
+                    ) {
+                        transact { try store.buy(item) }
+                    }
+                }
+                if count > 0 {
+                    actionButton(
+                        title: "Vendre · +\(MarketPrice.sell(for: item.rarity))",
+                        systemImage: "cart.badge.plus",
+                        tint: Theme.danger,
+                        isEnabled: true
+                    ) {
+                        transact { try store.sell(item.id) }
+                    }
+                }
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundStyle(Theme.danger)
+                        .multilineTextAlignment(.center)
+                }
+            }
+            .padding(Theme.spaceM)
+            .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
+                    .strokeBorder(Theme.stroke, lineWidth: 0.6)
+            }
+        }
+    }
+
+    private func actionButton(
+        title: String,
+        systemImage: String,
+        tint: Color,
+        isEnabled: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
+                .frame(maxWidth: .infinity, minHeight: 44)
+        }
+        .buttonStyle(.glassProminent)
+        .tint(tint)
+        .disabled(!isEnabled)
+    }
+
+    private func transact(_ action: () throws -> Void) {
+        do {
+            try action()
+            errorMessage = nil
+        } catch let error as AppError {
+            errorMessage = error.errorDescription ?? "Transaction échouée."
+        } catch {
+            errorMessage = "Transaction échouée."
+        }
+    }
+
     private var marketNote: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "chart.line.uptrend.xyaxis")
                 .foregroundStyle(Theme.copper)
-            Text("Le marché arrive dans une prochaine version. Pour l'instant, tes tirages sont enregistrés sur cet appareil.")
+            Text("Transactions réelles contre de la poussière, enregistrées sur cet appareil.")
                 .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)

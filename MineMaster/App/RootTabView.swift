@@ -41,6 +41,16 @@ struct RootTabView: View {
                             }
                         }
                         .tag("profile")
+                    MarketView()
+                        .tabItem {
+                            Label {
+                                Text("Marché")
+                            } icon: {
+                                Image(systemName: "cart.fill")
+                                    .renderingMode(.template)
+                            }
+                        }
+                        .tag("market")
                 }
                 .tint(Theme.accent)
                 .transition(.opacity)

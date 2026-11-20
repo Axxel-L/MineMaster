@@ -25,6 +25,7 @@ struct ProfileView: View {
                         titleCard
                         categoryChart
                         rarityLedger
+                        marketLedger
                         settings
                     }
                     .padding(.horizontal, Theme.spaceM)
@@ -339,6 +340,58 @@ struct ProfileView: View {
                         .foregroundStyle(Theme.textPrimary)
                         .frame(width: 48, alignment: .trailing)
                 }
+            }
+        }
+        .padding(Theme.spaceM)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous)
+                .strokeBorder(Theme.stroke, lineWidth: 0.6)
+        }
+    }
+
+    private var marketLedger: some View {
+        return VStack(alignment: .leading, spacing: Theme.spaceM) {
+            HStack {
+                Text("Marché")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Theme.textSecondary)
+                Spacer()
+                Text("Transactions")
+                    .font(.caption)
+                    .foregroundStyle(Theme.textSecondary.opacity(0.7))
+            }
+
+            HStack(spacing: 10) {
+                Image(systemName: "cart.fill")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(Theme.accent)
+                    .frame(width: 16)
+                Text("Achats")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.textSecondary)
+                    .lineLimit(1)
+                    .frame(width: 92, alignment: .leading)
+                Text("\(store.marketPurchases)")
+                    .font(Theme.mono(9, weight: .bold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .frame(width: 48, alignment: .trailing)
+            }
+
+            HStack(spacing: 10) {
+                Image(systemName: "cart.badge.plus")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(Theme.danger)
+                    .frame(width: 16)
+                Text("Ventes")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.textSecondary)
+                    .lineLimit(1)
+                    .frame(width: 92, alignment: .leading)
+                Text("\(store.marketSales)")
+                    .font(Theme.mono(9, weight: .bold))
+                    .foregroundStyle(Theme.textPrimary)
+                    .frame(width: 48, alignment: .trailing)
             }
         }
         .padding(Theme.spaceM)
