@@ -96,9 +96,24 @@ pack mystère affiche `TOUS TYPES` uniquement tant que le plan n'est pas prêt.
 
 ## Navigation et tutoriel
 
-Trois onglets seulement : Boosters, Collection, Profil. Le tutoriel de premier
+Quatre onglets : Boosters, Collection, Profil, Marché. Le tutoriel de premier
 lancement tient en trois écrans courts et reste accessible par le bouton `?` de
 l'accueil ou depuis Profil.
+
+## Marché
+
+- Contrepartie unique locale : achat et revente contre de la poussière, sans
+  réseau ni simulation. Le stock est persisté en SwiftData, les prix sont
+  recalculés depuis la rareté et ne sont jamais stockés.
+- Deux modes, `Acheter` et `Vendre`, sélectionnés par puces de filtre.
+- Prix d'achat = `dustValue × 5`, prix de revente = `dustValue` (spread 5:1).
+- Une carte par item : badge de rareté, stock ou quantité possédée en monospace,
+  prix en monospace, un bouton d'action de 44 pt minimum.
+- Le bouton d'achat est désactivé si la poussière manque. Les refus métier
+  (poussière insuffisante, stock nul, item non possédé) s'affichent en bandeau.
+- La fiche item (`ItemDetailView`) expose prix d'achat, prix de revente, stock
+  et quantité possédée, avec les mêmes actions.
+- Le profil affiche le total des achats et des ventes, persisté avec le joueur.
 
 ## Chargement
 
