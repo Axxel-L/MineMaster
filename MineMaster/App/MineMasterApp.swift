@@ -10,7 +10,8 @@ struct MineMasterApp: App {
             CatalogItemRecord.self,
             CollectionRecord.self,
             PlayerRecord.self,
-            OpeningRecord.self
+            OpeningRecord.self,
+            MarketListingRecord.self
         ])
         let configuration = ModelConfiguration(schema: schema)
         if let container = try? ModelContainer(for: schema, configurations: [configuration]) {

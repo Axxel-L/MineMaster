@@ -27,6 +27,9 @@ final class GameStore {
     private(set) var isOpening = false
     private(set) var isBootstrapped = false
     private(set) var pullsByItem: [String: Int] = [:]
+    private(set) var marketListings: [String: MarketListingRecord] = [:]
+    private(set) var marketPurchases = 0
+    private(set) var marketSales = 0
 
     init(
         container: ModelContainer,
@@ -83,12 +86,13 @@ final class GameStore {
         reloadFromStore()
         apply(remote: [:])
         reloadFromStore()
-        isBootstrapped = true
-        guard !catalog.isEmpty else {
-            loadError = .decoding
-            return
-        }
-        await sync()
+    isBootstrapped = true
+    guard !catalog.isEmpty else {
+        loadError = .decoding
+        return
+    }
+    ensureMarketSeeded()
+    await sync()
         prefixImages()
     }
 
@@ -186,14 +190,115 @@ final class GameStore {
         isOpening = false
     }
 
+    /// Offres de marché disponibles à l'achat.
+    ///
+    /// - Returns: Les items en vente, triés par rareté puis par nom.
+    /// - Complexity: O(n log n) pour le tri, *n* étant la taille du catalogue.
+    /// - Authors: Axel L.
+    var marketOfferings: [MarketOffer] {
+        let byID = Dictionary(catalog.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        return marketListings.values
+            .compactMap { record in
+                guard let item = byID[record.id] else { return nil }
+                return MarketOffer(item: item, stock: max(record.stock, 0))
+            }
+            .sorted { ($0.item.rarity.rank, $0.item.displayName) < ($1.item.rarity.rank, $1.item.displayName) }
+    }
+
+    /// Offre de marché d'un item donné.
+    ///
+    /// - Parameter itemID: Identifiant de l'item.
+    /// - Returns: L'offre correspondante, ou `nil` si l'item n'est pas au catalogue.
+    /// - Authors: Axel L.
+    func marketOffer(for itemID: String) -> MarketOffer? {
+        guard let item = catalog.first(where: { $0.id == itemID }),
+              let record = marketListings[itemID] else { return nil }
+        return MarketOffer(item: item, stock: max(record.stock, 0))
+    }
+
+    /// Achète un item sur le marché.
+    ///
+    /// Débite la poussière, ajoute l'item à la collection et décrémente le
+    /// stock de l'offre.
+    ///
+    /// - Parameter item: Item à acheter.
+    /// - Throws: `AppError.outOfStock` si l'offre est épuisée,
+    ///   `AppError.insufficientDust` si la poussière manque.
+    /// - Authors: Axel L.
+    func buy(_ item: CatalogItem) throws {
+        guard let record = marketListings[item.id] else {
+            throw AppError.outOfStock
+        }
+        guard record.stock > 0 else { throw AppError.outOfStock }
+
+        let price = MarketPrice.buy(for: item.rarity)
+        guard dust >= price else { throw AppError.insufficientDust }
+
+        dust -= price
+        if let existing = collectionRecord(for: item.id) {
+            existing.quantity += 1
+            existing.lastObtainedAt = .now
+        } else {
+            context.insert(CollectionRecord(itemID: item.id))
+        }
+        owned[item.id, default: 0] += 1
+
+        record.stock -= 1
+        marketPurchases += 1
+        persistPlayer(dust: dust, purchases: marketPurchases, sales: marketSales)
+        save()
+    }
+
+    /// Vend un item de la collection au marché.
+    ///
+    /// Crédite la poussière, retire un exemplaire de la collection et
+    /// réapprovisionne le stock de l'offre.
+    ///
+    /// - Parameter itemID: Identifiant de l'item à vendre.
+    /// - Throws: `AppError.notOwned` si l'item n'est pas possédé.
+    /// - Authors: Axel L.
+    func sell(_ itemID: String) throws {
+        guard let item = catalog.first(where: { $0.id == itemID }),
+              let quantity = owned[itemID], quantity > 0,
+              let record = marketListings[itemID] else {
+            throw AppError.notOwned
+        }
+
+        dust += MarketPrice.sell(for: item.rarity)
+
+        let remaining = quantity - 1
+        if remaining > 0 {
+            owned[itemID] = remaining
+        } else {
+            owned.removeValue(forKey: itemID)
+        }
+        if let existing = collectionRecord(for: itemID) {
+            existing.quantity = remaining
+            existing.lastObtainedAt = .now
+            if remaining <= 0 {
+                context.delete(existing)
+            }
+        }
+
+        record.stock += 1
+        marketSales += 1
+        persistPlayer(dust: dust, purchases: marketPurchases, sales: marketSales)
+        save()
+    }
+
     /// Efface la progression locale sans toucher au catalogue.
     ///
     /// - Authors: Axel L.
     func reset() {
         try? context.delete(model: CollectionRecord.self)
         try? context.delete(model: OpeningRecord.self)
+        for record in marketListings.values {
+            record.stock = 1
+        }
         let player = currentPlayer()
         player.dust = 0
+        player.marketPurchases = 0
+        player.marketSales = 0
         player.lastSyncAt = nil
         save()
         isOpening = false
@@ -211,6 +316,8 @@ final class GameStore {
 
         let player = currentPlayer()
         dust = player.dust
+        marketPurchases = player.marketPurchases
+        marketSales = player.marketSales
         lastSync = player.lastSyncAt
 
         let openings = (try? context.fetch(FetchDescriptor<OpeningRecord>())) ?? []
@@ -222,6 +329,9 @@ final class GameStore {
             }
         }
         pullsByItem = pulls
+
+        let listings = (try? context.fetch(FetchDescriptor<MarketListingRecord>())) ?? []
+        marketListings = Dictionary(uniqueKeysWithValues: listings.map { ($0.id, $0) })
     }
 
     private func apply(remote: [String: RemoteItem]) {
@@ -268,12 +378,45 @@ final class GameStore {
         return player
     }
 
+    /// Écrit l'état du joueur dans l'enregistrement persistant.
+    ///
+    /// - Parameters:
+    ///   - dust: Poussière courante.
+    ///   - purchases: Total des achats marché.
+    ///   - sales: Total des ventes marché.
+    /// - Authors: Axel L.
+    private func persistPlayer(dust: Int, purchases: Int, sales: Int) {
+        let player = currentPlayer()
+        player.dust = dust
+        player.marketPurchases = purchases
+        player.marketSales = sales
+    }
+
     private func collectionRecord(for itemID: String) -> CollectionRecord? {
         var descriptor = FetchDescriptor<CollectionRecord>(
             predicate: #Predicate { $0.itemID == itemID }
         )
         descriptor.fetchLimit = 1
         return try? context.fetch(descriptor).first
+    }
+
+    /// Crée les offres de marché manquantes pour les items du catalogue.
+    ///
+    /// Chaque item absent reçoit une offre avec un stock initial de 1. Les
+    /// offres existantes ne sont jamais écrasées.
+    ///
+    /// - Authors: Axel L.
+    private func ensureMarketSeeded() {
+        var inserted = false
+        for item in catalog where marketListings[item.id] == nil {
+            let record = MarketListingRecord(itemID: item.id, stock: 1)
+            context.insert(record)
+            marketListings[item.id] = record
+            inserted = true
+        }
+        if inserted {
+            save()
+        }
     }
 
     private func save() {

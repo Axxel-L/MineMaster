@@ -67,11 +67,15 @@ final class CollectionRecord {
 final class PlayerRecord {
     @Attribute(.unique) var key: String
     var dust: Int
+    var marketPurchases: Int = 0
+    var marketSales: Int = 0
     var lastSyncAt: Date?
 
     init(key: String = "player") {
         self.key = key
         dust = 0
+        marketPurchases = 0
+        marketSales = 0
         lastSyncAt = nil
     }
 }
@@ -93,5 +97,23 @@ final class OpeningRecord {
         kindRaw = kind.rawValue
         openedAt = .now
         self.itemIDs = itemIDs
+    }
+}
+
+/// Offre du marché pour un item du catalogue.
+///
+/// L'application agit comme contrepartie unique : achat et revente passent par
+/// ces offres, sans base de données distante. Seul le stock est persisté ; les
+/// prix sont recalculés depuis la rareté, donc jamais falsifiables côté stockage.
+///
+/// - Authors: Axel L.
+@Model
+final class MarketListingRecord {
+    @Attribute(.unique) var id: String
+    var stock: Int
+
+    init(itemID: String, stock: Int) {
+        id = itemID
+        self.stock = stock
     }
 }

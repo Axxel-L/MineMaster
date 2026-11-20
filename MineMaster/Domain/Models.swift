@@ -301,6 +301,9 @@ enum AppError: Error, Sendable, LocalizedError, Equatable {
     case decoding
     case imageUnavailable
     case rateLimited
+    case insufficientDust
+    case notOwned
+    case outOfStock
 
     var errorDescription: String? {
         switch self {
@@ -310,6 +313,9 @@ enum AppError: Error, Sendable, LocalizedError, Equatable {
         case .decoding: "Impossible de charger le catalogue."
         case .imageUnavailable: "Image indisponible."
         case .rateLimited: "Trop de requêtes, réessaie dans un instant."
+        case .insufficientDust: "Pas assez de poussière."
+        case .notOwned: "Tu ne possèdes pas cet item."
+        case .outOfStock: "Cet item n'est plus en vente."
         }
     }
 }
