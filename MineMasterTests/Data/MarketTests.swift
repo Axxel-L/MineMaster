@@ -19,7 +19,7 @@ struct MarketTests {
     }
 
     @Test("Achat avec poussière insuffisante échoue")
-    func buyFailsWhenInsufficientDust() throws {
+    func buyFailsWhenInsufficientDust() async throws {
         let item = Fixtures.item("diamond", rarity: .legendary)
         let fixture = try makeStoreWithMarket(items: [item], dust: 0)
 
@@ -33,7 +33,7 @@ struct MarketTests {
     }
 
     @Test("Achat sur stock nul échoue")
-    func buyFailsWhenOutOfStock() throws {
+    func buyFailsWhenOutOfStock() async throws {
         let item = Fixtures.item("diamond", rarity: .common)
         let fixture = try makeStoreWithMarket(items: [item], dust: 100, stock: 0)
 
@@ -78,7 +78,7 @@ struct MarketTests {
     }
 
     @Test("Vente d'un item non possédé échoue")
-    func sellFailsWhenNotOwned() throws {
+    func sellFailsWhenNotOwned() async throws {
         let item = Fixtures.item("diamond", rarity: .rare)
         let fixture = try makeStoreWithMarket(items: [item], dust: 0)
 

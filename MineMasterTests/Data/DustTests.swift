@@ -6,7 +6,7 @@ import Testing
 struct DustTests {
     @Test("Un item nouveau rapporte 0 poussière")
     func nouveauRapporteZero() throws {
-        let fixture = try makeStore(items: Fixtures.items(5), draw: { _, pool in pool })
+        let fixture = try makeStore(items: Fixtures.items(5), draw: { _, pool, _ in pool })
 
         let results = fixture.store.open(.common)
 
@@ -25,7 +25,7 @@ struct DustTests {
             Fixtures.item("diamond", rarity: .rare),
             Fixtures.item("nether_star", rarity: .legendary)
         ]
-        let fixture = try makeStore(items: items, draw: { _, pool in pool })
+        let fixture = try makeStore(items: items, draw: { _, pool, _ in pool })
 
         _ = fixture.store.open(.common)
         fixture.store.endOpening()
@@ -40,7 +40,7 @@ struct DustTests {
     @Test("La poussière du magasin égale celle des doublons du paquet")
     func totalCoherentAvecLaCollection() throws {
         var calls = 0
-        let fixture = try makeStore(items: Fixtures.items(5), draw: { _, pool in
+        let fixture = try makeStore(items: Fixtures.items(5), draw: { _, pool, _ in
             calls += 1
             return calls == 1 ? Array(pool.prefix(2)) : pool
         })
@@ -61,7 +61,7 @@ struct DustTests {
     @Test("La poussière se cumule d'une ouverture à l'autre")
     func cumulEntreOuvertures() throws {
         let items = Fixtures.items(5, rarity: .uncommon)
-        let fixture = try makeStore(items: items, dust: 10, draw: { _, pool in pool })
+        let fixture = try makeStore(items: items, dust: 10, draw: { _, pool, _ in pool })
 
         _ = fixture.store.open(.common)
         fixture.store.endOpening()
