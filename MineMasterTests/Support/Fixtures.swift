@@ -68,6 +68,7 @@ func makeStore(
         CollectionRecord.self,
         PlayerRecord.self,
         OpeningRecord.self,
+        MarketListingRecord.self,
         configurations: configuration
     )
     let context = container.mainContext
