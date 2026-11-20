@@ -13,6 +13,7 @@ final class GameStore {
     private let context: ModelContext
     private let drawProvider: DrawProvider
     private let boosterProvider: BoosterProvider
+    private let syncOnBootstrap: Bool
 
     private(set) var catalog: [CatalogItem] = []
     private(set) var owned: [String: Int] = [:]
@@ -33,12 +34,14 @@ final class GameStore {
     init(
         container: ModelContainer,
         drawProvider: @escaping DrawProvider = GameStore.randomDraw,
-        boosterProvider: @escaping BoosterProvider = GameStore.randomBooster
+        boosterProvider: @escaping BoosterProvider = GameStore.randomBooster,
+        syncOnBootstrap: Bool = true
     ) {
         self.container = container
         self.context = container.mainContext
         self.drawProvider = drawProvider
         self.boosterProvider = boosterProvider
+        self.syncOnBootstrap = syncOnBootstrap
         reloadFromStore()
     }
 
@@ -85,6 +88,13 @@ final class GameStore {
     /// Démarre l'application : catalogue local, puis synchronisation distante.
     func bootstrap() async {
         reloadFromStore()
+        guard syncOnBootstrap else {
+            isBootstrapped = true
+            if catalog.isEmpty {
+                loadError = .decoding
+            }
+            return
+        }
         apply(remote: [:])
         reloadFromStore()
     isBootstrapped = true

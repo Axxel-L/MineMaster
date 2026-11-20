@@ -6,6 +6,13 @@ struct MineMasterApp: App {
     @State private var store: GameStore?
 
     init() {
+        #if DEBUG
+        if UITestSupport.isEnabled, let store = UITestSupport.makeStore() {
+            _store = State(initialValue: store)
+            return
+        }
+        #endif
+
         let schema = Schema([
             CatalogItemRecord.self,
             CollectionRecord.self,
