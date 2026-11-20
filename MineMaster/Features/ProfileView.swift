@@ -239,7 +239,10 @@ struct ProfileView: View {
                 Spacer()
             }
 
-            HStack(spacing: 8) {
+            LazyVGrid(
+                columns: [GridItem(.adaptive(minimum: 88), spacing: 8)],
+                spacing: 8
+            ) {
                 boostPill("Légendaire", boost.legendaryBonus, tint: Rarity.legendary.color)
                 boostPill("Épique", boost.epicBonus, tint: Rarity.epic.color)
                 boostPill("Poussière", boost.dustBonus, tint: Theme.accent)
@@ -251,10 +254,10 @@ struct ProfileView: View {
                 } label: {
                     Label("Renaître", systemImage: "arrow.triangle.2.circlepath")
                         .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.glassProminent)
-                .controlSize(.small)
                 .tint(Theme.copper)
             } else {
                 ProgressView(value: progress)
@@ -276,14 +279,18 @@ struct ProfileView: View {
         VStack(spacing: 2) {
             Text(title.uppercased())
                 .font(Theme.mono(8, weight: .bold))
-                .tracking(0.8)
+                .tracking(0.6)
                 .foregroundStyle(Theme.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             Text(String(format: "+%.0f %%", bonus * 100))
                 .font(Theme.mono(11, weight: .bold))
                 .foregroundStyle(tint)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        .padding(.vertical, 10)
         .background(tint.opacity(0.10), in: RoundedRectangle(cornerRadius: Theme.radiusS, style: .continuous))
     }
 

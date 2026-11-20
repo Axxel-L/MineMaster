@@ -108,7 +108,10 @@ l'accueil ou depuis Profil.
 - Deux modes, `Acheter` et `Vendre`, sélectionnés par puces de filtre.
 - Prix d'achat = `dustValue × 5`, prix de revente = `dustValue` (spread 5:1).
 - Une carte par item : badge de rareté, stock ou quantité possédée en monospace,
-  prix en monospace, un bouton d'action compact en taille `small`.
+  prix en monospace, un bouton d'action pleine largeur de 44 pt.
+- Sélecteur Acheter / Vendre en contrôle segmenté pleine largeur.
+- Grille adaptative : deux colonnes sur petit écran, plus sur iPad, une seule en
+  taille de texte accessibilité. Les libellés se réduisent au lieu de déborder.
 - Le bouton d'achat est désactivé si la poussière manque. Les refus métier
   (poussière insuffisante, stock nul, item non possédé) s'affichent en bandeau.
 - La fiche item (`ItemDetailView`) expose prix d'achat, prix de revente, stock

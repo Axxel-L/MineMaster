@@ -137,10 +137,10 @@ struct ItemDetailView: View {
         Button(action: action) {
             Label(title, systemImage: systemImage)
                 .font(.subheadline.weight(.semibold))
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.glassProminent)
-        .controlSize(.small)
         .tint(tint)
         .disabled(!isEnabled)
     }
@@ -187,10 +187,14 @@ struct ItemDetailView: View {
             Text(title)
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
-            Spacer()
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Spacer(minLength: 8)
             Text(value)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Theme.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .padding(.vertical, 11)
     }

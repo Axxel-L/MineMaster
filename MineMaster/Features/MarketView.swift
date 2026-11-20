@@ -7,11 +7,15 @@ import SwiftUI
 /// à jour à chaque transaction.
 struct MarketView: View {
     @Environment(GameStore.self) private var store
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     @State private var mode: MarketMode = .buy
     @State private var errorMessage: String?
 
-    private let columns = [GridItem(.adaptive(minimum: 148), spacing: 12)]
+    private var columns: [GridItem] {
+        let minimum: CGFloat = dynamicTypeSize.isAccessibilitySize ? 220 : 150
+        return [GridItem(.adaptive(minimum: minimum, maximum: 300), spacing: 12)]
+    }
 
     private var buyOffers: [MarketOffer] {
         store.marketOfferings.filter { $0.stock > 0 }
@@ -48,34 +52,60 @@ struct MarketView: View {
     }
 
     private var balance: some View {
-        HStack(spacing: 12) {
-            StatCard(
-                title: "Poussière",
-                value: "\(store.dust)",
-                systemImage: "circle.hexagongrid.fill",
-                tint: Rarity.epic.color
-            )
-            StatCard(
-                title: mode == .buy ? "En vente" : "À vendre",
-                value: "\(mode == .buy ? buyOffers.count : sellable.count)",
-                systemImage: mode == .buy ? "cart.fill" : "square.stack.3d.up.fill",
-                tint: mode == .buy ? Theme.accent : Theme.danger
-            )
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(spacing: 12) { balanceCards }
+            } else {
+                HStack(spacing: 12) { balanceCards }
+            }
         }
     }
 
+    @ViewBuilder
+    private var balanceCards: some View {
+        StatCard(
+            title: "Poussière",
+            value: "\(store.dust)",
+            systemImage: "circle.hexagongrid.fill",
+            tint: Rarity.epic.color
+        )
+        StatCard(
+            title: mode == .buy ? "En vente" : "À vendre",
+            value: "\(mode == .buy ? buyOffers.count : sellable.count)",
+            systemImage: mode == .buy ? "cart.fill" : "square.stack.3d.up.fill",
+            tint: mode == .buy ? Theme.accent : Theme.danger
+        )
+    }
+
     private var modePicker: some View {
-        HStack(spacing: 8) {
-            FilterChip(title: "Acheter", isActive: mode == .buy, tint: Theme.accent) {
-                errorMessage = nil
-                mode = .buy
-            }
-            FilterChip(title: "Vendre", isActive: mode == .sell, tint: Theme.danger) {
-                errorMessage = nil
-                mode = .sell
-            }
-            Spacer()
+        HStack(spacing: 0) {
+            modeButton(.buy, title: "Acheter", icon: "cart.fill", tint: Theme.accent)
+            modeButton(.sell, title: "Vendre", icon: "cart.badge.plus", tint: Theme.danger)
         }
+        .padding(4)
+        .background(Theme.surface, in: Capsule())
+        .overlay(Capsule().strokeBorder(Theme.stroke, lineWidth: 0.5))
+    }
+
+    private func modeButton(_ value: MarketMode, title: String, icon: String, tint: Color) -> some View {
+        let active = mode == value
+        return Button {
+            withAnimation(.snappy) {
+                errorMessage = nil
+                mode = value
+            }
+        } label: {
+            Label(title, systemImage: icon)
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .foregroundStyle(active ? Theme.background : Theme.textSecondary)
+                .frame(maxWidth: .infinity, minHeight: 40)
+                .background(active ? tint : Color.clear, in: Capsule())
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(active ? .isSelected : [])
     }
 
     @ViewBuilder
@@ -114,6 +144,7 @@ struct MarketView: View {
             price: offer.buyPrice,
             priceTint: affordable ? Theme.accent : Theme.textSecondary,
             actionLabel: "Acheter",
+            actionIcon: "cart.fill",
             actionTint: affordable ? Theme.accent : Theme.textSecondary,
             isEnabled: affordable
         ) {
@@ -128,6 +159,7 @@ struct MarketView: View {
             price: MarketPrice.sell(for: item.rarity),
             priceTint: Theme.accent,
             actionLabel: "Vendre",
+            actionIcon: "cart.badge.plus",
             actionTint: Theme.danger,
             isEnabled: true
         ) {
@@ -141,46 +173,47 @@ struct MarketView: View {
         price: Int,
         priceTint: Color,
         actionLabel: String,
+        actionIcon: String,
         actionTint: Color,
         isEnabled: Bool,
         action: @escaping () -> Void
     ) -> some View {
-        VStack(spacing: 9) {
+        VStack(spacing: 10) {
             HStack {
                 RarityBadge(rarity: item.rarity)
-                Spacer()
+                Spacer(minLength: 4)
                 Text(badge)
                     .font(Theme.mono(10, weight: .bold))
                     .foregroundStyle(Theme.textSecondary)
+                    .lineLimit(1)
             }
 
-            ItemImageView(item: item, size: 54)
+            ItemImageView(item: item, size: 56)
 
             Text(item.displayName)
                 .font(.footnote.weight(.semibold))
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.8)
+                .minimumScaleFactor(0.75)
                 .foregroundStyle(Theme.textPrimary)
-                .frame(maxWidth: .infinity, minHeight: 32, alignment: .center)
+                .frame(maxWidth: .infinity, minHeight: 34, alignment: .center)
 
             HStack(spacing: 4) {
                 Image(systemName: "circle.hexagongrid.fill")
                     .font(.caption2)
                 Text("\(price)")
-                    .font(Theme.mono(11, weight: .bold))
+                    .font(Theme.mono(12, weight: .bold))
                     .contentTransition(.numericText())
             }
             .foregroundStyle(priceTint)
 
             Button(action: action) {
-                Text(actionLabel)
-                    .font(.caption.weight(.bold))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 5)
+                Label(actionLabel, systemImage: actionIcon)
+                    .font(.subheadline.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.glassProminent)
-            .controlSize(.small)
             .tint(actionTint)
             .disabled(!isEnabled)
         }
