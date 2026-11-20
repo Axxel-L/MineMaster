@@ -13,15 +13,7 @@ struct MineMasterApp: App {
         }
         #endif
 
-        let schema = Schema([
-            CatalogItemRecord.self,
-            CollectionRecord.self,
-            PlayerRecord.self,
-            OpeningRecord.self,
-            MarketListingRecord.self
-        ])
-        let configuration = ModelConfiguration(schema: schema)
-        if let container = try? ModelContainer(for: schema, configurations: [configuration]) {
+        if let container = try? GameContainer.make() {
             _store = State(initialValue: GameStore(container: container))
         } else {
             _store = State(initialValue: nil)

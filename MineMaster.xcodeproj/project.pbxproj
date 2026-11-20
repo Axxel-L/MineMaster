@@ -6,6 +6,25 @@
 	objectVersion = 70;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B30000000000000000000002 /* MineMasterWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* MineMasterWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C20000000000000000000001 /* MineMaster/Domain/Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000001 /* MineMaster/Domain/Models.swift */; };
+		C20000000000000000000002 /* MineMaster/Domain/LootEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002 /* MineMaster/Domain/LootEngine.swift */; };
+		C20000000000000000000003 /* MineMaster/Domain/Rebirth.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000003 /* MineMaster/Domain/Rebirth.swift */; };
+		C20000000000000000000004 /* MineMaster/Domain/Market.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000004 /* MineMaster/Domain/Market.swift */; };
+		C20000000000000000000005 /* MineMaster/Domain/ExplorerTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000005 /* MineMaster/Domain/ExplorerTitle.swift */; };
+		C20000000000000000000006 /* MineMaster/Data/Records.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000006 /* MineMaster/Data/Records.swift */; };
+		C20000000000000000000007 /* MineMaster/Data/CatalogAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000007 /* MineMaster/Data/CatalogAPI.swift */; };
+		C20000000000000000000008 /* MineMaster/Data/ImagePipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000008 /* MineMaster/Data/ImagePipeline.swift */; };
+		C20000000000000000000009 /* MineMaster/Data/MobRenderAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000009 /* MineMaster/Data/MobRenderAPI.swift */; };
+		C20000000000000000000010 /* MineMaster/Data/GameStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000010 /* MineMaster/Data/GameStore.swift */; };
+		C20000000000000000000011 /* MineMaster/Data/GameContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000011 /* MineMaster/Data/GameContainer.swift */; };
+		C20000000000000000000012 /* MineMaster/Design/Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000012 /* MineMaster/Design/Theme.swift */; };
+		C20000000000000000000013 /* MineMaster/App/UITestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000013 /* MineMaster/App/UITestSupport.swift */; };
+		C40000000000000000000001 /* MineMaster/Resources/ItemCatalog.json in Resources */ = {isa = PBXBuildFile; fileRef = C30000000000000000000001 /* MineMaster/Resources/ItemCatalog.json */; };
+		C40000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C30000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		A1000000000000000000001A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,18 +40,74 @@
 			remoteGlobalIDString = A10000000000000000000006;
 			remoteInfo = MineMaster;
 		};
+		B50000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B10000000000000000000001;
+			remoteInfo = MineMasterWatch;
+		};
+		B50000000000000000000003 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B10000000000000000000001;
+			remoteInfo = MineMasterWatch;
+		};
+		B50000000000000000000004 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B10000000000000000000001;
+			remoteInfo = MineMasterWatch;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B30000000000000000000001 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				B30000000000000000000002 /* MineMasterWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		A10000000000000000000004 /* MineMaster.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MineMaster.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000000000000000000010 /* MineMasterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MineMasterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000000000000000000001 /* MineMasterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MineMasterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000002 /* MineMasterWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MineMasterWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000011 /* MineMasterWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MineMasterWatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B20000000000000000000002 /* MineMasterWatchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MineMasterWatchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C10000000000000000000001 /* MineMaster/Domain/Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Domain/Models.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000002 /* MineMaster/Domain/LootEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Domain/LootEngine.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000003 /* MineMaster/Domain/Rebirth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Domain/Rebirth.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000004 /* MineMaster/Domain/Market.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Domain/Market.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000005 /* MineMaster/Domain/ExplorerTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Domain/ExplorerTitle.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000006 /* MineMaster/Data/Records.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Data/Records.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000007 /* MineMaster/Data/CatalogAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Data/CatalogAPI.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000008 /* MineMaster/Data/ImagePipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Data/ImagePipeline.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000009 /* MineMaster/Data/MobRenderAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Data/MobRenderAPI.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000010 /* MineMaster/Data/GameStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Data/GameStore.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000011 /* MineMaster/Data/GameContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Data/GameContainer.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000012 /* MineMaster/Design/Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Design/Theme.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000013 /* MineMaster/App/UITestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/App/UITestSupport.swift; sourceTree = SOURCE_ROOT; };
+		C30000000000000000000001 /* MineMaster/Resources/ItemCatalog.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MineMaster/Resources/ItemCatalog.json; sourceTree = SOURCE_ROOT; };
+		C30000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = MineMaster/Resources/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A10000000000000000000005 /* MineMaster */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MineMaster; sourceTree = "<group>"; };
 		A10000000000000000000011 /* MineMasterTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MineMasterTests; sourceTree = "<group>"; };
 		A20000000000000000000002 /* MineMasterUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MineMasterUITests; sourceTree = "<group>"; };
+		B10000000000000000000003 /* MineMasterWatch */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MineMasterWatch; sourceTree = "<group>"; };
+		B10000000000000000000012 /* MineMasterWatchTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MineMasterWatchTests; sourceTree = "<group>"; };
+		B20000000000000000000003 /* MineMasterWatchUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MineMasterWatchUITests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,16 +132,63 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B10000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B10000000000000000000014 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B20000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5A43BDAC30B0AB220044A2D3 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				C10000000000000000000001 /* MineMaster/Domain/Models.swift */,
+				C10000000000000000000002 /* MineMaster/Domain/LootEngine.swift */,
+				C10000000000000000000003 /* MineMaster/Domain/Rebirth.swift */,
+				C10000000000000000000004 /* MineMaster/Domain/Market.swift */,
+				C10000000000000000000005 /* MineMaster/Domain/ExplorerTitle.swift */,
+				C10000000000000000000006 /* MineMaster/Data/Records.swift */,
+				C10000000000000000000007 /* MineMaster/Data/CatalogAPI.swift */,
+				C10000000000000000000008 /* MineMaster/Data/ImagePipeline.swift */,
+				C10000000000000000000009 /* MineMaster/Data/MobRenderAPI.swift */,
+				C10000000000000000000010 /* MineMaster/Data/GameStore.swift */,
+				C10000000000000000000011 /* MineMaster/Data/GameContainer.swift */,
+				C10000000000000000000012 /* MineMaster/Design/Theme.swift */,
+				C10000000000000000000013 /* MineMaster/App/UITestSupport.swift */,
+				C30000000000000000000001 /* MineMaster/Resources/ItemCatalog.json */,
+				C30000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		A10000000000000000000002 = {
 			isa = PBXGroup;
 			children = (
 				A10000000000000000000005 /* MineMaster */,
 				A10000000000000000000011 /* MineMasterTests */,
 				A20000000000000000000002 /* MineMasterUITests */,
+				B10000000000000000000003 /* MineMasterWatch */,
+				B10000000000000000000012 /* MineMasterWatchTests */,
+				B20000000000000000000003 /* MineMasterWatchUITests */,
 				A10000000000000000000003 /* Products */,
+				5A43BDAC30B0AB220044A2D3 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -76,6 +198,9 @@
 				A10000000000000000000004 /* MineMaster.app */,
 				A10000000000000000000010 /* MineMasterTests.xctest */,
 				A20000000000000000000001 /* MineMasterUITests.xctest */,
+				B10000000000000000000002 /* MineMasterWatch.app */,
+				B10000000000000000000011 /* MineMasterWatchTests.xctest */,
+				B20000000000000000000002 /* MineMasterWatchUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -90,10 +215,12 @@
 				A10000000000000000000007 /* Sources */,
 				A10000000000000000000008 /* Frameworks */,
 				A10000000000000000000009 /* Resources */,
+				B30000000000000000000001 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				B40000000000000000000001 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				A10000000000000000000005 /* MineMaster */,
@@ -151,6 +278,74 @@
 			productReference = A20000000000000000000001 /* MineMasterUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		B10000000000000000000001 /* MineMasterWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B10000000000000000000007 /* Build configuration list for PBXNativeTarget "MineMasterWatch" */;
+			buildPhases = (
+				B10000000000000000000004 /* Sources */,
+				B10000000000000000000005 /* Frameworks */,
+				B10000000000000000000006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				B10000000000000000000003 /* MineMasterWatch */,
+			);
+			name = MineMasterWatch;
+			packageProductDependencies = (
+			);
+			productName = MineMasterWatch;
+			productReference = B10000000000000000000002 /* MineMasterWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B10000000000000000000010 /* MineMasterWatchTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B10000000000000000000016 /* Build configuration list for PBXNativeTarget "MineMasterWatchTests" */;
+			buildPhases = (
+				B10000000000000000000013 /* Sources */,
+				B10000000000000000000014 /* Frameworks */,
+				B10000000000000000000015 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B40000000000000000000003 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B10000000000000000000012 /* MineMasterWatchTests */,
+			);
+			name = MineMasterWatchTests;
+			packageProductDependencies = (
+			);
+			productName = MineMasterWatchTests;
+			productReference = B10000000000000000000011 /* MineMasterWatchTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B20000000000000000000001 /* MineMasterWatchUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B20000000000000000000007 /* Build configuration list for PBXNativeTarget "MineMasterWatchUITests" */;
+			buildPhases = (
+				B20000000000000000000004 /* Sources */,
+				B20000000000000000000005 /* Frameworks */,
+				B20000000000000000000006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B40000000000000000000004 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B20000000000000000000003 /* MineMasterWatchUITests */,
+			);
+			name = MineMasterWatchUITests;
+			packageProductDependencies = (
+			);
+			productName = MineMasterWatchUITests;
+			productReference = B20000000000000000000002 /* MineMasterWatchUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -172,6 +367,17 @@
 						CreatedOnToolsVersion = 26.0;
 						TestTargetID = A10000000000000000000006;
 					};
+					B10000000000000000000001 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					B10000000000000000000010 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = B10000000000000000000001;
+					};
+					B20000000000000000000001 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = B10000000000000000000001;
+					};
 				};
 			};
 			buildConfigurationList = A1000000000000000000000A /* Build configuration list for PBXProject "MineMaster" */;
@@ -192,6 +398,9 @@
 				A10000000000000000000006 /* MineMaster */,
 				A10000000000000000000012 /* MineMasterTests */,
 				A20000000000000000000006 /* MineMasterUITests */,
+				B10000000000000000000001 /* MineMasterWatch */,
+				B10000000000000000000010 /* MineMasterWatchTests */,
+				B20000000000000000000001 /* MineMasterWatchUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -212,6 +421,29 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		A20000000000000000000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B10000000000000000000006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C40000000000000000000001 /* MineMaster/Resources/ItemCatalog.json in Resources */,
+				C40000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B10000000000000000000015 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B20000000000000000000006 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -242,6 +474,40 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B10000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C20000000000000000000001 /* MineMaster/Domain/Models.swift in Sources */,
+				C20000000000000000000002 /* MineMaster/Domain/LootEngine.swift in Sources */,
+				C20000000000000000000003 /* MineMaster/Domain/Rebirth.swift in Sources */,
+				C20000000000000000000004 /* MineMaster/Domain/Market.swift in Sources */,
+				C20000000000000000000005 /* MineMaster/Domain/ExplorerTitle.swift in Sources */,
+				C20000000000000000000006 /* MineMaster/Data/Records.swift in Sources */,
+				C20000000000000000000007 /* MineMaster/Data/CatalogAPI.swift in Sources */,
+				C20000000000000000000008 /* MineMaster/Data/ImagePipeline.swift in Sources */,
+				C20000000000000000000009 /* MineMaster/Data/MobRenderAPI.swift in Sources */,
+				C20000000000000000000010 /* MineMaster/Data/GameStore.swift in Sources */,
+				C20000000000000000000011 /* MineMaster/Data/GameContainer.swift in Sources */,
+				C20000000000000000000012 /* MineMaster/Design/Theme.swift in Sources */,
+				C20000000000000000000013 /* MineMaster/App/UITestSupport.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B10000000000000000000013 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B20000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -254,6 +520,21 @@
 			isa = PBXTargetDependency;
 			target = A10000000000000000000006 /* MineMaster */;
 			targetProxy = A20000000000000000000007 /* PBXContainerItemProxy */;
+		};
+		B40000000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B10000000000000000000001 /* MineMasterWatch */;
+			targetProxy = B50000000000000000000001 /* PBXContainerItemProxy */;
+		};
+		B40000000000000000000003 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B10000000000000000000001 /* MineMasterWatch */;
+			targetProxy = B50000000000000000000003 /* PBXContainerItemProxy */;
+		};
+		B40000000000000000000004 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B10000000000000000000001 /* MineMasterWatch */;
+			targetProxy = B50000000000000000000004 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -561,6 +842,176 @@
 			};
 			name = Release;
 		};
+		B10000000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6CR9YQH87Z;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MineMaster;
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.minemaster.iut-st-die";
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.minemaster.iut-st-die.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		B10000000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6CR9YQH87Z;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = MineMaster;
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.minemaster.iut-st-die";
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.minemaster.iut-st-die.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+		B10000000000000000000017 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6CR9YQH87Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.minemaster.iut-st-die.watchkitapp.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MineMasterWatch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MineMasterWatch";
+				TEST_TARGET_NAME = MineMasterWatch;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		B10000000000000000000018 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6CR9YQH87Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.minemaster.iut-st-die.watchkitapp.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MineMasterWatch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MineMasterWatch";
+				TEST_TARGET_NAME = MineMasterWatch;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+		B20000000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6CR9YQH87Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.minemaster.iut-st-die.watchkitapp.uitests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = MineMasterWatch;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		B20000000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6CR9YQH87Z;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.minemaster.iut-st-die.watchkitapp.uitests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = MineMasterWatch;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -596,6 +1047,33 @@
 			buildConfigurations = (
 				A20000000000000000000009 /* Debug */,
 				A2000000000000000000000A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B10000000000000000000007 /* Build configuration list for PBXNativeTarget "MineMasterWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B10000000000000000000008 /* Debug */,
+				B10000000000000000000009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B10000000000000000000016 /* Build configuration list for PBXNativeTarget "MineMasterWatchTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B10000000000000000000017 /* Debug */,
+				B10000000000000000000018 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B20000000000000000000007 /* Build configuration list for PBXNativeTarget "MineMasterWatchUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B20000000000000000000008 /* Debug */,
+				B20000000000000000000009 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
