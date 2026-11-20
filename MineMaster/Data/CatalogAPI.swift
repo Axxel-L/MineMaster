@@ -1,8 +1,6 @@
 import Foundation
 
 /// Métadonnées distantes d'un item Minecraft.
-///
-/// - Authors: Axel L.
 struct RemoteItem: Decodable, Sendable {
     let name: String
     let displayName: String?
@@ -10,8 +8,6 @@ struct RemoteItem: Decodable, Sendable {
 }
 
 /// Client du catalogue distant.
-///
-/// - Authors: Axel L.
 enum CatalogAPI {
     static let metadataURL = URL(string: "https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/pc/1.21.4/items.json")!
     static let metadataHost = "raw.githubusercontent.com"
@@ -32,7 +28,6 @@ enum CatalogAPI {
     ///
     /// - Returns: Dictionnaire `identifiant → métadonnées`.
     /// - Throws: `AppError` si le réseau, le statut, la taille ou le décodage échouent.
-    /// - Authors: Axel L.
     static func fetchMetadata() async throws -> [String: RemoteItem] {
         guard metadataURL.scheme == "https", metadataURL.host == metadataHost else {
             throw AppError.invalidResponse
@@ -69,8 +64,6 @@ enum CatalogAPI {
 }
 
 /// Catalogue de secours embarqué.
-///
-/// - Authors: Axel L.
 enum SeedCatalog {
     private struct File: Decodable {
         let version: String
@@ -88,7 +81,6 @@ enum SeedCatalog {
     ///
     /// - Parameter bundle: Bundle contenant `ItemCatalog.json`.
     /// - Returns: La liste des items, vide si la ressource est absente ou invalide.
-    /// - Authors: Axel L.
     static func load(bundle: Bundle = .main) -> [CatalogItem] {
         guard let url = bundle.url(forResource: "ItemCatalog", withExtension: "json"),
               let data = try? Data(contentsOf: url),
@@ -117,7 +109,6 @@ enum SeedCatalog {
     ///
     /// - Parameter id: Identifiant de la forme `oak_log`.
     /// - Returns: Libellé de la forme `Oak Log`.
-    /// - Authors: Axel L.
     static func pretty(_ id: String) -> String {
         id.split(separator: "_")
             .map { $0.prefix(1).uppercased() + $0.dropFirst() }

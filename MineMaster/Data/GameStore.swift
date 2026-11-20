@@ -3,12 +3,10 @@ import Observation
 import SwiftData
 
 /// État applicatif central : catalogue, collection, poussière et synchronisation.
-///
-/// - Authors: Axel L.
 @Observable
 @MainActor
 final class GameStore {
-    typealias DrawProvider = @MainActor (Booster, [CatalogItem]) -> [CatalogItem]
+    typealias DrawProvider = @MainActor (Booster, [CatalogItem], RebirthBoost) -> [CatalogItem]
     typealias BoosterProvider = @MainActor ([CatalogItem]) -> (Booster, BoosterKind)
 
     private let container: ModelContainer
@@ -30,6 +28,7 @@ final class GameStore {
     private(set) var marketListings: [String: MarketListingRecord] = [:]
     private(set) var marketPurchases = 0
     private(set) var marketSales = 0
+    private(set) var rebirthLevel = 0
 
     init(
         container: ModelContainer,
@@ -61,11 +60,16 @@ final class GameStore {
         .next(for: uniqueCount)
     }
 
+    /// Boosts de renaissance courants.
+    var rebirthBoost: RebirthBoost { RebirthBoost(level: rebirthLevel) }
+
+    /// Indique si le seuil de renaissance est atteint.
+    var canRebirth: Bool { uniqueCount >= Rebirth.minimumUniqueItems }
+
     /// Quantité possédée pour un item donné.
     ///
     /// - Parameter item: Item évalué.
     /// - Returns: La quantité possédée, `0` si l'item n'a jamais été obtenu.
-    /// - Authors: Axel L.
     func ownedCount(for item: CatalogItem) -> Int {
         owned[item.id] ?? 0
     }
@@ -74,14 +78,11 @@ final class GameStore {
     ///
     /// - Parameter item: Item évalué.
     /// - Returns: Le nombre de fois où l'item est apparu dans un booster.
-    /// - Authors: Axel L.
     func pullCount(for item: CatalogItem) -> Int {
         pullsByItem[item.id] ?? 0
     }
 
     /// Démarre l'application : catalogue local, puis synchronisation distante.
-    ///
-    /// - Authors: Axel L.
     func bootstrap() async {
         reloadFromStore()
         apply(remote: [:])
@@ -97,8 +98,6 @@ final class GameStore {
     }
 
     /// Synchronise les métadonnées distantes sans bloquer l'interface.
-    ///
-    /// - Authors: Axel L.
     func sync() async {
         guard !isLoading else { return }
         isLoading = true
@@ -124,17 +123,19 @@ final class GameStore {
     /// Ouvre un booster, enregistre les résultats et retourne les tirages.
     ///
     /// Une seule ouverture est acceptée tant que la session courante n'est pas
-    /// terminée par `endOpening()`.
+    /// terminée par `endOpening()`. La poussière des doublons suit le boost de
+    /// renaissance courant.
     ///
-    /// - Parameter booster: Booster à ouvrir.
+    /// - Parameters:
+    ///   - booster: Booster à ouvrir.
+    ///   - kind: Type de contenu filtrant le catalogue.
     /// - Returns: Les cartes tirées, avec poussière gagnée et statut de nouveauté.
     ///   Retourne `[]` si une ouverture est déjà en cours ou si le catalogue est vide.
-    /// - Authors: Axel L.
     func open(_ booster: Booster, kind: BoosterKind = .mixed) -> [DrawResult] {
         guard !isOpening, !catalog.isEmpty else { return [] }
 
         let pool = kind.filter(catalog)
-        let drawn = drawProvider(booster, pool)
+        let drawn = drawProvider(booster, pool, rebirthBoost)
         guard !drawn.isEmpty else { return [] }
         isOpening = true
 
@@ -152,7 +153,7 @@ final class GameStore {
             }
 
             owned[item.id] = previous + 1
-            let gained = isNew ? 0 : item.rarity.dustValue
+            let gained = isNew ? 0 : rebirthBoost.dust(for: item.rarity)
             if gained > 0 {
                 player.dust += gained
             }
@@ -176,7 +177,6 @@ final class GameStore {
     ///
     /// - Returns: Le plan d'ouverture, ou `nil` si une ouverture est déjà en
     ///   cours ou si le catalogue est vide.
-    /// - Authors: Axel L.
     func planOpening() -> OpeningPlan? {
         guard !isOpening, !catalog.isEmpty else { return nil }
         let pick = boosterProvider(catalog)
@@ -184,8 +184,6 @@ final class GameStore {
     }
 
     /// Termine la session d'ouverture courante et autorise la suivante.
-    ///
-    /// - Authors: Axel L.
     func endOpening() {
         isOpening = false
     }
@@ -194,7 +192,6 @@ final class GameStore {
     ///
     /// - Returns: Les items en vente, triés par rareté puis par nom.
     /// - Complexity: O(n log n) pour le tri, *n* étant la taille du catalogue.
-    /// - Authors: Axel L.
     var marketOfferings: [MarketOffer] {
         let byID = Dictionary(catalog.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         return marketListings.values
@@ -209,7 +206,6 @@ final class GameStore {
     ///
     /// - Parameter itemID: Identifiant de l'item.
     /// - Returns: L'offre correspondante, ou `nil` si l'item n'est pas au catalogue.
-    /// - Authors: Axel L.
     func marketOffer(for itemID: String) -> MarketOffer? {
         guard let item = catalog.first(where: { $0.id == itemID }),
               let record = marketListings[itemID] else { return nil }
@@ -224,7 +220,6 @@ final class GameStore {
     /// - Parameter item: Item à acheter.
     /// - Throws: `AppError.outOfStock` si l'offre est épuisée,
     ///   `AppError.insufficientDust` si la poussière manque.
-    /// - Authors: Axel L.
     func buy(_ item: CatalogItem) throws {
         guard let record = marketListings[item.id] else {
             throw AppError.outOfStock
@@ -245,7 +240,7 @@ final class GameStore {
 
         record.stock -= 1
         marketPurchases += 1
-        persistPlayer(dust: dust, purchases: marketPurchases, sales: marketSales)
+        persistPlayer(dust: dust, purchases: marketPurchases, sales: marketSales, rebirth: rebirthLevel)
         save()
     }
 
@@ -256,7 +251,6 @@ final class GameStore {
     ///
     /// - Parameter itemID: Identifiant de l'item à vendre.
     /// - Throws: `AppError.notOwned` si l'item n'est pas possédé.
-    /// - Authors: Axel L.
     func sell(_ itemID: String) throws {
         guard let item = catalog.first(where: { $0.id == itemID }),
               let quantity = owned[itemID], quantity > 0,
@@ -282,24 +276,26 @@ final class GameStore {
 
         record.stock += 1
         marketSales += 1
-        persistPlayer(dust: dust, purchases: marketPurchases, sales: marketSales)
+        persistPlayer(dust: dust, purchases: marketPurchases, sales: marketSales, rebirth: rebirthLevel)
         save()
     }
 
-    /// Efface la progression locale sans toucher au catalogue.
+    /// Effectue une renaissance : remet la collection et la poussière à zéro,
+    /// conserve l'historique d'ouverture et incrémente les boosts permanents.
     ///
-    /// - Authors: Axel L.
-    func reset() {
+    /// - Throws: `AppError.rebirthLocked` si le seuil d'items différents n'est
+    ///   pas atteint.
+    func rebirth() throws {
+        guard canRebirth else { throw AppError.rebirthLocked }
+
         try? context.delete(model: CollectionRecord.self)
-        try? context.delete(model: OpeningRecord.self)
         for record in marketListings.values {
             record.stock = 1
         }
-        let player = currentPlayer()
-        player.dust = 0
-        player.marketPurchases = 0
-        player.marketSales = 0
-        player.lastSyncAt = nil
+
+        dust = 0
+        rebirthLevel += 1
+        persistPlayer(dust: 0, purchases: marketPurchases, sales: marketSales, rebirth: rebirthLevel)
         save()
         isOpening = false
         reloadFromStore()
@@ -318,6 +314,7 @@ final class GameStore {
         dust = player.dust
         marketPurchases = player.marketPurchases
         marketSales = player.marketSales
+        rebirthLevel = player.rebirthLevel
         lastSync = player.lastSyncAt
 
         let openings = (try? context.fetch(FetchDescriptor<OpeningRecord>())) ?? []
@@ -384,12 +381,13 @@ final class GameStore {
     ///   - dust: Poussière courante.
     ///   - purchases: Total des achats marché.
     ///   - sales: Total des ventes marché.
-    /// - Authors: Axel L.
-    private func persistPlayer(dust: Int, purchases: Int, sales: Int) {
+    ///   - rebirth: Nombre de renaissances effectuées.
+    private func persistPlayer(dust: Int, purchases: Int, sales: Int, rebirth: Int) {
         let player = currentPlayer()
         player.dust = dust
         player.marketPurchases = purchases
         player.marketSales = sales
+        player.rebirthLevel = rebirth
     }
 
     private func collectionRecord(for itemID: String) -> CollectionRecord? {
@@ -404,8 +402,6 @@ final class GameStore {
     ///
     /// Chaque item absent reçoit une offre avec un stock initial de 1. Les
     /// offres existantes ne sont jamais écrasées.
-    ///
-    /// - Authors: Axel L.
     private func ensureMarketSeeded() {
         var inserted = false
         for item in catalog where marketListings[item.id] == nil {
@@ -438,10 +434,11 @@ final class GameStore {
 
     private static func randomDraw(
         _ booster: Booster,
-        _ items: [CatalogItem]
+        _ items: [CatalogItem],
+        _ boost: RebirthBoost
     ) -> [CatalogItem] {
         var generator = SystemRandomNumberGenerator()
-        return LootEngine().draw(from: items, booster: booster, using: &generator)
+        return LootEngine().draw(from: items, booster: booster, boost: boost, using: &generator)
     }
 
     private func prefixImages() {

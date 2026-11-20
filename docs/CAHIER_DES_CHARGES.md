@@ -103,9 +103,13 @@ En tant que joueur, je veux ouvrir l'app sans réseau.
 - La collection et les statistiques restent consultables.
 - Un bandeau discret signale le mode hors ligne ; aucune erreur bloquante.
 
-**US-06 — Réinitialiser**
-En tant que joueur, je veux effacer ma progression.
-- Action dans Réglages, confirmation destructive explicite, irréversible.
+**US-06 — Renaître**
+En tant que joueur, je veux renaître pour obtenir des boosts permanents.
+- Débloquée à partir de `Rebirth.minimumUniqueItems` items différents.
+- Remet la collection et la poussière à zéro, conserve l'historique des
+  ouvertures et remet le stock du marché à `1`.
+- Chaque palier augmente la probabilité d'items épiques et légendaires et la
+  poussière des doublons, sans plafond.
 
 ---
 
@@ -124,7 +128,7 @@ En tant que joueur, je veux effacer ma progression.
 | EF-09 | Afficher des skeletons pendant tout chargement > 150 ms. | Must |
 | EF-10 | Gérer erreurs réseau, timeouts et absence de connexion sans crash. | Must |
 | EF-11 | Statistiques locales : ouvertures, items uniques, progression, meilleure rareté. | Should |
-| EF-12 | Réglages : réinitialisation, mentions légales, licences, version. | Should |
+| EF-12 | Réglages : renaissance, mentions légales, licences, version. | Should |
 | EF-13 | Empêcher l'ouverture d'un booster si le catalogue est vide. | Must |
 | EF-14 | Réduire les animations si « Réduire les animations » est actif. | Must |
 | EF-15 | Annuler les tâches d'images quand la vue disparaît. | Must |
@@ -248,13 +252,17 @@ TabView (verre)
 │   ├─ En-tête MeshGradient + compteur de collection
 │   ├─ Carrousel de 3 boosters (cartes en verre, scroll snapping)
 │   └─ fullScreenCover → Ouverture
+├─ Marché              (cart)
+│   ├─ Modes Acheter / Vendre
+│   └─ Fiche item → prix, stock, actions
 ├─ Collection          (square.grid.2x2)
 │   ├─ Recherche + chips de filtres (verre)
 │   ├─ LazyVGrid adaptative
 │   └─ sheet → Détail (zoom)
 └─ Profil              (chart.bar)
     ├─ Statistiques locales
-    └─ Réglages / légal / reset
+    ├─ Renaissance
+    └─ Réglages / légal
 ```
 
 États par écran : `loading` (skeleton), `loaded`, `empty`, `failed` (message + réessayer), `offline` (bandeau).
@@ -521,7 +529,6 @@ Modèle :
 /// - Returns: Les cartes tirées, sans doublon.
 /// - Throws: `AppError` si le catalogue est vide.
 /// - Complexity: O(n log n) où *n* est le nombre d'items candidats.
-/// - Authors: Axel L.
 public func drawCards(for booster: Booster, using generator: inout some RandomNumberGenerator) throws -> [CatalogItem]
 ```
 

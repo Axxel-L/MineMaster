@@ -1,8 +1,6 @@
 import SwiftUI
 
 /// Présentation « spécimen » d'une créature, à partir de sa texture 2D.
-///
-/// - Authors: Axel L.
 struct MobSpecimen: View {
     let item: CatalogItem
     var size: CGFloat = 220

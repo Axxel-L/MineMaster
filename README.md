@@ -41,9 +41,11 @@ xcodebuild -project MineMaster.xcodeproj -scheme MineMaster \
 - Tutoriel de premier lancement en trois étapes, accessible depuis l'accueil et le profil
 - Collection avec recherche, filtres rareté/catégorie et filtre « possédés »
 - Profil animé : anneau de progression, répartitions par catégorie et rareté, sept titres d'explorateur expliqués en modal
-- Fiche détail en modal avec chance de tirage, tirages locaux et prix du marché à venir
+- Fiche détail en modal avec chance de tirage, tirages locaux et prix du marché
+- Marché local : achat et revente d'items contre de la poussière
 - Doublons convertis en poussière
-- Statistiques locales, réinitialisation, mentions légales
+- Renaissance : boosts permanents de rareté et de poussière, cumulables
+- Statistiques locales, renaissance, mentions légales
 - Skeletons de chargement, mode hors ligne avec catalogue en cache
 - Accessibilité : VoiceOver, Dynamic Type, Reduce Motion
 

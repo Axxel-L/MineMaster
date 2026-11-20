@@ -3,8 +3,6 @@ import SwiftData
 @testable import MineMaster
 
 /// Fabrique des items de test valides pour le catalogue.
-///
-/// - Authors: Axel L.
 enum Fixtures {
     static func item(
         _ id: String,
@@ -38,8 +36,6 @@ enum Fixtures {
 }
 
 /// Conteneur SwiftData en mémoire et magasin applicatif associé.
-///
-/// - Authors: Axel L.
 @MainActor
 struct StoreFixture {
     let store: GameStore
@@ -54,12 +50,11 @@ struct StoreFixture {
 ///   - draw: Tirage injecté, déterministe dans les tests.
 /// - Returns: Le magasin et son conteneur.
 /// - Throws: Une erreur SwiftData si le conteneur ne peut pas être créé.
-/// - Authors: Axel L.
 @MainActor
 func makeStore(
     items: [CatalogItem] = [],
     dust: Int = 0,
-    draw: @escaping GameStore.DrawProvider = { _, _ in [] },
+    draw: @escaping GameStore.DrawProvider = { _, _, _ in [] },
     boosterProvider: @escaping GameStore.BoosterProvider = { _ in (.common, .mixed) }
 ) throws -> StoreFixture {
     let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
@@ -75,6 +70,7 @@ func makeStore(
 
     for item in items {
         context.insert(CatalogItemRecord(item: item))
+        context.insert(MarketListingRecord(itemID: item.id, stock: 1))
     }
     if dust > 0 {
         let player = PlayerRecord()

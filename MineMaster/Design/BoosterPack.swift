@@ -1,8 +1,6 @@
 import SwiftUI
 
 /// Illustration de pack booster scellé, avec bande de déchirure.
-///
-/// - Authors: Axel L.
 struct BoosterPackArt: View {
     let booster: Booster
     var kind: BoosterKind? = nil
@@ -143,8 +141,6 @@ struct BoosterPackArt: View {
 }
 
 /// Bande crantée du haut et du bas du pack.
-///
-/// - Authors: Axel L.
 struct CrimpedEdge: View {
     var body: some View {
         ZStack {
@@ -167,8 +163,6 @@ struct CrimpedEdge: View {
 }
 
 /// Ligne de perforation et languette de déchirure.
-///
-/// - Authors: Axel L.
 struct TearStrip: View {
     var body: some View {
         ZStack {
@@ -250,8 +244,6 @@ private struct PixelFoil: View {
 }
 
 /// Pack scellé à ouvrir au doigt.
-///
-/// - Authors: Axel L.
 struct InteractiveBoosterPack: View {
     let booster: Booster
     var kind: BoosterKind? = nil
@@ -326,8 +318,6 @@ struct InteractiveBoosterPack: View {
 /// Une charge lumineuse précède une onde de choc, puis des étincelles avec
 /// traînée. Les cartes épiques ajoutent des rayons, les légendaires une seconde
 /// onde et davantage de particules. L'animation s'arrête d'elle-même.
-///
-/// - Authors: Axel L.
 struct ParticleBurst: View {
     let rarity: Rarity
 

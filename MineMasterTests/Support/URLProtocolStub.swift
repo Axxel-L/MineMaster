@@ -3,8 +3,6 @@ import os
 @testable import MineMaster
 
 /// Intercepte les requêtes réseau des tests sans accès Internet.
-///
-/// - Authors: Axel L.
 final class StubURLProtocol: URLProtocol {
     typealias Handler = @Sendable (URLRequest) throws -> (HTTPURLResponse, Data)
 
@@ -65,7 +63,6 @@ final class StubURLProtocol: URLProtocol {
 /// Session `URLSession` branchée sur `StubURLProtocol`.
 ///
 /// - Returns: Une session éphémère sans cache.
-/// - Authors: Axel L.
 func makeStubSession() -> URLSession {
     let configuration = URLSessionConfiguration.ephemeral
     configuration.protocolClasses = [StubURLProtocol.self]
@@ -81,7 +78,6 @@ func makeStubSession() -> URLSession {
 ///   - status: Code de statut.
 ///   - mime: Type MIME annoncé.
 /// - Returns: La réponse HTTP.
-/// - Authors: Axel L.
 func makeResponse(
     for url: URL,
     status: Int = 200,
@@ -96,8 +92,6 @@ func makeResponse(
 }
 
 /// Porte de synchronisation entre un test et une requête bloquée.
-///
-/// - Authors: Axel L.
 struct RequestGate: Sendable {
     let started: AsyncStream<Void>
     private let continuation: AsyncStream<Void>.Continuation

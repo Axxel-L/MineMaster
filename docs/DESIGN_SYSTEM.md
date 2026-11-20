@@ -108,12 +108,28 @@ l'accueil ou depuis Profil.
 - Deux modes, `Acheter` et `Vendre`, sélectionnés par puces de filtre.
 - Prix d'achat = `dustValue × 5`, prix de revente = `dustValue` (spread 5:1).
 - Une carte par item : badge de rareté, stock ou quantité possédée en monospace,
-  prix en monospace, un bouton d'action compact en taille `small`.
+  prix en monospace, un bouton d'action pleine largeur de 44 pt.
+- Sélecteur Acheter / Vendre en contrôle segmenté pleine largeur.
+- Grille adaptative : deux colonnes sur petit écran, plus sur iPad, une seule en
+  taille de texte accessibilité. Les libellés se réduisent au lieu de déborder.
 - Le bouton d'achat est désactivé si la poussière manque. Les refus métier
   (poussière insuffisante, stock nul, item non possédé) s'affichent en bandeau.
 - La fiche item (`ItemDetailView`) expose prix d'achat, prix de revente, stock
   et quantité possédée, avec les mêmes actions.
 - Le profil affiche le total des achats et des ventes, persisté avec le joueur.
+
+## Renaissance
+
+- Remplace l'ancienne réinitialisation : carte dédiée dans le profil, niveau
+  courant, trois puces de boosts (légendaire, épique, poussière) et progression
+  vers le seuil.
+- Seuil : `Rebirth.minimumUniqueItems` items différents. Bouton `Renaître`
+  désactivé et barre de progression tant que le seuil n'est pas atteint.
+- Confirmation destructive explicite avant l'action.
+- Remet la collection et la poussière à zéro, conserve l'historique des
+  ouvertures, réapprovisionne le marché à `1` et incrémente le niveau.
+- Boosts cumulatifs sans plafond, appliqués au tirage et à la poussière des
+  doublons.
 
 ## Chargement
 

@@ -2,8 +2,6 @@ import Foundation
 import SwiftData
 
 /// Item du catalogue persisté localement.
-///
-/// - Authors: Axel L.
 @Model
 final class CatalogItemRecord {
     @Attribute(.unique) var id: String
@@ -25,7 +23,6 @@ final class CatalogItemRecord {
     /// Convertit l'enregistrement en item de domaine.
     ///
     /// - Returns: L'item correspondant, ou `nil` si les valeurs persistées sont invalides.
-    /// - Authors: Axel L.
     var item: CatalogItem? {
         guard let rarity = Rarity(rawValue: rarityRaw),
               let category = ItemCategory(rawValue: categoryRaw) else {
@@ -43,8 +40,6 @@ final class CatalogItemRecord {
 }
 
 /// Quantité possédée d'un item.
-///
-/// - Authors: Axel L.
 @Model
 final class CollectionRecord {
     @Attribute(.unique) var itemID: String
@@ -61,14 +56,13 @@ final class CollectionRecord {
 }
 
 /// État local du joueur.
-///
-/// - Authors: Axel L.
 @Model
 final class PlayerRecord {
     @Attribute(.unique) var key: String
     var dust: Int
     var marketPurchases: Int = 0
     var marketSales: Int = 0
+    var rebirthLevel: Int = 0
     var lastSyncAt: Date?
 
     init(key: String = "player") {
@@ -76,13 +70,12 @@ final class PlayerRecord {
         dust = 0
         marketPurchases = 0
         marketSales = 0
+        rebirthLevel = 0
         lastSyncAt = nil
     }
 }
 
 /// Historique d'une ouverture de booster.
-///
-/// - Authors: Axel L.
 @Model
 final class OpeningRecord {
     var id: UUID
@@ -105,8 +98,6 @@ final class OpeningRecord {
 /// L'application agit comme contrepartie unique : achat et revente passent par
 /// ces offres, sans base de données distante. Seul le stock est persisté ; les
 /// prix sont recalculés depuis la rareté, donc jamais falsifiables côté stockage.
-///
-/// - Authors: Axel L.
 @Model
 final class MarketListingRecord {
     @Attribute(.unique) var id: String
