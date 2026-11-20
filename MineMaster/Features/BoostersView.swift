@@ -1,8 +1,6 @@
 import SwiftUI
 
 /// Accueil : ouverture de packs et progression.
-///
-/// - Authors: Axel L.
 struct BoostersView: View {
     @Environment(GameStore.self) private var store
     @AppStorage("hasSeenTutorial") private var hasSeenTutorial = false

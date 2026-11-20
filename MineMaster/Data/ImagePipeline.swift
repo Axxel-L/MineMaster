@@ -2,8 +2,6 @@ import Foundation
 import UIKit
 
 /// Politique de construction et de validation des URLs de textures.
-///
-/// - Authors: Axel L.
 enum ImagePolicy {
     nonisolated static let host = "cdn.jsdelivr.net"
     nonisolated static let pathPrefix = "/gh/InventivetalentDev/minecraft-assets@1.21.4/assets/minecraft/textures/"
@@ -13,7 +11,6 @@ enum ImagePolicy {
     ///
     /// - Parameter path: Chemin de la forme `item/diamond.png`.
     /// - Returns: URL absolue validée, ou `nil` si le chemin est hors contrat.
-    /// - Authors: Axel L.
     nonisolated static func url(for path: String) -> URL? {
         guard isTexturePath(path) else { return nil }
         return base.appending(path: path)
@@ -23,7 +20,6 @@ enum ImagePolicy {
     ///
     /// - Parameter url: URL à contrôler.
     /// - Returns: `true` si le schéma, l'hôte et le préfixe sont autorisés.
-    /// - Authors: Axel L.
     nonisolated static func isAllowed(_ url: URL) -> Bool {
         guard url.scheme == "https",
               url.user == nil,
@@ -54,7 +50,6 @@ enum ImagePolicy {
     /// - Parameter path: Chemin relatif à valider.
     /// - Returns: `true` pour `item/<nom>.png`, `block/<nom>.png` ou
     ///   `entity/[<dossier>/]<nom>.png`.
-    /// - Authors: Axel L.
     nonisolated private static func isTexturePath(_ path: String) -> Bool {
         let parts = path.split(separator: "/", omittingEmptySubsequences: false)
         guard parts.count == 2 || (parts.count == 3 && parts[0] == "entity") else { return false }
@@ -69,7 +64,6 @@ enum ImagePolicy {
     ///
     /// - Parameter value: Segment à contrôler.
     /// - Returns: `true` si le segment est non vide et sûr.
-    /// - Authors: Axel L.
     nonisolated private static func isSafeName(_ value: Substring) -> Bool {
         !value.isEmpty && value.allSatisfy { $0.isASCII && ($0.isLowercase || $0.isNumber || $0 == "_") }
     }
@@ -78,8 +72,6 @@ enum ImagePolicy {
 /// Cache mémoire des images déjà décodées.
 ///
 /// Le cache est borné et laissé à la gestion de `NSCache` sous pression mémoire.
-///
-/// - Authors: Axel L.
 @MainActor
 final class ImageMemoryCache {
     static let shared = ImageMemoryCache()
@@ -95,7 +87,6 @@ final class ImageMemoryCache {
     ///
     /// - Parameter url: URL de l'image.
     /// - Returns: L'image décodée, ou `nil` si absente du cache.
-    /// - Authors: Axel L.
     func image(for url: URL) -> UIImage? {
         cache.object(forKey: url.absoluteString as NSString)
     }
@@ -105,7 +96,6 @@ final class ImageMemoryCache {
     /// - Parameters:
     ///   - image: Image décodée.
     ///   - url: URL source de l'image.
-    /// - Authors: Axel L.
     func insert(_ image: UIImage, for url: URL) {
         let pixels = image.size.width * image.size.height * image.scale * image.scale
         cache.setObject(image, forKey: url.absoluteString as NSString, cost: max(Int(pixels * 4), 1))
@@ -116,8 +106,6 @@ final class ImageMemoryCache {
 ///
 /// Les requêtes identiques sont coalescées, les réponses sont validées avant mise en cache
 /// et le nombre de connexions simultanées est borné par `URLSession`.
-///
-/// - Authors: Axel L.
 actor ImagePipeline {
     static let shared = ImagePipeline()
 
@@ -137,7 +125,6 @@ actor ImagePipeline {
     /// - Parameters:
     ///   - session: Session réseau utilisée pour les téléchargements.
     ///   - maxPayload: Taille maximale acceptée, en octets.
-    /// - Authors: Axel L.
     init(session: URLSession, maxPayload: Int = 2 * 1024 * 1024) {
         self.session = session
         self.maxPayload = maxPayload
@@ -167,7 +154,6 @@ actor ImagePipeline {
     /// - Parameter url: URL issue de `ImagePolicy`.
     /// - Returns: Les octets PNG validés.
     /// - Throws: `AppError` si l'URL, la réponse ou la charge utile sont invalides.
-    /// - Authors: Axel L.
     func data(for url: URL) async throws -> Data {
         guard ImagePolicy.isAllowed(url) else { throw AppError.invalidResponse }
 

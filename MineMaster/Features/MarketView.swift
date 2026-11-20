@@ -5,8 +5,6 @@ import SwiftUI
 /// L'application fait contrepartie unique. Aucun réseau, aucune simulation :
 /// la poussière est réellement débitée ou créditée et la collection est mise
 /// à jour à chaque transaction.
-///
-/// - Authors: Axel L.
 struct MarketView: View {
     @Environment(GameStore.self) private var store
 
@@ -227,8 +225,6 @@ struct MarketView: View {
 }
 
 /// Mode d'affichage du marché.
-///
-/// - Authors: Axel L.
 private enum MarketMode {
     case buy
     case sell

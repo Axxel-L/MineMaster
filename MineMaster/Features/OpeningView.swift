@@ -8,8 +8,6 @@ struct OpeningSession: Identifiable {
 }
 
 /// Pack scellé, dézippé au doigt avant révélation des cartes.
-///
-/// - Authors: Axel L.
 struct PackOpeningView: View {
     @Environment(GameStore.self) private var store
     @Environment(\.dismiss) private var dismiss
@@ -108,8 +106,6 @@ struct PackOpeningView: View {
 }
 
 /// Révélation manuelle des cartes, une carte par appui.
-///
-/// - Authors: Axel L.
 struct OpeningView: View {
     let session: OpeningSession
 
@@ -300,8 +296,6 @@ struct OpeningView: View {
 }
 
 /// Carte face cachée puis retournée au toucher.
-///
-/// - Authors: Axel L.
 struct RevealCard: View {
     let result: DrawResult
     let isRevealed: Bool

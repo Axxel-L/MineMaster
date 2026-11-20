@@ -1,8 +1,6 @@
 import SwiftUI
 
 /// Écran de chargement affiché avant l'ouverture de la navigation.
-///
-/// - Authors: Axel L.
 struct LaunchLoadingView: View {
     var body: some View {
         ZStack {

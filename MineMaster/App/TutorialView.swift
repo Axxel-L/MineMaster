@@ -1,8 +1,6 @@
 import SwiftUI
 
 /// Tutoriel de premier lancement, en trois étapes.
-///
-/// - Authors: Axel L.
 struct TutorialView: View {
     let onFinish: () -> Void
 

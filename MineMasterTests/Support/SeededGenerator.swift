@@ -1,8 +1,6 @@
 import Foundation
 
 /// Générateur pseudo-aléatoire déterministe pour les tests.
-///
-/// - Authors: Axel L.
 struct SeededGenerator: RandomNumberGenerator, Sendable {
     private var state: UInt64
 

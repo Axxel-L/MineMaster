@@ -7,7 +7,6 @@ import Testing
 /// - Parameters:
 ///   - expected: Erreur attendue.
 ///   - operation: Opération à exécuter.
-/// - Authors: Axel L.
 func expectAppError(
     _ expected: AppError,
     _ operation: () async throws -> Void

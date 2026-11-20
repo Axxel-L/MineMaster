@@ -1,8 +1,6 @@
 import Foundation
 
 /// Titre d'explorateur débloqué par le nombre d'items uniques.
-///
-/// - Authors: Axel L.
 enum ExplorerTitle: String, CaseIterable, Identifiable, Sendable {
     case novice
     case explorer
@@ -67,7 +65,6 @@ enum ExplorerTitle: String, CaseIterable, Identifiable, Sendable {
     ///
     /// - Parameter uniqueCount: Nombre d'items distincts possédés.
     /// - Returns: Le titre le plus élevé dont le seuil est atteint.
-    /// - Authors: Axel L.
     static func current(for uniqueCount: Int) -> ExplorerTitle {
         allCases.last { uniqueCount >= $0.requiredItems } ?? .novice
     }
@@ -76,7 +73,6 @@ enum ExplorerTitle: String, CaseIterable, Identifiable, Sendable {
     ///
     /// - Parameter uniqueCount: Nombre d'items distincts possédés.
     /// - Returns: Le prochain titre, ou `nil` si tous sont débloqués.
-    /// - Authors: Axel L.
     static func next(for uniqueCount: Int) -> ExplorerTitle? {
         allCases.first { uniqueCount < $0.requiredItems }
     }

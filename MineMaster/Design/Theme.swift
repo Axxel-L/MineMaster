@@ -1,8 +1,6 @@
 import SwiftUI
 
 /// Jetons de design de l'application.
-///
-/// - Authors: Axel L.
 enum Theme {
     static let accent = Color(red: 0.36, green: 0.84, blue: 0.58)
     static let moss = Color(red: 0.29, green: 0.66, blue: 0.55)
@@ -150,8 +148,6 @@ extension ExplorerTitle {
 }
 
 /// Fond principal de l'application.
-///
-/// - Authors: Axel L.
 struct ScreenBackground: View {
     var body: some View {
         ZStack {
@@ -200,8 +196,6 @@ private struct GrainOverlay: View {
 }
 
 /// Badge de rareté.
-///
-/// - Authors: Axel L.
 struct RarityBadge: View {
     let rarity: Rarity
 
@@ -219,8 +213,6 @@ struct RarityBadge: View {
 }
 
 /// Puce de filtre de collection.
-///
-/// - Authors: Axel L.
 struct FilterChip: View {
     let title: String
     let isActive: Bool
@@ -244,8 +236,6 @@ struct FilterChip: View {
 }
 
 /// Effet de chargement progressif.
-///
-/// - Authors: Axel L.
 struct ShimmerModifier: ViewModifier {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var phase: CGFloat = -1.2
@@ -280,15 +270,12 @@ extension View {
     /// Applique un balayage lumineux de chargement.
     ///
     /// - Returns: La vue animée.
-    /// - Authors: Axel L.
     func shimmering() -> some View {
         modifier(ShimmerModifier())
     }
 }
 
 /// Image d'item chargée à distance avec squelette et repli.
-///
-/// - Authors: Axel L.
 struct ItemImageView: View {
     let item: CatalogItem
     var size: CGFloat = 56
@@ -354,8 +341,6 @@ struct ItemImageView: View {
 }
 
 /// Squelette rectangulaire d'une image en attente de téléchargement.
-///
-/// - Authors: Axel L.
 struct SkeletonImage: View {
     let size: CGFloat
 
@@ -369,8 +354,6 @@ struct SkeletonImage: View {
 }
 
 /// Squelette d'une carte de booster.
-///
-/// - Authors: Axel L.
 struct SkeletonBooster: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -389,8 +372,6 @@ struct SkeletonBooster: View {
 }
 
 /// Squelette d'une grille de collection.
-///
-/// - Authors: Axel L.
 struct SkeletonGrid: View {
     private let columns = [GridItem(.adaptive(minimum: 104), spacing: 12)]
 
@@ -413,8 +394,6 @@ struct SkeletonGrid: View {
 }
 
 /// Carte de statistique.
-///
-/// - Authors: Axel L.
 struct StatCard: View {
     let title: String
     let value: String
@@ -451,8 +430,6 @@ struct StatCard: View {
 }
 
 /// État vide illustré avec une icône Heroicons.
-///
-/// - Authors: Axel L.
 struct EmptyStateView: View {
     let icon: String
     let title: String

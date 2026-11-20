@@ -4,8 +4,6 @@ import Foundation
 ///
 /// Les URLs sont figées dans le binaire : aucune recherche dynamique n'est faite
 /// au démarrage. Une texture d'entité reste utilisée en repli si le rendu échoue.
-///
-/// - Authors: Axel L.
 enum MobRenderAPI {
     private static let renders: [String: String] = [
         "zombie": "https://minecraft.wiki/images/Zombie_JE5_BE2.png",
@@ -80,7 +78,6 @@ enum MobRenderAPI {
     ///
     /// - Parameter id: Identifiant du catalogue.
     /// - Returns: L'URL du rendu, ou `nil` pour les items non-créatures.
-    /// - Authors: Axel L.
     static func url(for id: String) -> URL? {
         renders[id].flatMap(URL.init(string:))
     }
