@@ -1,8 +1,6 @@
 import SwiftUI
 
 /// Profil : collection, titres, raretés et réglages.
-///
-/// - Authors: Axel L.
 struct ProfileView: View {
     @Environment(GameStore.self) private var store
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -10,7 +8,7 @@ struct ProfileView: View {
     @State private var showLegal = false
     @State private var showTitles = false
     @State private var showTutorial = false
-    @State private var confirmReset = false
+    @State private var confirmRebirth = false
     @State private var revealed = false
 
     var body: some View {
@@ -23,6 +21,7 @@ struct ProfileView: View {
                         header
                         passport
                         titleCard
+                        rebirthCard
                         categoryChart
                         rarityLedger
                         marketLedger
@@ -60,15 +59,15 @@ struct ProfileView: View {
                 .presentationBackground(Theme.background)
             }
             .confirmationDialog(
-                "Réinitialiser la collection ?",
-                isPresented: $confirmReset,
+                "Renaître ?",
+                isPresented: $confirmRebirth,
                 titleVisibility: .visible
             ) {
-                Button("Tout effacer", role: .destructive) {
-                    store.reset()
+                Button("Renaître", role: .destructive) {
+                    try? store.rebirth()
                 }
             } message: {
-                Text("La collection et la poussière seront effacées. Cette action est définitive.")
+                Text("La collection et la poussière seront remises à zéro. Tes boosts de renaissance restent acquis.")
             }
         }
     }
@@ -213,6 +212,79 @@ struct ProfileView: View {
             RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous)
                 .strokeBorder(current.tint.opacity(0.28), lineWidth: 0.6)
         }
+    }
+
+    private var rebirthCard: some View {
+        let boost = store.rebirthBoost
+        let progress = Rebirth.progress(uniqueCount: store.uniqueCount)
+        let remaining = Rebirth.remaining(uniqueCount: store.uniqueCount)
+
+        return VStack(alignment: .leading, spacing: Theme.spaceM) {
+            HStack(spacing: 12) {
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(Theme.copper)
+                    .frame(width: 42, height: 42)
+                    .background(Theme.copper.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Renaissance")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Theme.textSecondary)
+                    Text("Niveau \(store.rebirthLevel)")
+                        .font(.headline)
+                        .foregroundStyle(Theme.textPrimary)
+                        .contentTransition(.numericText())
+                }
+                Spacer()
+            }
+
+            HStack(spacing: 8) {
+                boostPill("Légendaire", boost.legendaryBonus, tint: Rarity.legendary.color)
+                boostPill("Épique", boost.epicBonus, tint: Rarity.epic.color)
+                boostPill("Poussière", boost.dustBonus, tint: Theme.accent)
+            }
+
+            if store.canRebirth {
+                Button {
+                    confirmRebirth = true
+                } label: {
+                    Label("Renaître", systemImage: "arrow.triangle.2.circlepath")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.glassProminent)
+                .controlSize(.small)
+                .tint(Theme.copper)
+            } else {
+                ProgressView(value: progress)
+                    .tint(Theme.copper)
+                Text("Encore \(remaining) items différents pour renaître")
+                    .font(.caption)
+                    .foregroundStyle(Theme.textSecondary)
+            }
+        }
+        .padding(Theme.spaceM)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusL, style: .continuous)
+                .strokeBorder(Theme.copper.opacity(0.28), lineWidth: 0.6)
+        }
+    }
+
+    private func boostPill(_ title: String, _ bonus: Double, tint: Color) -> some View {
+        VStack(spacing: 2) {
+            Text(title.uppercased())
+                .font(Theme.mono(8, weight: .bold))
+                .tracking(0.8)
+                .foregroundStyle(Theme.textSecondary)
+            Text(String(format: "+%.0f %%", bonus * 100))
+                .font(Theme.mono(11, weight: .bold))
+                .foregroundStyle(tint)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(tint.opacity(0.10), in: RoundedRectangle(cornerRadius: Theme.radiusS, style: .continuous))
     }
 
     private var categoryChart: some View {
@@ -412,10 +484,6 @@ struct ProfileView: View {
                 showLegal = true
             }
             divider
-            settingsRow(title: "Réinitialiser la collection", icon: "trash.fill", isDestructive: true) {
-                confirmReset = true
-            }
-            divider
             HStack {
                 Image(systemName: "info.circle.fill")
                     .frame(width: 24)
@@ -447,17 +515,16 @@ struct ProfileView: View {
     private func settingsRow(
         title: String,
         icon: String,
-        isDestructive: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .frame(width: 24)
-                    .foregroundStyle(isDestructive ? Theme.danger : Theme.textSecondary)
+                    .foregroundStyle(Theme.textSecondary)
                 Text(title)
                     .font(.subheadline)
-                    .foregroundStyle(isDestructive ? Theme.danger : Theme.textPrimary)
+                    .foregroundStyle(Theme.textPrimary)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.bold))
@@ -489,8 +556,6 @@ private struct RarityStat: Identifiable {
 }
 
 /// Explication des titres d'explorateur et de leurs seuils.
-///
-/// - Authors: Axel L.
 struct TitlesView: View {
     @Environment(GameStore.self) private var store
     @Environment(\.dismiss) private var dismiss

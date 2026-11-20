@@ -1,8 +1,6 @@
 import Foundation
 
 /// Rareté d'un item, du plus courant au plus rare.
-///
-/// - Authors: Axel L.
 enum Rarity: String, CaseIterable, Codable, Sendable, Comparable, Identifiable {
     case common
     case uncommon
@@ -61,8 +59,6 @@ enum Rarity: String, CaseIterable, Codable, Sendable, Comparable, Identifiable {
 }
 
 /// Catégorie fonctionnelle d'un item.
-///
-/// - Authors: Axel L.
 enum ItemCategory: String, CaseIterable, Codable, Sendable, Identifiable {
     case block
     case tool
@@ -104,13 +100,20 @@ enum ItemCategory: String, CaseIterable, Codable, Sendable, Identifiable {
 
 /// Item du catalogue, indépendant de la persistance.
 ///
-/// - Authors: Axel L.
+/// L'égalité et le hachage reposent uniquement sur `id` : deux items de même
+/// identifiant sont considérés identiques même si leurs métadonnées diffèrent.
 struct CatalogItem: Identifiable, Hashable, Sendable {
+    /// Identifiant technique, unique dans le catalogue, par exemple `oak_log`.
     let id: String
+    /// Libellé affiché, déjà localisé si le catalogue distant le fournit.
     let displayName: String
+    /// Chemin de texture relatif au CDN, validé par `ImagePolicy`.
     let texturePath: String
+    /// Rareté, qui fixe le poids de tirage, la poussière et les prix du marché.
     let rarity: Rarity
+    /// Catégorie fonctionnelle, utilisée par les filtres et les packs typés.
     let category: ItemCategory
+    /// Taille de pile maximale annoncée par le catalogue.
     let stackSize: Int
 
     static func == (lhs: CatalogItem, rhs: CatalogItem) -> Bool {
@@ -123,19 +126,18 @@ struct CatalogItem: Identifiable, Hashable, Sendable {
 }
 
 /// Résultat d'un tirage dans un booster.
-///
-/// - Authors: Axel L.
 struct DrawResult: Identifiable, Sendable {
+    /// Item tiré.
     let item: CatalogItem
+    /// Poussière gagnée, `0` pour un item nouveau.
     let dust: Int
+    /// `true` si l'item n'était pas encore possédé avant ce tirage.
     let isNew: Bool
 
     var id: String { item.id }
 }
 
 /// Type de booster et ses règles de tirage.
-///
-/// - Authors: Axel L.
 enum Booster: String, CaseIterable, Identifiable, Sendable {
     case common
     case rare
@@ -189,7 +191,6 @@ enum Booster: String, CaseIterable, Identifiable, Sendable {
     ///
     /// - Parameter rarity: Rareté évaluée.
     /// - Returns: Facteur multiplicatif, `0` excluant la rareté du tirage.
-    /// - Authors: Axel L.
     func multiplier(for rarity: Rarity) -> Double {
         switch (self, rarity) {
         case (.common, .rare): 0.5
@@ -206,8 +207,6 @@ enum Booster: String, CaseIterable, Identifiable, Sendable {
 }
 
 /// Type de contenu ciblé par un booster.
-///
-/// - Authors: Axel L.
 enum BoosterKind: String, CaseIterable, Codable, Sendable, Identifiable {
     case mixed
     case creatures
@@ -263,7 +262,6 @@ enum BoosterKind: String, CaseIterable, Codable, Sendable, Identifiable {
     ///
     /// - Parameter items: Catalogue complet.
     /// - Returns: Les items compatibles, ou le catalogue complet pour `.mixed`.
-    /// - Authors: Axel L.
     func filter(_ items: [CatalogItem]) -> [CatalogItem] {
         guard let categories = categories else { return items }
         return items.filter { categories.contains($0.category) }
@@ -285,15 +283,16 @@ enum BoosterKind: String, CaseIterable, Codable, Sendable, Identifiable {
 
 /// Plan d'ouverture tiré avant la déchirure du pack.
 ///
-/// - Authors: Axel L.
+/// Fixé une seule fois par `GameStore.planOpening()` pour que le pack scellé
+/// affiche exactement le type et la rareté qui seront ouverts.
 struct OpeningPlan: Sendable {
+    /// Booster dont dépendent les poids de tirage.
     let booster: Booster
+    /// Type de contenu filtrant le catalogue.
     let kind: BoosterKind
 }
 
 /// Erreur applicative exposable à l'interface.
-///
-/// - Authors: Axel L.
 enum AppError: Error, Sendable, LocalizedError, Equatable {
     case offline
     case timeout
@@ -304,6 +303,7 @@ enum AppError: Error, Sendable, LocalizedError, Equatable {
     case insufficientDust
     case notOwned
     case outOfStock
+    case rebirthLocked
 
     var errorDescription: String? {
         switch self {
@@ -316,6 +316,7 @@ enum AppError: Error, Sendable, LocalizedError, Equatable {
         case .insufficientDust: "Pas assez de poussière."
         case .notOwned: "Tu ne possèdes pas cet item."
         case .outOfStock: "Cet item n'est plus en vente."
+        case .rebirthLocked: "Pas assez d'items pour renaître."
         }
     }
 }

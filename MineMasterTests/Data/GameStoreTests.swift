@@ -8,7 +8,7 @@ struct GameStoreTests {
     @Test("Quatre appuis sur Ouvrir produisent une seule ouverture")
     func fourTapsProduceOneOpening() throws {
         let item = Fixtures.item("oak_log", category: .block)
-        let fixture = try makeStore(items: [item], draw: { _, _ in [item] })
+        let fixture = try makeStore(items: [item], draw: { _, _, _ in [item] })
 
         #expect(fixture.store.open(.common).count == 1)
         for _ in 0..<3 {
@@ -26,7 +26,7 @@ struct GameStoreTests {
     @Test("Un item nouveau ne rapporte aucune poussière")
     func newItemGivesNoDust() throws {
         let item = Fixtures.item("diamond", rarity: .rare)
-        let fixture = try makeStore(items: [item], draw: { _, _ in [item] })
+        let fixture = try makeStore(items: [item], draw: { _, _, _ in [item] })
 
         let result = fixture.store.open(.rare)
 
@@ -38,7 +38,7 @@ struct GameStoreTests {
     @Test("Un doublon rapporte exactement la poussière de sa rareté")
     func duplicateGivesExactDust() throws {
         let item = Fixtures.item("diamond", rarity: .rare)
-        let fixture = try makeStore(items: [item], draw: { _, _ in [item] })
+        let fixture = try makeStore(items: [item], draw: { _, _, _ in [item] })
 
         _ = fixture.store.open(.rare)
         fixture.store.endOpening()
@@ -54,7 +54,7 @@ struct GameStoreTests {
         let item = Fixtures.item("nether_star", rarity: .legendary)
         let fixture = try makeStore(
             items: [item],
-            draw: { _, _ in [item, item, item] }
+            draw: { _, _, _ in [item, item, item] }
         )
 
         let result = fixture.store.open(.legendary)
@@ -74,7 +74,7 @@ struct GameStoreTests {
         let diamond = Fixtures.item("diamond", rarity: .rare)
         let fixture = try makeStore(
             items: [panda, diamond],
-            draw: { _, items in items },
+            draw: { _, items, _ in items },
             boosterProvider: { _ in (.rare, .creatures) }
         )
 
@@ -92,7 +92,7 @@ struct GameStoreTests {
     @Test("Les tirages locaux sont comptés par item")
     func localPullCountIsTracked() throws {
         let item = Fixtures.item("diamond", rarity: .rare)
-        let fixture = try makeStore(items: [item], draw: { _, _ in [item] })
+        let fixture = try makeStore(items: [item], draw: { _, _, _ in [item] })
 
         _ = fixture.store.open(.rare)
         fixture.store.endOpening()
@@ -107,7 +107,7 @@ struct GameStoreTests {
         let fixture = try makeStore(
             items: [item],
             dust: 100,
-            draw: { _, _ in [item] }
+            draw: { _, _, _ in [item] }
         )
 
         _ = fixture.store.open(.rare)
