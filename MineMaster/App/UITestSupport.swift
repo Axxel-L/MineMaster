@@ -8,8 +8,6 @@ import SwiftData
 /// Activé uniquement par l'argument de lancement `-uiTesting`, il remplace le
 /// catalogue embarqué par six items fixes, coupe la synchronisation réseau et
 /// utilise un conteneur SwiftData en mémoire.
-///
-/// - Authors: Axel L.
 enum UITestSupport {
     /// Argument de lancement activant l'environnement de test.
     nonisolated static let launchArgument = "-uiTesting"
@@ -30,7 +28,6 @@ enum UITestSupport {
     /// Construit une session réseau qui refuse toute requête d'image.
     ///
     /// - Returns: Une session dont chaque requête échoue immédiatement hors ligne.
-    /// - Authors: Axel L.
     nonisolated static func makeImageSession() -> URLSession {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [OfflineImageProtocol.self]
@@ -145,8 +142,6 @@ enum UITestSupport {
 }
 
 /// Protocol réseau qui refuse toute requête, réservé aux tests d'interface.
-///
-/// - Authors: Axel L.
 private nonisolated final class OfflineImageProtocol: URLProtocol {
     override class func canInit(with request: URLRequest) -> Bool { true }
 

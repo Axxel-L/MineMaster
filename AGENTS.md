@@ -110,6 +110,9 @@ pure. Un test qui échoue ne se contourne pas : on corrige le code ou le contrat
   (`TEST_HOST`), pour accéder au bundle et à `@testable import MineMaster`.
 - Framework : Swift Testing (`import Testing`, `@Suite`, `@Test`, `#expect`,
   `#require`). Ne pas mélanger avec XCTest sans raison.
+- Interface : cible `MineMasterUITests`, XCTest uniquement, car Swift Testing
+  ne pilote pas `XCUIApplication`. Chaque lancement passe `-uiTesting` et
+  `-hasSeenTutorial` pour obtenir un état déterministe.
 - SwiftData : conteneur en mémoire uniquement.
   Jamais la base réelle de l'utilisateur.
 - Réseau : jamais réel dans un test unitaire. Utiliser une `URLSession` injectée
@@ -127,6 +130,10 @@ xcodebuild -project MineMaster.xcodeproj -scheme MineMaster \
 
 xcodebuild test -project MineMaster.xcodeproj -scheme MineMaster \
   -destination 'platform=iOS Simulator,name=<simulateur installé>'
+
+xcodebuild test -project MineMaster.xcodeproj -scheme MineMaster \
+  -destination 'platform=iOS Simulator,name=<simulateur installé>' \
+  -only-testing:MineMasterUITests
 ```
 
 Le build et les tests doivent passer avant de rendre le travail.
@@ -139,6 +146,12 @@ MineMasterTests/
 ├─ Domain/      LootEngine, Rarity, Booster, ImagePolicy, SeedCatalog
 ├─ Data/        GameStore, ImagePipeline, CatalogAPI, Records
 └─ Features/    verrou d'ouverture, accueil, collection
+
+MineMasterUITests/
+├─ Support/     base commune, lancement déterministe et gestes partagés
+├─ OpeningFlowUITests.swift
+├─ CollectionUITests.swift
+└─ ProfileUITests.swift
 ```
 
 Conventions :
@@ -243,6 +256,17 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 - Le titre courant est le plus haut seuil atteint par les items uniques.
 - Le prochain titre est le premier seuil non atteint ; le titre maximal n'a pas
   de suivant.
+
+**Interface**
+
+- L'ouverture d'un pack révèle cinq cartes, puis revient à l'accueil.
+- La deuxième ouverture crédite exactement la poussière des doublons.
+- La recherche isole un item et ouvre son détail.
+- Le filtre « Possédés » masque les items jamais obtenus.
+- La renaissance vide la collection et la poussière, puis incrémente le niveau.
+- Le tutoriel de premier lancement se ferme par « Passer ».
+- Le mode `-uiTesting` ne touche ni la base réelle, ni le réseau, ni le catalogue
+  de production.
 
 ### 4.6 Prérequis et limites connues
 

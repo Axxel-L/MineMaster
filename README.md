@@ -78,11 +78,18 @@ MineMaster/
 
 ## Tests
 
-La cible `MineMasterTests` utilise Swift Testing, un conteneur SwiftData en mémoire et des sessions réseau de test.
+Deux cibles de test coexistent :
+
+- `MineMasterTests` : tests unitaires Swift Testing, conteneur SwiftData en mémoire et sessions réseau de test.
+- `MineMasterUITests` : parcours XCTest pilotés par l'interface, avec un catalogue fixe de six items et aucun accès réseau.
 
 ```bash
 xcodebuild test -project MineMaster.xcodeproj -scheme MineMaster \
   -destination 'platform=iOS Simulator,name=<simulateur installé>'
+
+xcodebuild test -project MineMaster.xcodeproj -scheme MineMaster \
+  -destination 'platform=iOS Simulator,name=<simulateur installé>' \
+  -only-testing:MineMasterUITests
 ```
 
 Les conventions et les invariants obligatoires sont décrits dans [`AGENTS.md`](AGENTS.md).
