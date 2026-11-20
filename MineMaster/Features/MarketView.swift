@@ -177,10 +177,12 @@ struct MarketView: View {
 
             Button(action: action) {
                 Text(actionLabel)
-                    .font(.footnote.weight(.bold))
-                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .font(.caption.weight(.bold))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 5)
             }
             .buttonStyle(.glassProminent)
+            .controlSize(.small)
             .tint(actionTint)
             .disabled(!isEnabled)
         }

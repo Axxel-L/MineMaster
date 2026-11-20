@@ -136,9 +136,11 @@ struct ItemDetailView: View {
     ) -> some View {
         Button(action: action) {
             Label(title, systemImage: systemImage)
-                .frame(maxWidth: .infinity, minHeight: 44)
+                .font(.subheadline.weight(.semibold))
+                .frame(maxWidth: .infinity)
         }
         .buttonStyle(.glassProminent)
+        .controlSize(.small)
         .tint(tint)
         .disabled(!isEnabled)
     }
