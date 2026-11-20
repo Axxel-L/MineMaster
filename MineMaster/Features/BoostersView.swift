@@ -95,6 +95,7 @@ struct BoostersView: View {
         .padding(.vertical, 8)
         .background(Theme.accent.opacity(0.10), in: Capsule())
         .overlay(Capsule().strokeBorder(Theme.accent.opacity(0.28), lineWidth: 0.6))
+        .accessibilityIdentifier("dust-pill")
         .accessibilityLabel("\(store.dust) poussière")
     }
 
@@ -139,6 +140,7 @@ struct BoostersView: View {
             .buttonStyle(.glassProminent)
             .tint(BoosterKind.mixed.tint)
             .disabled(store.isOpening)
+            .accessibilityIdentifier("open-pack")
             .accessibilityHint("Ouvre un pack mystère")
         }
         .padding(Theme.spaceM)

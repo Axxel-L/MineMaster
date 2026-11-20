@@ -40,6 +40,16 @@
                ReferencedContainer = "container:MineMaster.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "A20000000000000000000006"
+               BuildableName = "MineMasterUITests.xctest"
+               BlueprintName = "MineMasterUITests"
+               ReferencedContainer = "container:MineMaster.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
