@@ -61,10 +61,11 @@ résultat faux.
 - Aucun commentaire libre dans les fichiers de code.
 - Seule la documentation d'API est autorisée, en Swift DocC (`///`), en français,
   avec les balises utiles :
-  `- Parameter`, `- Parameters`, `- Returns`, `- Throws`, `- Complexity`,
-  `- Authors: Axel L.`
-- La documentation du code s'adresse aux humains : elle explique le contrat,
-  les invariants, les erreurs et la complexité, pas l'implémentation ligne à ligne.
+  `- Parameter`, `- Parameters`, `- Returns`, `- Throws`, `- Complexity`.
+- Aucune balise d'auteur : ni `- Authors`, ni `@author`.
+- La documentation du code s'adresse aux humains et aux IA : elle explique le
+  contrat, les invariants, les erreurs et la complexité, pas l'implémentation
+  ligne à ligne.
 - Les commentaires existants non demandés ne sont ni supprimés, ni raccourcis.
 
 Exemple conforme :
@@ -74,7 +75,6 @@ Exemple conforme :
 ///
 /// - Parameter booster: Booster à ouvrir.
 /// - Returns: Les cartes tirées avec leur poussière.
-/// - Authors: Axel L.
 func open(_ booster: Booster) -> [DrawResult]
 ```
 
@@ -211,9 +211,31 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 **Poussière**
 
 - Un item nouveau rapporte `0` poussière.
-- Un doublon rapporte exactement `Rarity.dustValue` de sa rareté, une seule fois.
+- Un doublon rapporte `Rarity.dustValue` augmenté du boost de renaissance, une
+  seule fois.
 - Plusieurs doublons dans une même ouverture cumulent exactement leurs valeurs.
 - La poussière ne devient jamais négative.
+
+**Marché**
+
+- Achat : débite le prix d'achat, ajoute un exemplaire, décrémente le stock.
+- Vente : crédite le prix de revente, retire un exemplaire, incrémente le stock.
+- Un achat refuse une poussière insuffisante (`insufficientDust`) ou un stock nul
+  (`outOfStock`).
+- Une vente refuse un item non possédé (`notOwned`).
+- Acheter l'unique exemplaire d'un item ne le marque pas deux fois comme unique.
+- Les prix dérivent de la rareté et ne sont jamais persistés.
+- Les compteurs d'achats et de ventes survivent au rechargement.
+
+**Renaissance**
+
+- La renaissance est refusée sous `Rebirth.minimumUniqueItems` items différents
+  (`rebirthLocked`).
+- Une renaissance vide la collection et la poussière, conserve l'historique des
+  ouvertures et incrémente le niveau d'un palier.
+- Les boosts de rareté et de poussière se cumulent sans plafond et persistent.
+- Le boost est transmis au tirage ; la poussière d'un doublon suit le niveau.
+- Une renaissance remet le stock du marché à `1`.
 
 **Profil**
 

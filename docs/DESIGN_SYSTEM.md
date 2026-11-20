@@ -115,6 +115,19 @@ l'accueil ou depuis Profil.
   et quantité possédée, avec les mêmes actions.
 - Le profil affiche le total des achats et des ventes, persisté avec le joueur.
 
+## Renaissance
+
+- Remplace l'ancienne réinitialisation : carte dédiée dans le profil, niveau
+  courant, trois puces de boosts (légendaire, épique, poussière) et progression
+  vers le seuil.
+- Seuil : `Rebirth.minimumUniqueItems` items différents. Bouton `Renaître`
+  désactivé et barre de progression tant que le seuil n'est pas atteint.
+- Confirmation destructive explicite avant l'action.
+- Remet la collection et la poussière à zéro, conserve l'historique des
+  ouvertures, réapprovisionne le marché à `1` et incrémente le niveau.
+- Boosts cumulatifs sans plafond, appliqués au tirage et à la poussière des
+  doublons.
+
 ## Chargement
 
 Toute image distante affiche `SkeletonImage` avant décodage. Aucune zone d'image
