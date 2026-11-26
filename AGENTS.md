@@ -64,10 +64,10 @@ résultat faux.
   watchOS n'appelle directement `open`, `buy`, `sell` ou `rebirth`.
 - Le mode miroir optionnel ne mute jamais la copie locale de la montre : il
   envoie une commande bornée à l'iPhone et applique l'état reçu.
-- Les fichiers partagés entre iOS, watchOS et WidgetKit vivent dans `Shared/`
-  et `SharedComplication/`, hors de tout groupe synchronisé. Ils sont référencés
-  explicitement dans les phases Sources des cibles concernées, sans jamais
-  dépendre de la synchronisation d'une autre cible.
+- Les fichiers partagés entre iOS, watchOS et WidgetKit vivent dans `Shared/`,
+  hors de tout groupe synchronisé. Ils sont référencés explicitement dans les
+  phases Sources des cibles concernées, sans jamais dépendre de la
+  synchronisation d'une autre cible.
 
 ### Commentaires
 
@@ -173,11 +173,15 @@ MineMasterUITests/
 └─ ProfileUITests.swift
 
 Shared/
-├─ WatchProtocol.swift    paquets, commandes et bornes
-└─ WatchSessionRelay.swift relais WCSession sans état
+├─ WatchProtocol.swift       paquets, commandes et bornes
+├─ WatchSessionRelay.swift   relais WCSession sans état
+└─ ComplicationState.swift   état borné partagé avec WidgetKit
 
-SharedComplication/
-└─ ComplicationState.swift état borné partagé avec WidgetKit
+MineMasterWidgets/
+├─ MineMasterWidgetsBundle.swift  bundle des trois widgets iPhone
+├─ ProgressionWidget.swift        collection, poussière et titres
+├─ CareerWidget.swift             titre, ouvertures et renaissances
+└─ PackWidget.swift               accès rapide aux boosters
 
 MineMasterWatch/
 ├─ WatchLink.swift        lien iPhone, commandes et cache de lecture
@@ -356,6 +360,23 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 - En mode miroir optionnel, une montre hors connexion reste en lecture seule et
   une déconnexion iPhone verrouille son cache.
 
+**Widgets iPhone**
+
+- Les widgets sont en lecture seule : aucune ouverture, aucun achat, aucune
+  vente et aucune renaissance depuis l'extension.
+- L'état partagé ne contient que des agrégats bornés : progression, compteurs,
+  titre, poussière et date. Aucun email, aucun identifiant de compte, aucune
+  collection brute.
+- L'état est effacé à la déconnexion ; un widget sans état affiche un
+  placeholder et n'expose aucune donnée du compte précédent.
+- Le lien profond `minemaster://` ouvre uniquement un onglet connu et ne modifie
+  jamais la progression.
+- Les tailles supportées sont petit et moyen. Les trois widgets partagent le
+  même état borné et la même identité visuelle.
+- La cible iOS et la cible `MineMasterWidgets` partagent le groupe
+  `group.com.minemaster.iut-st-die`. Sans cette capacité, le widget affiche son
+  placeholder.
+
 **Interface**
 
 - L'ouverture d'un pack révèle cinq cartes, puis revient à l'accueil.
@@ -389,11 +410,12 @@ Points restant à instrumenter avant d'ajouter les tests correspondants :
 - `WCSession` n'est pas injectable dans les tests unitaires : le mode local
   livré de `WatchLink` est testé directement, et le mode miroir optionnel est
   couvert par le protocole et le routeur séparément.
-- La complication WidgetKit n'a pas de cible de test dédiée ; seuls l'encodage et
-  les bornes de `ComplicationState` sont testés.
+- La complication et les widgets WidgetKit n'ont pas de cible de test dédiée ;
+  seuls l'encodage, les bornes de `ComplicationState` et l'instantané publié
+  sont testés. Le rendu SwiftUI des widgets n'est pas couvert.
 - La capacité App Groups doit être autorisée par l'équipe de signature pour que
-  la complication partage son état. Sans elle, la complication affiche un
-  placeholder et le reste de l'app reste fonctionnel.
+  la complication et les widgets iPhone partagent leur état. Sans elle, ils
+  affichent un placeholder et le reste de l'app reste fonctionnel.
 
 ## 5. Definition of done
 

@@ -22,6 +22,7 @@ Application iOS et Apple Watch, éducative et non commerciale. La montre est aut
 | <img src="https://api.iconify.design/heroicons/sparkles.svg?color=%23d97706&width=16" width="16" height="16" alt="" /> Comprendre les fonctionnalités | [Fonctionnalités](#fonctionnalites) |
 | <img src="https://api.iconify.design/heroicons/rocket-launch.svg?color=%23d97706&width=16" width="16" height="16" alt="" /> Lancer l'application | [Démarrage](#demarrage) |
 | <img src="https://api.iconify.design/heroicons/beaker.svg?color=%23d97706&width=16" width="16" height="16" alt="" /> Lancer les tests | [Tests](#tests) |
+| <img src="https://api.iconify.design/heroicons/device-phone-mobile.svg?color=%23d97706&width=16" width="16" height="16" alt="" /> Voir les widgets | [Widgets iPhone](#widgets-iphone) |
 | <img src="https://api.iconify.design/heroicons/clock.svg?color=%23d97706&width=16" width="16" height="16" alt="" /> Voir la montre | [Apple Watch](#apple-watch) |
 | <img src="https://api.iconify.design/heroicons/cpu-chip.svg?color=%23d97706&width=16" width="16" height="16" alt="" /> Voir la stack | [Stack technique](#stack-technique) |
 | <img src="https://api.iconify.design/heroicons/folder.svg?color=%23d97706&width=16" width="16" height="16" alt="" /> Explorer le code | [Architecture](#architecture) |
@@ -115,6 +116,36 @@ Application iOS et Apple Watch, éducative et non commerciale. La montre est aut
 
 </details>
 
+<details>
+<summary><img src="https://api.iconify.design/heroicons/device-phone-mobile.svg?color=%23d97706&width=18" width="18" height="18" alt="" /> <strong>Widgets iPhone</strong></summary>
+
+- **Progression** : anneau de collection, items uniques, poussière et échelle de titres.
+- **Carrière** : titre courant, ouvertures et renaissances.
+- **Pack** : accès rapide à l'écran Boosters pour ouvrir un booster.
+- Formats petit et moyen, lecture seule, aucun identifiant de compte partagé.
+- Un appui ouvre l'onglet correspondant ; le widget n'écrit jamais dans la progression.
+- Sans connexion, un placeholder invite à ouvrir l'application.
+
+</details>
+
+---
+
+<a id="widgets-iphone"></a>
+## <img src="https://api.iconify.design/heroicons/device-phone-mobile.svg?color=%23d97706&width=20" width="20" height="20" alt="" /> Widgets iPhone
+
+La cible `MineMasterWidgets` est une extension WidgetKit séparée. Elle lit un
+état borné écrit par l'application dans le groupe d'applications
+`group.com.minemaster.iut-st-die`.
+
+- Trois widgets : progression, carrière et accès rapide au pack.
+- Les données se limitent à la progression, aux compteurs, au titre et à la
+  poussière. Aucun email, aucun identifiant Firebase, aucune collection brute.
+- Le widget est en lecture seule : il ouvre l'application via `minemaster://`
+  et ne modifie jamais la progression.
+- L'état est réécrit après chaque action locale et effacé à la déconnexion.
+- La capacité **App Groups** doit être autorisée pour la cible iOS et la cible
+  `MineMasterWidgets`. Sans elle, le widget affiche son placeholder.
+
 ---
 
 <a id="apple-watch"></a>
@@ -163,10 +194,10 @@ MineMaster/
 │  ├─ Domain/                  Modèles, tirages, marché, renaissance, titres
 │  ├─ Design/                  Thème, packs, animations, composants visuels
 │  └─ Features/                Boosters, ouverture, collection, marché, profil
+├─ MineMasterWidgets/          Widgets iPhone WidgetKit
 ├─ MineMasterWatch/            Application watchOS autonome
 ├─ MineMasterWatchWidgets/     Complication WidgetKit
-├─ Shared/                     Protocole montre, relais WCSession, état de révélation
-├─ SharedComplication/         État borné partagé avec la complication
+├─ Shared/                     Protocole montre, relais WCSession, révélation et état borné partagé
 ├─ MineMasterTests/            Tests unitaires Swift Testing
 ├─ MineMasterUITests/          Parcours d'interface XCTest
 ├─ MineMasterWatchTests/       Tests unitaires watchOS
@@ -221,7 +252,7 @@ xcodebuild -project MineMaster.xcodeproj -scheme MineMasterWatch \
   -destination 'generic/platform=watchOS' build
 ```
 
-> La complication et le partage d'état nécessitent l'entitlement **App Groups** autorisé par l'équipe de signature. Sans lui, la complication affiche un placeholder et le reste de l'application continue de fonctionner.
+> La complication, les widgets iPhone et le partage d'état nécessitent l'entitlement **App Groups** autorisé par l'équipe de signature. Sans lui, la complication et les widgets affichent un placeholder et le reste de l'application continue de fonctionner.
 
 ---
 

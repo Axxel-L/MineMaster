@@ -149,6 +149,21 @@ carte et ne modifient pas la rareté.
 Toute image distante affiche `SkeletonImage` avant décodage. Aucune zone d'image
 vide, même si le CDN ne répond pas. En cas d'échec, repli sur l'icône cube.
 
+## Widgets iPhone
+
+Les trois widgets reprennent l'atelier minier en version compacte.
+
+- Fond ardoise avec deux halos discrets, émeraude en haut à droite et cuivre en
+  bas à gauche. Aucun matériau système superposé.
+- Chiffres en monospace, libellés en capitales espacées, titre en SF Pro heavy.
+- **Progression** : anneau dégradé émeraude vers cuivre, items uniques et
+  poussière. L'échelle des sept titres sert de signature.
+- **Carrière** : titre courant en grand, ouvertures et renaissances en colonne.
+- **Pack** : carte de pack en cuivre et icône `shippingbox.fill`, sans image
+  distante ni animation.
+- Aucune information brute de collection, aucun identifiant de compte.
+- Le placeholder sans connexion tient en une icône, un titre et une phrase.
+
 ## Apple Watch
 
 La montre reprend les mêmes tokens, en version compacte et sombre.

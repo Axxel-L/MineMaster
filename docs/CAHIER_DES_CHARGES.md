@@ -478,7 +478,7 @@ Proxy serverless (Cloudflare Worker) exposant `GET /v1/items` et `GET /v1/booste
 | Journalisation excessive | Logs `os.Logger` en Debug uniquement, jamais de contenu utilisateur. |
 | Stockage | SwiftData dans le sandbox ; fichiers images en `Caches` ; rien de sensible. |
 | Vie privée | Aucune collecte, aucun tracking, aucun IDFA, aucun SDK analytics. |
-| Manifeste de confidentialité | `PrivacyInfo.xcprivacy` : aucune donnée collectée, aucun API à raison valable. |
+| Manifeste de confidentialité | `PrivacyInfo.xcprivacy` : aucune donnée collectée, seule l'API UserDefaults est déclarée (`CA92.1`). |
 | Dépendances | Zéro dépendance d'exécution ; pas de risque de chaîne d'approvisionnement. |
 | XSS / WebView | Aucune WebView, aucun HTML rendu. |
 | Abus de ressources | Sémaphore 6, annulation des tâches, plafonds de cache. |
@@ -635,8 +635,8 @@ montre ── ComplicationState ──▶ groupe d'applications WidgetKit
 
 - Extension WidgetKit séparée, familles circulaire, rectangulaire et en ligne.
 - L'app écrit un `ComplicationState` borné (progression, poussière, titre,
-  prochain titre) depuis l'état local dans le groupe d'applications
-  `group.com.minemaster.iut-st-die`.
+  prochain titre et compteurs agrégés) depuis l'état local dans le groupe
+  d'applications `group.com.minemaster.iut-st-die`.
 - La complication ne lit jamais la progression brute, la collection, l'email ni
   l'identifiant Firebase.
 - La capacité App Groups doit être autorisée par l'équipe de signature ; sans
@@ -649,3 +649,51 @@ montre ── ComplicationState ──▶ groupe d'applications WidgetKit
 - Mode miroir optionnel : routeur iPhone (plan, idempotence, achats, ventes,
   agrégats) et protocole (bornes, décodage).
 - Les tests d'interface watchOS exigent un runtime de simulateur installé.
+
+---
+
+## 17. Extension Widgets iPhone
+
+### 17.1 Périmètre
+
+Trois widgets WidgetKit, en formats petit et moyen :
+
+- **Progression** : anneau de collection, items uniques, poussière, titre courant
+  et échelle des sept titres.
+- **Carrière** : titre courant, ouvertures et renaissances.
+- **Pack** : accès rapide à l'écran Boosters.
+
+Les widgets sont en lecture seule. Un appui ouvre `minemaster://boosters` ou
+`minemaster://profile` ; aucune action ne modifie la progression, la poussière
+ou le stock depuis l'extension.
+
+### 17.2 Données partagées
+
+- L'application écrit un `ComplicationState` borné dans le groupe
+  d'applications `group.com.minemaster.iut-st-die` après chaque écriture locale.
+- Champs : progression, poussière, items uniques, total du catalogue, ouvertures,
+  niveau de renaissance, titre, prochain titre, rang et date.
+- Aucun email, aucun identifiant Firebase, aucune collection brute, aucune URL.
+- L'état est effacé à la déconnexion ; le widget affiche alors un placeholder.
+- Les liens profonds sont limités aux onglets connus.
+
+### 17.3 Architecture
+
+```text
+app iOS ── GameStore ──▶ WidgetStatePublisher ──▶ App Group ──▶ widgets
+widget  ── minemaster://onglet ──▶ AppRoute ──▶ RootTabView
+```
+
+- `WidgetStatePublisher` ne publie que des agrégats bornés et rafraîchit les
+  timelines après une écriture locale ou un effacement.
+- `AppRoute` filtre le schéma, l'hôte et la destination ; un lien inconnu est
+  ignoré.
+- La cible iOS et la cible `MineMasterWidgets` doivent posséder la capacité
+  App Groups ; sans elle, le widget affiche son placeholder.
+
+### 17.4 Tests
+
+- Bornes de `ComplicationState` et décodage d'un ancien état sans statistiques.
+- Instantané publié fidèle aux compteurs du magasin.
+- Liens profonds : onglet valide, schéma inconnu et hôte inconnu.
+- Le rendu SwiftUI des widgets n'est pas couvert par un test unitaire.
