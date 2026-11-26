@@ -613,30 +613,30 @@ Une fonctionnalité est terminée si : critères d'acceptation validés, états 
 
 ### 16.2 Architecture
 
-L'iPhone reste l'unique source de vérité. La montre ne possède qu'un cache
-d'affichage SwiftData et ne modifie jamais la progression.
+La montre possède son propre magasin SwiftData et son propre catalogue embarqué.
+Elle joue hors ligne, sans compte, sans Firebase et sans dépendre de l'iPhone.
+La progression de l'iPhone et celle de la montre divergent par conception.
 
 ```text
-montre ── commande bornée ──▶ iPhone (WatchCommandRouter)
-montre ◀── état + résultat ── iPhone (WatchState)
+montre ── WatchLink ──▶ GameStore local (SwiftData)
+montre ── ComplicationState ──▶ groupe d'applications WidgetKit
 ```
 
-- Transport : `WCSession` en messages de données, sans réponse synchrone ; les
-  réponses sont corrélées par identifiant de commande.
-- Les commandes sont idempotentes : un identifiant rejoué renvoie la réponse en
-  cache sans réexécuter l'action.
-- Les états et commandes sont bornés (60 Ko / 8 Ko), validés et décodés en
-  valeurs `Sendable`.
-- Hors connexion, la montre est en lecture seule sur le dernier état reçu.
-- Une déconnexion iPhone publie un verrou ; la montre efface son cache de
-  progression et affiche un écran « Compte requis ».
-- La montre charge le catalogue embarqué sans réseau et ne crée aucun compte.
+- La montre charge le catalogue de secours et le stock du marché sans réseau.
+- Les ouvertures, achats, ventes et renaissances ne touchent que le magasin local.
+- Les tirages locaux par item sont persistés ; les compteurs communautaires ne
+  sont pas disponibles sur la montre.
+- Le code conserve un mode miroir optionnel (`WatchLink.Mode.live`) avec
+  `WCSession`, borné à 60 Ko par paquet et 8 Ko par commande, idempotent et
+  verrouillé à la déconnexion. L'app livrée utilise `Mode.local`.
+- Aucun identifiant de compte n'est stocké sur la montre.
 
 ### 16.3 Complication
 
 - Extension WidgetKit séparée, familles circulaire, rectangulaire et en ligne.
-- L'app écrit un `ComplicationState` borné (progression, poussière, titre) dans
-  le groupe d'applications `group.com.minemaster.iut-st-die`.
+- L'app écrit un `ComplicationState` borné (progression, poussière, titre,
+  prochain titre) depuis l'état local dans le groupe d'applications
+  `group.com.minemaster.iut-st-die`.
 - La complication ne lit jamais la progression brute, la collection, l'email ni
   l'identifiant Firebase.
 - La capacité App Groups doit être autorisée par l'équipe de signature ; sans
@@ -644,10 +644,8 @@ montre ◀── état + résultat ── iPhone (WatchState)
 
 ### 16.4 Tests
 
-- Protocole : aller-retour des paquets, refus des charges trop grandes ou
-  invalides, bornes des instantanés et des commandes.
-- Routeur iPhone : plan sans verrou, ouverture idempotente, achat, vente,
-  stock épuisé, identifiant invalide, agrégats communautaires.
-- Watch : mode local déterministe pour les parcours d'interface, navigation vers
-  le marché, ouverture et révélation.
+- Watch : mode local, ouverture de cinq cartes, marché, tirages locaux et bornes
+  de la complication.
+- Mode miroir optionnel : routeur iPhone (plan, idempotence, achats, ventes,
+  agrégats) et protocole (bornes, décodage).
 - Les tests d'interface watchOS exigent un runtime de simulateur installé.

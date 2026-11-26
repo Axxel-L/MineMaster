@@ -60,9 +60,10 @@ résultat faux.
   uniquement par les SDK Firebase, jamais par un `URLSession` maison.
 - Toute image distante affiche un squelette de chargement avant décodage.
   Aucune zone d'image vide, même sans réponse du CDN.
-- La montre ne mute jamais la progression locale : elle envoie une commande
-  bornée à l'iPhone et applique l'état reçu. Aucune vue watchOS n'appelle
-  directement `open`, `buy`, `sell` ou `rebirth`.
+- La montre livrée joue sur son propre magasin via `WatchLink` : aucune vue
+  watchOS n'appelle directement `open`, `buy`, `sell` ou `rebirth`.
+- Le mode miroir optionnel ne mute jamais la copie locale de la montre : il
+  envoie une commande bornée à l'iPhone et applique l'état reçu.
 - Les fichiers partagés entre iOS, watchOS et WidgetKit vivent dans `Shared/`
   et `SharedComplication/`, hors de tout groupe synchronisé. Ils sont référencés
   explicitement dans les phases Sources des cibles concernées, sans jamais
@@ -340,21 +341,20 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 
 **Apple Watch**
 
-- La montre est un miroir : `WatchCommandRouter` exécute les ouvertures, achats,
-  ventes et renaissances côté iPhone, puis renvoie l'état complet.
-- Une commande rejouée avec le même identifiant ne produit jamais une seconde
-  ouverture ni un second débit.
-- Un plan d'ouverture ne consomme pas le verrou et n'enregistre rien.
-- Hors connexion, la montre reste en lecture seule : aucune action locale ne
-  modifie la progression.
-- Une déconnexion iPhone verrouille le cache de la montre ; un état reçu d'un
-  compte authentifié le déverrouille.
-- Tout état reçu est borné : poussière négative ramenée à zéro, quantités
-  plafonnées, identifiants hors catalogue ignorés, compteurs mondiaux bornés.
-- Un paquet dépassant 60 Ko ou une commande dépassant 8 Ko est refusé.
-- La montre charge le catalogue embarqué sans réseau et sans second compte.
+- L'app livrée utilise `WatchLink.Mode.local` : la montre joue sur son propre
+  magasin SwiftData, sans compte, sans Firebase et sans iPhone.
+- Ouvertures, achats, ventes et renaissances ne modifient que la progression
+  locale de la montre ; la progression iPhone diverge par conception.
+- La montre charge le catalogue embarqué et le stock du marché sans réseau.
+- Les tirages locaux par item sont persistés ; les compteurs communautaires
+  restent indisponibles sur la montre.
 - La complication ne lit qu'un état borné partagé par groupe d'applications,
   sans progression brute ni identifiant de compte.
+- Le mode miroir optionnel (`WatchLink.Mode.live`) conserve les invariants
+  suivants, couverts par les tests du routeur : commandes idempotentes, plan
+  sans verrou, états bornés, paquets de 60 Ko et commandes de 8 Ko maximum.
+- En mode miroir optionnel, une montre hors connexion reste en lecture seule et
+  une déconnexion iPhone verrouille son cache.
 
 **Interface**
 
@@ -386,8 +386,9 @@ Points restant à instrumenter avant d'ajouter les tests correspondants :
   Un test multi-instances sur le même conteneur doit couvrir l'unicité.
 - Le chargement des images est vérifié par les tests de `ImagePipeline`.
   Le rendu SwiftUI du squelette n'est pas couvert par un test unitaire.
-- `WCSession` n'est pas injectable dans les tests unitaires : le protocole, le
-  routeur et le mode local de `WatchLink` sont testés séparément.
+- `WCSession` n'est pas injectable dans les tests unitaires : le mode local
+  livré de `WatchLink` est testé directement, et le mode miroir optionnel est
+  couvert par le protocole et le routeur séparément.
 - La complication WidgetKit n'a pas de cible de test dédiée ; seuls l'encodage et
   les bornes de `ComplicationState` sont testés.
 - La capacité App Groups doit être autorisée par l'équipe de signature pour que

@@ -155,15 +155,15 @@ La montre reprend les mêmes tokens, en version compacte et sombre.
 
 - Accueil : un seul pack héros, puis une pile de lignes de destination
   (Marché, Collection, Profil). Pas de grille, pas de dégradé supplémentaire.
-- Le pack scellé affiche le type et la rareté reçus de l'iPhone ; le bouton reste
-  désactivé hors connexion.
+- Le pack scellé affiche le type et la rareté tirés localement ; le bouton reste
+  actif hors connexion.
 - Marché : sélecteur Acheter/Vendre en deux puces pleine largeur, puis une liste
   de lignes. L'action d'achat ou de vente vit dans la fiche item pour éviter les
   transactions accidentelles.
 - Profil : jauge circulaire, compteurs en monospace, une section Communauté
-  (tirages et échanges mondiaux) et une section Renaissance.
-- Un bandeau « Lecture seule » remplace toute action quand l'iPhone n'est pas
-  joignable. Aucun bouton de jeu n'est actif dans cet état.
+  affichée comme indisponible en local, et une section Renaissance.
+- La montre joue sur sa propre progression : un badge « Mode local » remplace la
+  mention iPhone. Aucune action n'est grisée par l'absence de connexion.
 - La complication utilise les familles circulaire, rectangulaire et en ligne.
   Elle n'affiche que progression, poussière et titre, jamais un identifiant de
   compte ni la collection brute.

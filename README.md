@@ -29,14 +29,13 @@ Projet non commercial, libre de droits. Tout le monde peut le réutiliser.
 
 ## Apple Watch
 
-La cible `MineMasterWatch` est un miroir compact de l'iPhone, avec son schéma et ses tests. L'iPhone reste l'unique source de vérité : la montre lui envoie chaque action et applique l'état reçu. Hors connexion, elle reste en lecture seule sur le dernier état synchronisé, et une déconnexion verrouille son cache.
+La cible `MineMasterWatch` possède sa propre progression SwiftData, indépendante de l'iPhone. Elle charge le catalogue embarqué, joue hors ligne et reste utilisable sans compte, sans Firebase et sans WatchConnectivity. La progression iPhone et montre divergent par conception.
 
 - Ouverture de packs, collection, marché dédié, profil et renaissance
-- Statistiques communautaires par item
+- Tirages locaux par item ; les compteurs communautaires ne sont pas disponibles sur la montre
 - Complication WidgetKit : progression, poussière, titre courant et prochain titre
-- Aucun second compte : la montre ne crée jamais de progression locale
-
-Les fichiers partagés vivent dans `Shared/` et `SharedComplication/` et sont référencés explicitement par les cibles iOS, watchOS et WidgetKit.
+- Les fichiers partagés avec WidgetKit vivent dans `SharedComplication/` et sont référencés explicitement par les cibles watchOS et WidgetKit
+- Le pont WatchConnectivity reste dans le code pour un mode miroir optionnel, désactivé dans l'app livrée
 
 ## Fonctionnalités
 
