@@ -597,3 +597,57 @@ Une fonctionnalité est terminée si : critères d'acceptation validés, états 
 - Heroicons 2.2.0 — MIT, © Tailwind Labs. Licence incluse dans le bundle.
 - Textures et noms Minecraft — © Mojang Studios / Microsoft. Projet pédagogique non affilié, assets non redistribués.
 - SF Symbols — Apple, usage selon les termes du SDK.
+
+---
+
+## 16. Extension Apple Watch
+
+### 16.1 Périmètre
+
+- Accueil compact : pack mystère, progression, accès au marché, à la collection
+  et au profil.
+- Ouverture d'un pack en cinq cartes, révélation manuelle carte par carte.
+- Marché dédié : offres à l'achat et items revendables, stock, prix et solde.
+- Profil : titre, compteurs, renaissance, statistiques communautaires.
+- Complication WidgetKit : progression, poussière et titre.
+
+### 16.2 Architecture
+
+L'iPhone reste l'unique source de vérité. La montre ne possède qu'un cache
+d'affichage SwiftData et ne modifie jamais la progression.
+
+```text
+montre ── commande bornée ──▶ iPhone (WatchCommandRouter)
+montre ◀── état + résultat ── iPhone (WatchState)
+```
+
+- Transport : `WCSession` en messages de données, sans réponse synchrone ; les
+  réponses sont corrélées par identifiant de commande.
+- Les commandes sont idempotentes : un identifiant rejoué renvoie la réponse en
+  cache sans réexécuter l'action.
+- Les états et commandes sont bornés (60 Ko / 8 Ko), validés et décodés en
+  valeurs `Sendable`.
+- Hors connexion, la montre est en lecture seule sur le dernier état reçu.
+- Une déconnexion iPhone publie un verrou ; la montre efface son cache de
+  progression et affiche un écran « Compte requis ».
+- La montre charge le catalogue embarqué sans réseau et ne crée aucun compte.
+
+### 16.3 Complication
+
+- Extension WidgetKit séparée, familles circulaire, rectangulaire et en ligne.
+- L'app écrit un `ComplicationState` borné (progression, poussière, titre) dans
+  le groupe d'applications `group.com.minemaster.iut-st-die`.
+- La complication ne lit jamais la progression brute, la collection, l'email ni
+  l'identifiant Firebase.
+- La capacité App Groups doit être autorisée par l'équipe de signature ; sans
+  elle, la complication affiche un placeholder et le reste de l'app fonctionne.
+
+### 16.4 Tests
+
+- Protocole : aller-retour des paquets, refus des charges trop grandes ou
+  invalides, bornes des instantanés et des commandes.
+- Routeur iPhone : plan sans verrou, ouverture idempotente, achat, vente,
+  stock épuisé, identifiant invalide, agrégats communautaires.
+- Watch : mode local déterministe pour les parcours d'interface, navigation vers
+  le marché, ouverture et révélation.
+- Les tests d'interface watchOS exigent un runtime de simulateur installé.

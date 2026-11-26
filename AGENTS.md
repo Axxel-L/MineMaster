@@ -60,6 +60,11 @@ résultat faux.
   uniquement par les SDK Firebase, jamais par un `URLSession` maison.
 - Toute image distante affiche un squelette de chargement avant décodage.
   Aucune zone d'image vide, même sans réponse du CDN.
+- La montre ne mute jamais la progression locale : elle envoie une commande
+  bornée à l'iPhone et applique l'état reçu. Aucune vue watchOS n'appelle
+  directement `open`, `buy`, `sell` ou `rebirth`.
+- Les fichiers partagés entre iOS et watchOS sont listés explicitement dans la
+  phase Sources de la cible `MineMasterWatch`.
 
 ### Commentaires
 
@@ -139,6 +144,12 @@ xcodebuild test -project MineMaster.xcodeproj -scheme MineMaster \
 xcodebuild test -project MineMaster.xcodeproj -scheme MineMaster \
   -destination 'platform=iOS Simulator,name=<simulateur installé>' \
   -only-testing:MineMasterUITests
+
+xcodebuild -project MineMaster.xcodeproj -scheme MineMasterWatch \
+  -destination 'generic/platform=watchOS' build
+
+xcodebuild test -project MineMaster.xcodeproj -scheme MineMasterWatch \
+  -destination 'platform=watchOS Simulator,name=<montre installée>'
 ```
 
 Le build et les tests doivent passer avant de rendre le travail.
@@ -157,6 +168,20 @@ MineMasterUITests/
 ├─ OpeningFlowUITests.swift
 ├─ CollectionUITests.swift
 └─ ProfileUITests.swift
+
+MineMasterWatch/
+├─ WatchLink.swift        lien iPhone, commandes et cache de lecture
+├─ WatchMarketView.swift  marché compact
+└─ ...                    accueil, ouverture, collection, profil, tutoriel
+
+MineMasterWatchTests/
+├─ WatchStoreTests.swift
+└─ WatchProtocolTests.swift
+
+MineMasterWatchUITests/
+├─ Support/
+├─ WatchNavigationUITests.swift
+└─ WatchOpeningFlowUITests.swift
 ```
 
 Conventions :
@@ -304,6 +329,24 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 - Le prochain titre est le premier seuil non atteint ; le titre maximal n'a pas
   de suivant.
 
+**Apple Watch**
+
+- La montre est un miroir : `WatchCommandRouter` exécute les ouvertures, achats,
+  ventes et renaissances côté iPhone, puis renvoie l'état complet.
+- Une commande rejouée avec le même identifiant ne produit jamais une seconde
+  ouverture ni un second débit.
+- Un plan d'ouverture ne consomme pas le verrou et n'enregistre rien.
+- Hors connexion, la montre reste en lecture seule : aucune action locale ne
+  modifie la progression.
+- Une déconnexion iPhone verrouille le cache de la montre ; un état reçu d'un
+  compte authentifié le déverrouille.
+- Tout état reçu est borné : poussière négative ramenée à zéro, quantités
+  plafonnées, identifiants hors catalogue ignorés, compteurs mondiaux bornés.
+- Un paquet dépassant 60 Ko ou une commande dépassant 8 Ko est refusé.
+- La montre charge le catalogue embarqué sans réseau et sans second compte.
+- La complication ne lit qu'un état borné partagé par groupe d'applications,
+  sans progression brute ni identifiant de compte.
+
 **Interface**
 
 - L'ouverture d'un pack révèle cinq cartes, puis revient à l'accueil.
@@ -334,6 +377,13 @@ Points restant à instrumenter avant d'ajouter les tests correspondants :
   Un test multi-instances sur le même conteneur doit couvrir l'unicité.
 - Le chargement des images est vérifié par les tests de `ImagePipeline`.
   Le rendu SwiftUI du squelette n'est pas couvert par un test unitaire.
+- `WCSession` n'est pas injectable dans les tests unitaires : le protocole, le
+  routeur et le mode local de `WatchLink` sont testés séparément.
+- La complication WidgetKit n'a pas de cible de test dédiée ; seuls l'encodage et
+  les bornes de `ComplicationState` sont testés.
+- La capacité App Groups doit être autorisée par l'équipe de signature pour que
+  la complication partage son état. Sans elle, la complication affiche un
+  placeholder et le reste de l'app reste fonctionnel.
 
 ## 5. Definition of done
 
