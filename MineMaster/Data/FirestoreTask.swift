@@ -22,33 +22,50 @@ enum FirestoreTask {
         seconds: Double = defaultTimeout,
         _ operation: @escaping @Sendable () async throws -> T
     ) async throws -> T {
-        let answered = Mutex(false)
+        let answer = FirestoreAnswer<T>()
         return try await withCheckedThrowingContinuation { continuation in
+            answer.install(continuation)
             Task {
                 do {
-                    resume(answered, continuation, with: .success(try await operation()))
+                    answer.resume(with: .success(try await operation()))
                 } catch {
-                    resume(answered, continuation, with: .failure(error))
+                    answer.resume(with: .failure(error))
                 }
             }
             Task {
-                try? await Task.sleep(for: .seconds(seconds))
-                resume(answered, continuation, with: .failure(AppError.timeout))
+                do {
+                    try await Task.sleep(for: .seconds(seconds))
+                } catch {
+                    return
+                }
+                answer.resume(with: .failure(AppError.timeout))
             }
         }
     }
+}
 
-    private nonisolated static func resume<T: Sendable>(
-        _ answered: borrowing Mutex<Bool>,
-        _ continuation: CheckedContinuation<T, Error>,
-        with result: Result<T, Error>
-    ) {
-        let isFirstAnswer = answered.withLock { answered in
-            guard !answered else { return false }
-            answered = true
-            return true
+/// Réponse unique protégée par un verrou, partageable entre les deux tâches.
+private nonisolated final class FirestoreAnswer<T: Sendable>: Sendable {
+    private struct State {
+        var answered = false
+        var continuation: CheckedContinuation<T, Error>?
+    }
+
+    private let state = Mutex<State>(State())
+
+    func install(_ continuation: CheckedContinuation<T, Error>) {
+        state.withLock { state in
+            state.continuation = continuation
         }
-        guard isFirstAnswer else { return }
-        continuation.resume(with: result)
+    }
+
+    func resume(with result: Result<T, Error>) {
+        let continuation = state.withLock { state -> CheckedContinuation<T, Error>? in
+            guard !state.answered, let continuation = state.continuation else { return nil }
+            state.answered = true
+            state.continuation = nil
+            return continuation
+        }
+        continuation?.resume(with: result)
     }
 }
