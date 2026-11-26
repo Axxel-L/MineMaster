@@ -6,6 +6,13 @@
 	objectVersion = 70;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B20000000000000000000006 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = B20000000000000000000003 /* FirebaseAuth */; };
+		B20000000000000000000007 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = B20000000000000000000004 /* FirebaseCore */; };
+		B20000000000000000000008 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = B20000000000000000000005 /* GoogleSignIn */; };
+		B2000000000000000000000C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = B2000000000000000000000E /* FirebaseFirestore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		A1000000000000000000001A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -31,6 +38,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B20000000000000000000006 /* FirebaseAuth in Frameworks */,
+				B20000000000000000000007 /* FirebaseCore in Frameworks */,
+				B20000000000000000000008 /* GoogleSignIn in Frameworks */,
+				B2000000000000000000000C /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,6 +93,10 @@
 			);
 			name = MineMaster;
 			packageProductDependencies = (
+				B20000000000000000000003 /* FirebaseAuth */,
+				B20000000000000000000004 /* FirebaseCore */,
+				B20000000000000000000005 /* GoogleSignIn */,
+				B2000000000000000000000E /* FirebaseFirestore */,
 			);
 			productName = MineMaster;
 			productReference = A10000000000000000000004 /* MineMaster.app */;
@@ -140,6 +155,10 @@
 			);
 			mainGroup = A10000000000000000000002;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B20000000000000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				B20000000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			productRefGroup = A10000000000000000000003 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -332,6 +351,7 @@
 				DEVELOPMENT_TEAM = 6CR9YQH87Z;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MineMaster;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -351,6 +371,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -367,6 +388,7 @@
 				DEVELOPMENT_TEAM = 6CR9YQH87Z;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MineMaster;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -386,6 +408,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -477,6 +500,48 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B20000000000000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.9.0;
+			};
+		};
+		B20000000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B20000000000000000000003 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B20000000000000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		B20000000000000000000004 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B20000000000000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		B20000000000000000000005 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B20000000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		B2000000000000000000000E /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B20000000000000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A10000000000000000000001 /* Project object */;
 }
