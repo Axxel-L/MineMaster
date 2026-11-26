@@ -31,6 +31,8 @@
 		B6000000000000000000000E /* ComplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000017 /* ComplicationState.swift */; };
 		C40000000000000000000001 /* MineMaster/Resources/ItemCatalog.json in Resources */ = {isa = PBXBuildFile; fileRef = C30000000000000000000001 /* MineMaster/Resources/ItemCatalog.json */; };
 		C40000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C30000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy */; };
+		C90000000000000000000001 /* RevealDeck.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000018 /* RevealDeck.swift */; };
+		C90000000000000000000002 /* RevealDeck.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000018 /* RevealDeck.swift */; };
 		D20000000000000000000006 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D20000000000000000000003 /* FirebaseAuth */; };
 		D20000000000000000000007 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = D20000000000000000000004 /* FirebaseCore */; };
 		D20000000000000000000008 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = D20000000000000000000005 /* GoogleSignIn */; };
@@ -132,6 +134,7 @@
 		C10000000000000000000015 /* WatchProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchProtocol.swift; sourceTree = "<group>"; };
 		C10000000000000000000016 /* WatchSessionRelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionRelay.swift; sourceTree = "<group>"; };
 		C10000000000000000000017 /* ComplicationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationState.swift; sourceTree = "<group>"; };
+		C10000000000000000000018 /* RevealDeck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevealDeck.swift; sourceTree = "<group>"; };
 		C30000000000000000000001 /* MineMaster/Resources/ItemCatalog.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MineMaster/Resources/ItemCatalog.json; sourceTree = SOURCE_ROOT; };
 		C30000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = MineMaster/Resources/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -248,6 +251,7 @@
 			children = (
 				C10000000000000000000015 /* WatchProtocol.swift */,
 				C10000000000000000000016 /* WatchSessionRelay.swift */,
+				C10000000000000000000018 /* RevealDeck.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -571,6 +575,7 @@
 			files = (
 				A30000000000000000000001 /* WatchProtocol.swift in Sources */,
 				A30000000000000000000002 /* WatchSessionRelay.swift in Sources */,
+				C90000000000000000000002 /* RevealDeck.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -609,6 +614,7 @@
 				C20000000000000000000015 /* WatchProtocol.swift in Sources */,
 				C20000000000000000000016 /* WatchSessionRelay.swift in Sources */,
 				C20000000000000000000017 /* ComplicationState.swift in Sources */,
+				C90000000000000000000001 /* RevealDeck.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

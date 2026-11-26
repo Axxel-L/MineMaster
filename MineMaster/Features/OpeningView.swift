@@ -105,7 +105,7 @@ struct PackOpeningView: View {
     }
 }
 
-/// Révélation manuelle des cartes, une carte par appui.
+/// Révélation manuelle des cartes, puis passage à la suivante au second appui.
 struct OpeningView: View {
     let session: OpeningSession
 
@@ -113,24 +113,23 @@ struct OpeningView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    @State private var revealed: Set<Int> = []
-    @State private var feedbackTick = 0
-    @State private var index = 0
+    @State private var deck: RevealDeck
     @State private var flash = false
 
-    private var allRevealed: Bool {
-        revealed.count == session.results.count
+    init(session: OpeningSession) {
+        self.session = session
+        _deck = State(initialValue: RevealDeck(count: session.results.count))
     }
 
     private var dustTotal: Int {
         session.results.enumerated()
-            .filter { revealed.contains($0.offset) }
+            .filter { deck.revealed.contains($0.offset) }
             .reduce(0) { $0 + $1.element.dust }
     }
 
     private var newCount: Int {
         session.results.enumerated()
-            .filter { revealed.contains($0.offset) }
+            .filter { deck.revealed.contains($0.offset) }
             .filter { $0.element.isNew }
             .count
     }
@@ -139,19 +138,25 @@ struct OpeningView: View {
         ZStack {
             ScreenBackground()
 
+            Color.white
+                .opacity(flash ? 0.13 : 0)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+                .animation(flash ? .easeIn(duration: 0.08) : .easeOut(duration: 0.5), value: flash)
+
             VStack(spacing: Theme.spaceM) {
                 topBar
 
-                TabView(selection: $index) {
+                TabView(selection: Binding(get: { deck.index }, set: { deck.select($0) })) {
                     ForEach(Array(session.results.enumerated()), id: \.element.id) { position, result in
                         RevealCard(
                             result: result,
-                            isRevealed: revealed.contains(position),
+                            isRevealed: deck.revealed.contains(position),
                             reduceMotion: reduceMotion,
                             width: 300,
                             height: 430
                         ) {
-                            reveal(position)
+                            handleTap(position)
                         }
                         .frame(maxWidth: .infinity)
                         .tag(position)
@@ -169,15 +174,10 @@ struct OpeningView: View {
                 }
                 .padding(.bottom, Theme.spaceL)
             }
-
-            Color.white
-                .opacity(flash ? 0.13 : 0)
-                .ignoresSafeArea()
-                .allowsHitTesting(false)
-                .animation(flash ? .easeIn(duration: 0.08) : .easeOut(duration: 0.5), value: flash)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .sensoryFeedback(.success, trigger: feedbackTick)
+        .sensoryFeedback(.success, trigger: deck.revealTick)
+        .sensoryFeedback(.selection, trigger: deck.advanceTick)
         .onDisappear {
             store.endOpening()
         }
@@ -193,13 +193,14 @@ struct OpeningView: View {
                         .font(.footnote.weight(.semibold))
                 }
                 .foregroundStyle(session.kind.tint)
-                Text("Carte \(index + 1) sur \(session.results.count)")
+                Text("Carte \(deck.index + 1) sur \(session.results.count)")
                     .font(Theme.display(24))
                     .foregroundStyle(Theme.textPrimary)
                     .contentTransition(.numericText())
+                    .accessibilityIdentifier("card-index")
             }
             Spacer()
-            Text("Révélées : \(revealed.count) sur \(session.results.count)")
+            Text("Révélées : \(deck.revealed.count) sur \(session.results.count)")
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                 .foregroundStyle(Theme.textSecondary)
             Button {
@@ -222,16 +223,16 @@ struct OpeningView: View {
             ForEach(session.results.indices, id: \.self) { position in
                 Button {
                     withAnimation(.easeInOut(duration: 0.22)) {
-                        index = position
+                        deck.select(position)
                     }
                 } label: {
                     Capsule()
                         .fill(
-                            position == index
+                            position == deck.index
                                 ? session.results[position].item.rarity.color
                                 : Theme.textSecondary.opacity(0.24)
                         )
-                        .frame(width: position == index ? 22 : 7, height: 7)
+                        .frame(width: position == deck.index ? 22 : 7, height: 7)
                         .frame(height: 24)
                         .contentShape(Rectangle())
                 }
@@ -239,12 +240,12 @@ struct OpeningView: View {
                 .accessibilityLabel("Carte \(position + 1)")
             }
         }
-        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: index)
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: deck.index)
     }
 
     @ViewBuilder
     private var bottomBar: some View {
-        if allRevealed {
+        if deck.allRevealed {
             VStack(spacing: 12) {
                 HStack(spacing: 8) {
                     if newCount > 0 {
@@ -263,7 +264,7 @@ struct OpeningView: View {
             }
             .transition(.move(edge: .bottom).combined(with: .opacity))
         } else {
-            Text(revealed.contains(index) ? "Glisse pour changer de carte" : "Touche la carte pour la révéler")
+            Text(deck.isCurrentRevealed ? "Touche encore pour la carte suivante" : "Touche la carte pour la révéler")
                 .font(.system(size: 10, weight: .medium, design: .rounded))
                 .foregroundStyle(Theme.textSecondary)
                 .frame(height: 44)
@@ -279,18 +280,22 @@ struct OpeningView: View {
             .background(tint.opacity(0.12), in: Capsule())
     }
 
-    private func reveal(_ index: Int) {
-        guard !revealed.contains(index) else { return }
-        withAnimation(reduceMotion ? .linear(duration: 0.01) : .spring(response: 0.62, dampingFraction: 0.76)) {
-            _ = revealed.insert(index)
-        }
-        feedbackTick += 1
+    private func handleTap(_ position: Int) {
+        if deck.revealed.contains(position) {
+            withAnimation(reduceMotion ? .linear(duration: 0.01) : .easeInOut(duration: 0.28)) {
+                deck.advance(from: position)
+            }
+        } else {
+            withAnimation(reduceMotion ? .linear(duration: 0.01) : .spring(response: 0.62, dampingFraction: 0.76)) {
+                deck.reveal(position)
+            }
 
-        if !reduceMotion, session.results[index].item.rarity == .legendary {
-            flash = true
-            Task {
-                try? await Task.sleep(for: .milliseconds(120))
-                flash = false
+            if !reduceMotion, session.results[position].item.rarity == .legendary {
+                flash = true
+                Task {
+                    try? await Task.sleep(for: .milliseconds(120))
+                    flash = false
+                }
             }
         }
     }
@@ -329,75 +334,80 @@ struct RevealCard: View {
     }
 
     var body: some View {
-        Button(action: onTap) {
-            ZStack {
-                back
-                    .opacity(isRevealed ? 0 : 1)
-                    .rotation3DEffect(
-                        .degrees(reduceMotion ? 0 : (isRevealed ? 180 : 0)),
-                        axis: (x: 0, y: 1, z: 0),
-                        perspective: 0.35
-                    )
-
-                front
-                    .opacity(isRevealed ? 1 : 0)
-                    .rotation3DEffect(
-                        .degrees(reduceMotion ? 0 : (isRevealed ? 0 : -180)),
-                        axis: (x: 0, y: 1, z: 0),
-                        perspective: 0.35
-                    )
-
-                if isRevealed, result.item.rarity >= .rare, !reduceMotion {
-                    ParticleBurst(rarity: result.item.rarity)
-                        .frame(width: width * 1.6, height: height * 1.25)
-                        .transition(.opacity)
+        face
+            .contentShape(Rectangle())
+            .onTapGesture(perform: onTap)
+            .onChange(of: isRevealed) { _, value in
+                guard value else { return }
+                if result.item.rarity == .legendary {
+                    impact += 1
+                }
+                guard result.item.rarity >= .epic, !reduceMotion else { return }
+                sweep = -1.4
+                withAnimation(.easeInOut(duration: 0.75)) {
+                    sweep = 1.4
                 }
             }
-            .frame(width: width, height: height)
-            .background {
-                RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .fill(result.item.rarity.color.opacity(isRevealed ? glow : 0.10))
-                    .blur(radius: isRevealed ? 26 : 12)
-            }
-            .glassEffect(
-                .regular.tint(result.item.rarity.color.opacity(isRevealed ? 0.22 : 0.08)),
-                in: RoundedRectangle(cornerRadius: 26, style: .continuous)
-            )
-            .scaleEffect(isRevealed ? revealScale : 0.96)
-            .shadow(
-                color: result.item.rarity.color.opacity(isRevealed ? glow : 0.08),
-                radius: isRevealed ? 28 : 12
-            )
-            .overlay {
-                if isRevealed, result.item.rarity >= .epic, !reduceMotion {
-                    LinearGradient(
-                        colors: [.clear, .white.opacity(0.38), .clear],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .rotationEffect(.degrees(18))
-                    .offset(x: sweep * width * 1.3)
-                    .mask(RoundedRectangle(cornerRadius: 26, style: .continuous))
-                    .allowsHitTesting(false)
-                }
-            }
-        }
-        .buttonStyle(.plain)
-        .onChange(of: isRevealed) { _, value in
-            guard value else { return }
-            if result.item.rarity == .legendary {
-                impact += 1
-            }
-            guard result.item.rarity >= .epic, !reduceMotion else { return }
-            sweep = -1.4
-            withAnimation(.easeInOut(duration: 0.75)) {
-                sweep = 1.4
+            .sensoryFeedback(.impact(weight: .heavy), trigger: impact)
+            .accessibilityElement(children: .ignore)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityLabel(isRevealed ? result.item.displayName : "Carte non révélée")
+            .accessibilityValue(isRevealed ? "\(result.item.rarity.displayName), \(result.dust) poussière" : "Touche pour révéler")
+            .accessibilityHint(isRevealed ? "Passe à la carte suivante" : "Révèle cette carte")
+    }
+
+    private var face: some View {
+        ZStack {
+            back
+                .opacity(isRevealed ? 0 : 1)
+                .rotation3DEffect(
+                    .degrees(reduceMotion ? 0 : (isRevealed ? 180 : 0)),
+                    axis: (x: 0, y: 1, z: 0),
+                    perspective: 0.35
+                )
+
+            front
+                .opacity(isRevealed ? 1 : 0)
+                .rotation3DEffect(
+                    .degrees(reduceMotion ? 0 : (isRevealed ? 0 : -180)),
+                    axis: (x: 0, y: 1, z: 0),
+                    perspective: 0.35
+                )
+
+            if isRevealed, result.item.rarity >= .rare, !reduceMotion {
+                ParticleBurst(rarity: result.item.rarity)
+                    .frame(width: width * 1.6, height: height * 1.25)
+                    .transition(.opacity)
             }
         }
-        .sensoryFeedback(.impact(weight: .heavy), trigger: impact)
-        .accessibilityLabel(isRevealed ? result.item.displayName : "Carte non révélée")
-        .accessibilityValue(isRevealed ? "\(result.item.rarity.displayName), \(result.dust) poussière" : "Touche pour révéler")
-        .accessibilityHint(isRevealed ? "" : "Révèle cette carte")
+        .frame(width: width, height: height)
+        .background {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .fill(result.item.rarity.color.opacity(isRevealed ? glow : 0.10))
+                .blur(radius: isRevealed ? 26 : 12)
+        }
+        .glassEffect(
+            .regular.tint(result.item.rarity.color.opacity(isRevealed ? 0.22 : 0.08)),
+            in: RoundedRectangle(cornerRadius: 26, style: .continuous)
+        )
+        .scaleEffect(isRevealed ? revealScale : 0.96)
+        .shadow(
+            color: result.item.rarity.color.opacity(isRevealed ? glow : 0.08),
+            radius: isRevealed ? 28 : 12
+        )
+        .overlay {
+            if isRevealed, result.item.rarity >= .epic, !reduceMotion {
+                LinearGradient(
+                    colors: [.clear, .white.opacity(0.38), .clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .rotationEffect(.degrees(18))
+                .offset(x: sweep * width * 1.3)
+                .mask(RoundedRectangle(cornerRadius: 26, style: .continuous))
+                .allowsHitTesting(false)
+            }
+        }
     }
 
     private var front: some View {

@@ -146,44 +146,44 @@ struct WatchPackOpeningView: View {
     }
 }
 
-/// Révélation des cinq cartes, une carte par appui.
+/// Révélation des cinq cartes, puis passage à la suivante au second appui.
 struct WatchOpeningView: View {
     let session: WatchOpeningSession
     let onFinish: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    @State private var index = 0
-    @State private var revealed: Set<Int> = []
-    @State private var feedbackTick = 0
+    @State private var deck: RevealDeck
 
-    private var allRevealed: Bool {
-        revealed.count == session.results.count
+    init(session: WatchOpeningSession, onFinish: @escaping () -> Void) {
+        self.session = session
+        self.onFinish = onFinish
+        _deck = State(initialValue: RevealDeck(count: session.results.count))
     }
 
     private var dustTotal: Int {
         session.results.enumerated()
-            .filter { revealed.contains($0.offset) }
+            .filter { deck.revealed.contains($0.offset) }
             .reduce(0) { $0 + $1.element.dust }
     }
 
     private var newCount: Int {
         session.results.enumerated()
-            .filter { revealed.contains($0.offset) && $0.element.isNew }
+            .filter { deck.revealed.contains($0.offset) && $0.element.isNew }
             .count
     }
 
     var body: some View {
         VStack(spacing: 6) {
             header
-            TabView(selection: $index) {
+            TabView(selection: Binding(get: { deck.index }, set: { deck.select($0) })) {
                 ForEach(Array(session.results.enumerated()), id: \.element.id) { position, result in
                     WatchRevealCard(
                         result: result,
                         position: position,
-                        isRevealed: revealed.contains(position)
+                        isRevealed: deck.revealed.contains(position)
                     ) {
-                        reveal(position)
+                        handleTap(position)
                     }
                     .tag(position)
                 }
@@ -194,7 +194,8 @@ struct WatchOpeningView: View {
         }
         .padding(.horizontal, 6)
         .padding(.bottom, 4)
-        .sensoryFeedback(.success, trigger: feedbackTick)
+        .sensoryFeedback(.success, trigger: deck.revealTick)
+        .sensoryFeedback(.selection, trigger: deck.advanceTick)
     }
 
     private var header: some View {
@@ -206,12 +207,13 @@ struct WatchOpeningView: View {
                     .font(.system(size: 8, weight: .black, design: .rounded))
                     .tracking(0.6)
                 Spacer(minLength: 2)
-                Text("\(index + 1) / \(session.results.count)")
+                Text("\(deck.index + 1) / \(session.results.count)")
                     .font(Theme.mono(9, weight: .bold))
                     .foregroundStyle(Theme.textSecondary)
+                    .accessibilityIdentifier("watch-card-index")
             }
             .foregroundStyle(session.kind.tint)
-            Text("\(revealed.count) / \(session.results.count) révélées")
+            Text("\(deck.revealed.count) / \(session.results.count) révélées")
                 .font(.system(size: 8, weight: .medium, design: .rounded))
                 .foregroundStyle(Theme.textSecondary)
                 .accessibilityIdentifier("watch-reveal-count")
@@ -223,20 +225,20 @@ struct WatchOpeningView: View {
             ForEach(session.results.indices, id: \.self) { position in
                 Capsule()
                     .fill(
-                        position == index
+                        position == deck.index
                             ? session.results[position].item.rarity.color
                             : Theme.textSecondary.opacity(0.24)
                     )
-                    .frame(width: position == index ? 12 : 4, height: 4)
+                    .frame(width: position == deck.index ? 12 : 4, height: 4)
             }
         }
-        .animation(reduceMotion ? nil : .snappy, value: index)
+        .animation(reduceMotion ? nil : .snappy, value: deck.index)
         .accessibilityHidden(true)
     }
 
     @ViewBuilder
     private var bottomBar: some View {
-        if allRevealed {
+        if deck.allRevealed {
             VStack(spacing: 4) {
                 HStack(spacing: 4) {
                     if newCount > 0 {
@@ -255,18 +257,22 @@ struct WatchOpeningView: View {
                     .accessibilityIdentifier("watch-finish")
             }
         } else {
-            Text(revealed.contains(index) ? "Glisse pour changer" : "Touche la carte")
+            Text(deck.isCurrentRevealed ? "Touche encore pour avancer" : "Touche la carte")
                 .font(.system(size: 8, weight: .medium, design: .rounded))
                 .foregroundStyle(Theme.textSecondary)
                 .frame(height: 24)
         }
     }
 
-    private func reveal(_ position: Int) {
-        guard !revealed.contains(position) else { return }
-        withAnimation(reduceMotion ? .linear(duration: 0.01) : .snappy) {
-            _ = revealed.insert(position)
+    private func handleTap(_ position: Int) {
+        if deck.revealed.contains(position) {
+            withAnimation(reduceMotion ? .linear(duration: 0.01) : .snappy) {
+                deck.advance(from: position)
+            }
+        } else {
+            withAnimation(reduceMotion ? .linear(duration: 0.01) : .snappy) {
+                deck.reveal(position)
+            }
         }
-        feedbackTick += 1
     }
 }

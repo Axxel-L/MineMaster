@@ -143,8 +143,10 @@ struct WatchRevealCard: View {
             ZStack {
                 back
                     .opacity(isRevealed ? 0 : 1)
+                    .accessibilityHidden(isRevealed)
                 front
                     .opacity(isRevealed ? 1 : 0)
+                    .accessibilityHidden(!isRevealed)
             }
             .frame(maxWidth: .infinity)
             .frame(height: 186)
@@ -166,6 +168,8 @@ struct WatchRevealCard: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityAddTraits(.isButton)
         .accessibilityIdentifier("watch-card-\(position)")
         .accessibilityLabel(isRevealed ? result.item.displayName : "Carte non révélée")
         .accessibilityValue(
@@ -173,6 +177,7 @@ struct WatchRevealCard: View {
                 ? "\(result.item.rarity.displayName), \(result.dust) poussière"
                 : "Touche pour révéler"
         )
+        .accessibilityHint(isRevealed ? "Passe à la carte suivante" : "Révèle cette carte")
     }
 
     private var front: some View {
