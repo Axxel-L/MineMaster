@@ -1,4 +1,5 @@
 import Foundation
+import ImageIO
 import UIKit
 
 /// Politique de construction et de validation des URLs de textures.
@@ -69,43 +70,35 @@ enum ImagePolicy {
     }
 }
 
-/// Cache mémoire des images déjà décodées.
+/// Image décodée et redimensionnée, transférable hors de l'acteur de chargement.
 ///
-/// Le cache est borné et laissé à la gestion de `NSCache` sous pression mémoire.
-@MainActor
-final class ImageMemoryCache {
-    static let shared = ImageMemoryCache()
+/// `CGImage` n'est pas `Sendable`. L'image portée ici est immuable après
+/// construction : aucun code ne modifie ses pixels. Le partage entre l'acteur de
+/// décodage et l'interface est donc sûr. La conversion en `UIImage` se fait sur
+/// le `MainActor`, où UIKit l'exige.
+nonisolated final class DecodedImage: @unchecked Sendable {
+    /// Image Core Graphics prête pour l'affichage.
+    let cgImage: CGImage
+    /// Largeur en pixels.
+    let pixelWidth: Int
+    /// Hauteur en pixels.
+    let pixelHeight: Int
 
-    private let cache = NSCache<NSString, UIImage>()
-
-    private init() {
-        cache.totalCostLimit = 64 * 1024 * 1024
-        cache.countLimit = 256
-    }
-
-    /// Retourne une image en cache.
+    /// Enveloppe une image décodée.
     ///
-    /// - Parameter url: URL de l'image.
-    /// - Returns: L'image décodée, ou `nil` si absente du cache.
-    func image(for url: URL) -> UIImage? {
-        cache.object(forKey: url.absoluteString as NSString)
-    }
-
-    /// Ajoute une image décodée au cache.
-    ///
-    /// - Parameters:
-    ///   - image: Image décodée.
-    ///   - url: URL source de l'image.
-    func insert(_ image: UIImage, for url: URL) {
-        let pixels = image.size.width * image.size.height * image.scale * image.scale
-        cache.setObject(image, forKey: url.absoluteString as NSString, cost: max(Int(pixels * 4), 1))
+    /// - Parameter cgImage: Image immuable.
+    init(_ cgImage: CGImage) {
+        self.cgImage = cgImage
+        pixelWidth = cgImage.width
+        pixelHeight = cgImage.height
     }
 }
 
-/// Charge et met en cache les textures d'items.
+/// Charge, décode et met en cache les textures d'items.
 ///
-/// Les requêtes identiques sont coalescées, les réponses sont validées avant mise en cache
-/// et le nombre de connexions simultanées est borné par `URLSession`.
+/// Les requêtes identiques sont coalescées, le décodage et le redimensionnement
+/// s'exécutent hors du `MainActor`, et le nombre de décodages simultanés reste
+/// borné par l'acteur. L'interface ne reçoit que des images déjà prêtes.
 actor ImagePipeline {
     static let shared: ImagePipeline = {
         #if DEBUG
@@ -117,14 +110,19 @@ actor ImagePipeline {
     }()
 
     private let cache = NSCache<NSString, NSData>()
+    private let decodedCache = NSCache<NSString, DecodedImage>()
     private var inFlight: [String: Task<Data, Error>] = [:]
+    private var decodeInFlight: [String: Task<DecodedImage, Error>] = [:]
     private let session: URLSession
     private let maxPayload: Int
+    private let maximumPixel: CGFloat = 2048
 
     private init() {
         session = Self.makeSession()
         maxPayload = 2 * 1024 * 1024
         cache.totalCostLimit = 32 * 1024 * 1024
+        decodedCache.totalCostLimit = 64 * 1024 * 1024
+        decodedCache.countLimit = 256
     }
 
     /// Crée un pipeline avec une session injectée.
@@ -136,6 +134,8 @@ actor ImagePipeline {
         self.session = session
         self.maxPayload = maxPayload
         cache.totalCostLimit = 32 * 1024 * 1024
+        decodedCache.totalCostLimit = 64 * 1024 * 1024
+        decodedCache.countLimit = 256
     }
 
     private static func makeSession() -> URLSession {
@@ -209,5 +209,66 @@ actor ImagePipeline {
                 throw AppError.invalidResponse
             }
         }
+    }
+
+    /// Télécharge, décode et redimensionne une texture hors du `MainActor`.
+    ///
+    /// - Parameters:
+    ///   - url: URL issue de `ImagePolicy`.
+    ///   - maxPixel: Dimension maximale en pixels physiques.
+    /// - Returns: L'image décodée, prête pour l'affichage.
+    /// - Throws: `AppError.imageUnavailable` si le décodage échoue.
+    func decodedImage(for url: URL, maxPixel: CGFloat) async throws -> DecodedImage {
+        guard ImagePolicy.isAllowed(url) else { throw AppError.invalidResponse }
+
+        let pixel = min(max(maxPixel.rounded(.up), 32), maximumPixel)
+        let keyString = "\(url.absoluteString)|\(Int(pixel))"
+        let key = keyString as NSString
+        if let cached = decodedCache.object(forKey: key) {
+            return cached
+        }
+        if let running = decodeInFlight[keyString] {
+            return try await running.value
+        }
+
+        let task = Task<DecodedImage, Error> { [weak self] in
+            guard let self else { throw AppError.imageUnavailable }
+            let data = try await self.data(for: url)
+            try Task.checkCancellation()
+            guard let decoded = Self.decode(data, maxPixel: pixel) else {
+                throw AppError.imageUnavailable
+            }
+            return DecodedImage(decoded)
+        }
+
+        decodeInFlight[keyString] = task
+        defer { decodeInFlight[keyString] = nil }
+
+        let decoded = try await task.value
+        let cost = decoded.pixelWidth * decoded.pixelHeight * 4
+        decodedCache.setObject(decoded, forKey: key, cost: max(cost, 1))
+        return decoded
+    }
+
+    /// Décode et redimensionne des octets d'image à la taille d'affichage.
+    ///
+    /// - Parameters:
+    ///   - data: Octets de l'image.
+    ///   - maxPixel: Dimension maximale en pixels physiques.
+    /// - Returns: L'image décodée, ou `nil` si les octets sont invalides.
+    nonisolated private static func decode(_ data: Data, maxPixel: CGFloat) -> CGImage? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
+            return nil
+        }
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceShouldCacheImmediately: true,
+            kCGImageSourceThumbnailMaxPixelSize: Int(maxPixel)
+        ]
+        if let thumbnail = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) {
+            return thumbnail
+        }
+        return CGImageSourceCreateImageAtIndex(source, 0, nil)
     }
 }

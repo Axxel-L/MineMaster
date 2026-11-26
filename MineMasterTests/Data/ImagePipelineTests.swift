@@ -104,6 +104,35 @@ struct ImagePipelineTests {
         #expect(StubURLProtocol.requestCount == 1)
     }
 
+    @Test("Une image valide est décodée hors du MainActor à la taille demandée")
+    func decodesImageAtRequestedSize() async throws {
+        StubURLProtocol.configure { [url] _ in
+            (makeResponse(for: url), Self.onePixelPNG)
+        }
+        let pipeline = makePipeline()
+
+        let decoded = try await pipeline.decodedImage(for: url, maxPixel: 32)
+
+        #expect((1...32).contains(decoded.pixelWidth))
+        #expect((1...32).contains(decoded.pixelHeight))
+    }
+
+    @Test("Des octets non décodables échouent sans bloquer le pipeline")
+    func rejectsUndecodableImage() async {
+        StubURLProtocol.configure { [url] _ in
+            (makeResponse(for: url), Data([0, 1, 2, 3]))
+        }
+        let pipeline = makePipeline()
+
+        await expectAppError(.imageUnavailable) {
+            _ = try await pipeline.decodedImage(for: url, maxPixel: 64)
+        }
+    }
+
+    private static let onePixelPNG = Data(
+        base64Encoded: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+    )!
+
     private func makePipeline(maxPayload: Int = 2 * 1024 * 1024) -> ImagePipeline {
         ImagePipeline(session: makeStubSession(), maxPayload: maxPayload)
     }

@@ -280,6 +280,8 @@ struct ItemImageView: View {
     let item: CatalogItem
     var size: CGFloat = 56
 
+    @Environment(\.displayScale) private var displayScale
+
     private enum LoadState {
         case loading
         case loaded(UIImage)
@@ -315,27 +317,27 @@ struct ItemImageView: View {
     }
 
     private func load() async {
+        guard !Task.isCancelled else { return }
+
+        let pixel = min(max(size * displayScale, 32), 2048)
         let candidates = [
             MobRenderAPI.url(for: item.id),
+            LegacyRenderAPI.url(for: item.id),
             ImagePolicy.url(for: item.texturePath)
         ].compactMap { $0 }
 
         for url in candidates {
-            if let cached = ImageMemoryCache.shared.image(for: url) {
-                state = .loaded(cached)
-                return
-            }
+            guard !Task.isCancelled else { return }
             do {
-                let data = try await ImagePipeline.shared.data(for: url)
-                if let decoded = UIImage(data: data) {
-                    ImageMemoryCache.shared.insert(decoded, for: url)
-                    state = .loaded(decoded)
-                    return
-                }
+                let decoded = try await ImagePipeline.shared.decodedImage(for: url, maxPixel: pixel)
+                guard !Task.isCancelled else { return }
+                state = .loaded(UIImage(cgImage: decoded.cgImage))
+                return
             } catch {
                 continue
             }
         }
+        guard !Task.isCancelled else { return }
         state = .failed
     }
 }

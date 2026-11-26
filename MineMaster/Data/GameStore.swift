@@ -33,6 +33,10 @@ final class GameStore {
 
     /// Appelée après chaque écriture locale, hors restauration distante.
     @ObservationIgnored var onPersist: (() -> Void)?
+    /// Appelée avec les identifiants tirés après une ouverture réussie.
+    @ObservationIgnored var onPulls: (([String]) -> Void)?
+    /// Appelée avec l'identifiant échangé après un achat ou une vente.
+    @ObservationIgnored var onMarketTrade: ((String) -> Void)?
 
     @ObservationIgnored private var isApplyingRemote = false
     @ObservationIgnored private var isBootstrapping = false
@@ -114,7 +118,6 @@ final class GameStore {
         }
         ensureMarketSeeded()
         await sync()
-        prefixImages()
     }
 
     /// Synchronise les métadonnées distantes sans bloquer l'interface.
@@ -187,6 +190,7 @@ final class GameStore {
         }
         dust = player.dust
         save()
+        onPulls?(drawn.map(\.id))
         return results
     }
 
@@ -262,6 +266,7 @@ final class GameStore {
         marketPurchases += 1
         persistPlayer(dust: dust, purchases: marketPurchases, sales: marketSales, rebirth: rebirthLevel)
         save()
+        onMarketTrade?(item.id)
     }
 
     /// Vend un item de la collection au marché.
@@ -298,6 +303,7 @@ final class GameStore {
         marketSales += 1
         persistPlayer(dust: dust, purchases: marketPurchases, sales: marketSales, rebirth: rebirthLevel)
         save()
+        onMarketTrade?(itemID)
     }
 
     /// Effectue une renaissance : remet la collection et la poussière à zéro,
@@ -530,12 +536,5 @@ final class GameStore {
     ) -> [CatalogItem] {
         var generator = SystemRandomNumberGenerator()
         return LootEngine().draw(from: items, booster: booster, boost: boost, using: &generator)
-    }
-
-    private func prefixImages() {
-        for item in catalog where item.rarity >= .epic && MobRenderAPI.url(for: item.id) == nil {
-            guard let url = ImagePolicy.url(for: item.texturePath) else { continue }
-            Task { _ = try? await ImagePipeline.shared.data(for: url) }
-        }
     }
 }
