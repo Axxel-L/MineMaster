@@ -45,6 +45,9 @@ class UITestCase: XCTestCase {
 
     /// Révèle les cinq cartes du pack courant.
     ///
+    /// Chaque carte se révèle au premier appui, puis un second appui fait
+    /// glisser la révélation vers la carte suivante.
+    ///
     /// - Parameter app: Application en cours d'exécution.
         @MainActor
     func revealAll(in app: XCUIApplication) {
@@ -53,8 +56,14 @@ class UITestCase: XCTestCase {
             XCTAssertTrue(card.waitForExistence(timeout: 5))
             waitUntilHittable(card)
             card.tap()
+            XCTAssertTrue(
+                app.staticTexts["Révélées : \(position + 1) sur 5"].waitForExistence(timeout: 5)
+            )
             if position < 4 {
-                app.swipeLeft()
+                card.tap()
+                let cardIndex = app.staticTexts["card-index"]
+                XCTAssertTrue(cardIndex.waitForExistence(timeout: 5))
+                waitForLabel(cardIndex, "Carte \(position + 2) sur 5")
             }
         }
         XCTAssertTrue(app.staticTexts["Révélées : 5 sur 5"].waitForExistence(timeout: 5))

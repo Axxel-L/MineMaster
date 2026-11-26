@@ -15,6 +15,22 @@ final class OpeningFlowUITests: UITestCase {
     }
 
     @MainActor
+    func testToucheUneCarteReveleePasseALaSuivante() {
+        let app = launchApp()
+
+        openPack(in: app)
+        let firstCard = app.buttons["card-0"]
+        firstCard.tap()
+
+        XCTAssertTrue(app.staticTexts["Révélées : 1 sur 5"].waitForExistence(timeout: 5))
+        firstCard.tap()
+
+        let cardIndex = app.staticTexts["card-index"]
+        XCTAssertTrue(cardIndex.waitForExistence(timeout: 5))
+        waitForLabel(cardIndex, "Carte 2 sur 5")
+    }
+
+    @MainActor
     func testDeuxiemeOuvertureCrediteLaPoussiereDesDoublons() {
         let app = launchApp()
         let dust = app.descendants(matching: .any).matching(identifier: "dust-pill").firstMatch

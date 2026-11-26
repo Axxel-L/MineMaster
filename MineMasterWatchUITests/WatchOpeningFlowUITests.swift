@@ -17,6 +17,25 @@ final class WatchOpeningFlowUITests: WatchUITestCase {
     }
 
     @MainActor
+    func testToucheUneCarteReveleePasseALaSuivante() {
+        let app = launchApp()
+
+        openPack(in: app)
+        let firstCard = app.buttons["watch-card-0"]
+        firstCard.tap()
+
+        let count = app.staticTexts["watch-reveal-count"]
+        XCTAssertTrue(count.waitForExistence(timeout: 5))
+        XCTAssertEqual(count.label, "1 / 5 révélées")
+
+        firstCard.tap()
+
+        let cardIndex = app.staticTexts["watch-card-index"]
+        XCTAssertTrue(cardIndex.waitForExistence(timeout: 5))
+        XCTAssertEqual(cardIndex.label, "2 / 5")
+    }
+
+    @MainActor
     func testFermetureDUneSessionRevientALAccueil() {
         let app = launchApp()
 
