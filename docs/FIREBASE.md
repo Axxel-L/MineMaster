@@ -119,8 +119,18 @@ players/{uid}
 └─ updatedAt: Timestamp
 ```
 
-Taille typique : moins de 20 Ko pour 254 items. L'historique des ouvertures
+Taille typique : moins de 40 Ko pour 515 items. L'historique des ouvertures
 reste local, il n'est pas synchronisé.
+
+Les compteurs communautaires vivent hors du compte, dans une collection
+publique en lecture pour les utilisateurs connectés :
+
+```text
+globalItems/{itemID}
+├─ pulls: Int          // tirages mondiaux
+├─ marketTrades: Int   // achats + ventes mondiaux
+└─ updatedAt: Timestamp
+```
 
 ### Règles de sécurité
 
@@ -132,6 +142,12 @@ reste local, il n'est pas synchronisé.
 - Les règles ne peuvent pas vérifier le type de chaque valeur d'une carte : le
   client valide à la lecture (`ProgressSnapshot(firestoreData:)`) et ignore tout
   identifiant hors catalogue.
+- `globalItems` est lisible par tout utilisateur connecté. Les écritures sont
+  limitées aux champs `pulls`, `marketTrades` et `updatedAt`, les compteurs ne
+  peuvent que croître et chaque envoi est plafonné à `+50`. Suppression refusée.
+- Ces agrégats sont fournis par les clients authentifiés : ils restent
+  indicatifs et bornés. Pour une production réelle, activer App Check et
+  déplacer l'agrégation dans une Cloud Function.
 
 ### Comportement de synchronisation
 

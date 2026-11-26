@@ -131,6 +131,19 @@ l'accueil ou depuis Profil.
 - Boosts cumulatifs sans plafond, appliqués au tirage et à la poussière des
   doublons.
 
+## Communauté
+
+La collection expose une carte « Communauté » sous les statistiques du compte :
+deux compteurs, tirages mondiaux et échanges mondiaux. Chaque compteur porte une
+pastille de couleur (émeraude pour les tirages, cuivre pour les échanges) et un
+chiffre en police mono. La carte affiche un point d'interrogation tant que la
+première lecture Firestore n'a pas réussi, et un bouton « Réessayer » discret en
+cas d'erreur. Le tirer vers le bas recharge les agrégats.
+
+La fiche d'un item reprend ces deux compteurs et conserve le stock du compte.
+Les compteurs mondiaux restent visuellement secondaires : ils ne colorent pas la
+carte et ne modifient pas la rareté.
+
 ## Chargement
 
 Toute image distante affiche `SkeletonImage` avant décodage. Aucune zone d'image

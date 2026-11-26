@@ -25,6 +25,14 @@ struct MineMasterApp: App {
                             transport: .init(fetch: { nil }, push: { _ in })
                         )
                     )
+                    .environment(
+                        GlobalStatsSync(
+                            transport: .init(
+                                fetch: { [String: GlobalItemStats]() },
+                                push: { _ in }
+                            )
+                        )
+                    )
                     .preferredColorScheme(.dark)
             } else {
                 RootGateView()

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CollectionView: View {
     @Environment(GameStore.self) private var store
+    @Environment(GlobalStatsSync.self) private var global
 
     @State private var search = ""
     @State private var rarity: Rarity?
@@ -32,6 +33,7 @@ struct CollectionView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 14) {
                         summary
+                        community
                         searchField
                         filters
 
@@ -55,9 +57,17 @@ struct CollectionView: View {
                     .padding(.bottom, 110)
                 }
                 .scrollIndicators(.hidden)
+                .refreshable {
+                    await global.refresh()
+                }
             }
             .navigationTitle("Collection")
             .navigationBarTitleDisplayMode(.large)
+            .task {
+                if !global.hasLoaded {
+                    await global.refresh()
+                }
+            }
             .sheet(item: $selectedItem) { item in
                 NavigationStack {
                     ItemDetailView(item: item)
@@ -84,6 +94,64 @@ struct CollectionView: View {
                 tint: Rarity.epic.color
             )
         }
+    }
+
+    private var community: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "globe")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Theme.moss)
+                Text("Communauté")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Theme.textSecondary)
+                Spacer()
+                if global.isLoading {
+                    ProgressView()
+                        .controlSize(.mini)
+                        .tint(Theme.textSecondary)
+                } else if global.lastError != nil {
+                    Button("Réessayer") {
+                        Task { await global.refresh() }
+                    }
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.copper)
+                }
+            }
+
+            HStack(spacing: 16) {
+                communityStat("Tirages mondiaux", value: global.totalPulls, tint: Theme.accent)
+                communityStat("Échanges mondiaux", value: global.totalTrades, tint: Theme.copper)
+            }
+        }
+        .padding(Theme.spaceM)
+        .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous)
+                .strokeBorder(Theme.stroke, lineWidth: 0.5)
+        }
+        .accessibilityIdentifier("global-summary")
+    }
+
+    private func communityStat(_ title: String, value: Int, tint: Color) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(spacing: 5) {
+                Circle()
+                    .fill(tint)
+                    .frame(width: 5, height: 5)
+                Text(title.uppercased())
+                    .font(Theme.mono(8, weight: .bold))
+                    .tracking(0.8)
+                    .foregroundStyle(Theme.textSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            Text(global.hasLoaded ? value.formatted(.number) : "—")
+                .font(Theme.mono(15, weight: .bold))
+                .foregroundStyle(Theme.textPrimary)
+                .contentTransition(.numericText())
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var searchField: some View {

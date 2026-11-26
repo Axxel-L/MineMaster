@@ -37,7 +37,7 @@ xcodebuild -project MineMaster.xcodeproj -scheme MineMaster \
 - Compte obligatoire : email/mot de passe, Google Sign-In (actif une fois le fournisseur configuré), progression synchronisée avec Firestore par compte
 - Démarrage non bloquant : Firebase s'initialise derrière un skeleton de chargement
 - Pack mystère unique : rareté et type tirés avant la déchirure, type affiché sur le pack scellé, 5 cartes par pack, garanties par rareté
-- 5 raretés, 8 catégories, 254 items (blocs, outils, armes, armures, livres enchantés, créatures)
+- 5 raretés, 8 catégories, 515 items (blocs, outils, armes, armures, livres enchantés, créatures, objets historiques retirés du jeu)
 - Types de packs : créatures, armes, armures, consommables, nourriture, blocs, outils
 - Chaque type possède sa couleur, son icône et sa bande de type sur le pack
 - Pack scellé à ouvrir au doigt, révélation en carrousel, ondes et rayons renforcés pour les cartes rares, épiques et légendaires
@@ -46,12 +46,12 @@ xcodebuild -project MineMaster.xcodeproj -scheme MineMaster \
 - Tutoriel de premier lancement en trois étapes, accessible depuis l'accueil et le profil
 - Collection avec recherche, filtres rareté/catégorie et filtre « possédés »
 - Profil animé : anneau de progression, répartitions par catégorie et rareté, sept titres d'explorateur expliqués en modal
-- Fiche détail en modal avec chance de tirage, tirages locaux et prix du marché
-- Marché local : achat et revente d'items contre de la poussière
+- Fiche détail en modal avec chance de tirage, tirages locaux, tirages mondiaux et prix du marché
+- Marché synchronisé par compte : achat et revente d'items contre de la poussière
 - Doublons convertis en poussière
 - Renaissance : boosts permanents de rareté et de poussière, cumulables
-- Statistiques locales, renaissance, mentions légales
-- Skeletons de chargement, mode hors ligne avec catalogue en cache
+- Statistiques locales et communautaires (tirages et échanges mondiaux via Firestore), renaissance, mentions légales
+- Skeletons de chargement, chargement d'images progressif hors MainActor avec redimensionnement, mode hors ligne avec catalogue en cache
 - Accessibilité : VoiceOver, Dynamic Type, Reduce Motion
 
 ## Sources de données

@@ -1,7 +1,6 @@
 import FirebaseFirestore
 import Foundation
 import Observation
-import Synchronization
 
 /// Synchronisation de la progression d'un compte avec Firestore.
 ///
@@ -46,12 +45,6 @@ final class ProgressSync {
         /// Écrit le document du compte.
         let push: @Sendable (ProgressSnapshot) async throws -> Void
     }
-
-    /// Délai maximal accordé à une opération Firestore.
-    ///
-    /// Hors ligne, le SDK peut ne jamais appeler son gestionnaire d'achèvement.
-    /// Sans cette borne, l'interface resterait bloquée en synchronisation.
-    private static let operationTimeout = 12.0
 
     private let uid: String
     private let defaults: UserDefaults
@@ -254,14 +247,14 @@ final class ProgressSync {
     private func fetchRemote() async throws -> ProgressSnapshot? {
         if let transport {
             do {
-                return try await Self.bounded(transport.fetch)
+                return try await FirestoreTask.bounded(transport.fetch)
             } catch {
                 throw Self.map(error)
             }
         }
         let document = self.document
         do {
-            let snapshot = try await Self.bounded { try await document.getDocument() }
+            let snapshot = try await FirestoreTask.bounded { try await document.getDocument() }
             guard snapshot.exists, let data = snapshot.data() else { return nil }
             guard let remote = ProgressSnapshot(firestoreData: data) else {
                 throw AppError.invalidResponse
@@ -277,10 +270,10 @@ final class ProgressSync {
     private func push(_ snapshot: ProgressSnapshot) async throws {
         do {
             if let transport {
-                try await Self.bounded { try await transport.push(snapshot) }
+                try await FirestoreTask.bounded { try await transport.push(snapshot) }
             } else {
                 let document = self.document
-                try await Self.bounded { try await document.setData(snapshot.firestoreFields) }
+                try await FirestoreTask.bounded { try await document.setData(snapshot.firestoreFields) }
             }
             succeed(at: snapshot.updatedAt)
         } catch {
@@ -320,52 +313,6 @@ final class ProgressSync {
         }
         if nsError.domain == NSURLErrorDomain { return .offline }
         return .invalidResponse
-    }
-
-    /// Exécute une opération Firestore en la bornant dans le temps.
-    ///
-    /// Les méthodes asynchrones importées du SDK ne répondent pas à
-    /// l'annulation : un groupe de tâches attendrait indéfiniment l'opération
-    /// bloquée. Ici la continuation est reprise une seule fois, par l'opération
-    /// ou par le délai, et l'éventuelle réponse tardive est ignorée.
-    ///
-    /// - Parameters:
-    ///   - seconds: Délai maximal avant `AppError.timeout`.
-    ///   - operation: Opération à exécuter.
-    /// - Returns: La valeur retournée par l'opération.
-    /// - Throws: L'erreur de l'opération, ou `AppError.timeout`.
-    private static func bounded<T: Sendable>(
-        seconds: Double = operationTimeout,
-        _ operation: @escaping @Sendable () async throws -> T
-    ) async throws -> T {
-        let answered = Mutex(false)
-        return try await withCheckedThrowingContinuation { continuation in
-            Task {
-                do {
-                    resume(answered, continuation, with: .success(try await operation()))
-                } catch {
-                    resume(answered, continuation, with: .failure(error))
-                }
-            }
-            Task {
-                try? await Task.sleep(for: .seconds(seconds))
-                resume(answered, continuation, with: .failure(AppError.timeout))
-            }
-        }
-    }
-
-    private static func resume<T: Sendable>(
-        _ answered: borrowing Mutex<Bool>,
-        _ continuation: CheckedContinuation<T, Error>,
-        with result: Result<T, Error>
-    ) {
-        let isFirstAnswer = answered.withLock { answered in
-            guard !answered else { return false }
-            answered = true
-            return true
-        }
-        guard isFirstAnswer else { return }
-        continuation.resume(with: result)
     }
 
     private var isPending: Bool {

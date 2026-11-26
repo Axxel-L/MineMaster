@@ -165,7 +165,7 @@ Conventions :
 - Nom de test : phrase française décrivant l'invariant, pas le nom de la méthode.
 - Structure : Arrange, Act, Assert.
 - Un test vérifie un invariant. Plusieurs `#expect` acceptés si le même scénario.
-- Les fixtures sont minimales et nommées. Pas de JSON de 254 items si 3 suffisent.
+- Les fixtures sont minimales et nommées. Pas de JSON de 500 items si 3 suffisent.
 - Chaque test doit échouer si l'invariant est cassé. Vérifier ce point en cassant
   volontairement le code une fois, localement.
 
@@ -214,7 +214,9 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 - Toute URL refusée : query, fragment, traversée, hôte inconnu ou port non standard.
 - Toutes les textures du catalogue embarqué produisent une URL autorisée.
 - Chaque créature du catalogue possède un rendu Minecraft Wiki autorisé.
-- Le catalogue embarqué charge ses 254 items et aucun item n'est perdu au décodage.
+- Le catalogue embarqué charge ses 515 items et aucun item n'est perdu au décodage.
+- Le catalogue contient les créatures et objets historiques (`herobrine`,
+  `killer_bunny`, `horse_saddle`, `camera`) avec un rendu autorisé.
 - Le catalogue contient les catégories armure, créature, arme, outil, bloc,
   nourriture, matériau et spécial.
 - `ImagePipeline` coalesce les requêtes simultanées sur la même URL en un seul
@@ -283,6 +285,17 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 - Chaque envoi remplace le document entier, sans fusion : un champ hors schéma
   laissé par une ancienne version ferait échouer `hasOnly` et toutes les
   écritures suivantes seraient refusées (`PERMISSION_DENIED`).
+
+**Statistiques mondiales**
+
+- `globalItems/{itemID}` est lisible par tout utilisateur authentifié et ne
+  contient que `pulls`, `marketTrades` et `updatedAt`.
+- Les compteurs ne peuvent que croître, chaque envoi est plafonné à `+50` et la
+  suppression est refusée.
+- Les incréments sont agrégés par item, envoyés par lots et bornés dans le
+  temps ; un échec conserve les incréments en attente.
+- Les compteurs mondiaux sont indicatifs et ne pilotent jamais la progression,
+  la rareté ou les prix.
 
 **Profil**
 

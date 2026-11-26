@@ -12,6 +12,7 @@ struct RootGateView: View {
     @State private var session = AuthSession()
     @State private var store: GameStore?
     @State private var sync: ProgressSync?
+    @State private var globalStats: GlobalStatsSync?
     @State private var storageError: AppError?
     @State private var attempt = 0
     @State private var confirmReset = false
@@ -58,8 +59,11 @@ struct RootGateView: View {
                 guard let id = session.account?.id else { return }
                 sync?.suspend()
                 store?.onPersist = nil
+                store?.onPulls = nil
+                store?.onMarketTrade = nil
                 sync = nil
                 store = nil
+                globalStats = nil
                 ProgressSync.clearMarkers(uid: id)
                 try? AppPersistence.resetStore(for: id)
                 attempt += 1
@@ -71,11 +75,12 @@ struct RootGateView: View {
 
     @ViewBuilder
     private var signedInContent: some View {
-        if let store, let sync {
+        if let store, let sync, let globalStats {
             RootTabView()
                 .environment(store)
                 .environment(session)
                 .environment(sync)
+                .environment(globalStats)
         } else if let storageError {
             UnavailableView(
                 title: "Stockage local",
@@ -92,8 +97,11 @@ struct RootGateView: View {
         guard let account = session.account else {
             sync?.suspend()
             store?.onPersist = nil
+            store?.onPulls = nil
+            store?.onMarketTrade = nil
             sync = nil
             store = nil
+            globalStats = nil
             storageError = nil
             return
         }
@@ -101,8 +109,11 @@ struct RootGateView: View {
 
         sync?.suspend()
         store?.onPersist = nil
+        store?.onPulls = nil
+        store?.onMarketTrade = nil
         sync = nil
         store = nil
+        globalStats = nil
         storageError = nil
 
         do {
@@ -121,13 +132,22 @@ struct RootGateView: View {
                     accountStore?.applyRemote(snapshot) ?? false
                 }
             )
+            let accountGlobal = GlobalStatsSync()
             accountStore.onPersist = { [weak accountSync] in
                 accountSync?.markDirty()
             }
+            accountStore.onPulls = { [weak accountGlobal] ids in
+                accountGlobal?.recordPulls(ids)
+            }
+            accountStore.onMarketTrade = { [weak accountGlobal] id in
+                accountGlobal?.recordMarketTrade(id)
+            }
             store = accountStore
             sync = accountSync
+            globalStats = accountGlobal
 
             await accountSync.restore()
+            Task { await accountGlobal.refresh() }
             guard !Task.isCancelled, session.account?.id == account.id else { return }
         } catch let error as AppError {
             storageError = error

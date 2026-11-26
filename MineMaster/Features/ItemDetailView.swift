@@ -4,6 +4,7 @@ struct ItemDetailView: View {
     let item: CatalogItem
 
     @Environment(GameStore.self) private var store
+    @Environment(GlobalStatsSync.self) private var global
     @Environment(\.dismiss) private var dismiss
 
     @State private var errorMessage: String?
@@ -69,7 +70,9 @@ struct ItemDetailView: View {
             divider
             infoRow("Tirages sur cet appareil", value: "\(store.pullCount(for: item))", icon: "hand.tap")
             divider
-            infoRow("Tirages mondiaux", value: "—", icon: "globe")
+            infoRow("Tirages mondiaux", value: globalValue(global.pulls(for: item.id)), icon: "globe")
+            divider
+            infoRow("Échanges mondiaux", value: globalValue(global.trades(for: item.id)), icon: "arrow.left.arrow.right")
             divider
             infoRow("Prix d'achat", value: "\(MarketPrice.buy(for: item.rarity))", icon: "cart.fill")
             divider
@@ -160,7 +163,7 @@ struct ItemDetailView: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "chart.line.uptrend.xyaxis")
                 .foregroundStyle(Theme.copper)
-            Text("Transactions réelles contre de la poussière, enregistrées sur cet appareil.")
+            Text("Ton stock et tes transactions sont synchronisés avec ton compte. Les compteurs mondiaux sont indicatifs et fournis par la communauté.")
                 .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -177,6 +180,10 @@ struct ItemDetailView: View {
         Rectangle()
             .fill(Theme.stroke)
             .frame(height: 0.5)
+    }
+
+    private func globalValue(_ value: Int) -> String {
+        global.hasLoaded ? value.formatted(.number) : "—"
     }
 
     private func infoRow(_ title: String, value: String, icon: String) -> some View {
