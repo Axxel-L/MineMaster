@@ -21,7 +21,7 @@ struct BoosterPackArt: View {
                 CrimpedEdge()
                     .frame(height: 22)
                     .offset(y: -tearProgress * 14)
-                    .opacity(1 - tearProgress * 0.3)
+                    .opacity(1 - Double(tearProgress) * 0.3)
 
                 packBody
 

@@ -41,13 +41,7 @@ enum UITestSupport {
     ///
     /// - Returns: Un magasin en mémoire, sans réseau, avec un tirage fixe.
     static func makeStore() -> GameStore? {
-        let schema = Schema([
-            CatalogItemRecord.self,
-            CollectionRecord.self,
-            PlayerRecord.self,
-            OpeningRecord.self,
-            MarketListingRecord.self
-        ])
+        let schema = GameContainer.schema
         let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         let container: ModelContainer
         do {
