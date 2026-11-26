@@ -14,6 +14,7 @@ struct RootGateView: View {
     @State private var sync: ProgressSync?
     @State private var globalStats: GlobalStatsSync?
     @State private var storageError: AppError?
+    @State private var watchBridge = WatchBridge()
     @State private var attempt = 0
     @State private var confirmReset = false
 
@@ -43,12 +44,16 @@ struct RootGateView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: session.phase)
-        .task { await session.start() }
+        .task {
+            watchBridge.start()
+            await session.start()
+        }
         .task(id: LoadKey(accountID: session.account?.id, attempt: attempt)) { await prepare() }
         .onOpenURL { GIDSignIn.sharedInstance.handle($0) }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
             sync?.retry()
+            watchBridge.pushNow()
         }
         .confirmationDialog(
             "Réinitialiser le stockage local ?",
@@ -64,6 +69,7 @@ struct RootGateView: View {
                 sync = nil
                 store = nil
                 globalStats = nil
+                watchBridge.lock()
                 ProgressSync.clearMarkers(uid: id)
                 try? AppPersistence.resetStore(for: id)
                 attempt += 1
@@ -103,10 +109,12 @@ struct RootGateView: View {
             store = nil
             globalStats = nil
             storageError = nil
+            watchBridge.lock()
             return
         }
         if store != nil, sync?.accountID == account.id, storageError == nil { return }
 
+        watchBridge.lock()
         sync?.suspend()
         store?.onPersist = nil
         store?.onPulls = nil
@@ -133,8 +141,9 @@ struct RootGateView: View {
                 }
             )
             let accountGlobal = GlobalStatsSync()
-            accountStore.onPersist = { [weak accountSync] in
+            accountStore.onPersist = { [weak accountSync, weak watchBridge] in
                 accountSync?.markDirty()
+                watchBridge?.schedulePush()
             }
             accountStore.onPulls = { [weak accountGlobal] ids in
                 accountGlobal?.recordPulls(ids)
@@ -145,14 +154,20 @@ struct RootGateView: View {
             store = accountStore
             sync = accountSync
             globalStats = accountGlobal
+            watchBridge.attach(store: accountStore, stats: accountGlobal)
 
             await accountSync.restore()
-            Task { await accountGlobal.refresh() }
+            Task {
+                await accountGlobal.refresh()
+                watchBridge.schedulePush()
+            }
             guard !Task.isCancelled, session.account?.id == account.id else { return }
         } catch let error as AppError {
             storageError = error
+            watchBridge.lock()
         } catch {
             storageError = .storageUnavailable
+            watchBridge.lock()
         }
     }
 }

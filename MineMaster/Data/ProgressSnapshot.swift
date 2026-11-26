@@ -5,7 +5,7 @@ import Foundation
 /// Seules les valeurs métier sont transportées. Les prix, les titres et les
 /// rendus visuels sont recalculés localement depuis le catalogue, donc jamais
 /// falsifiables par un document distant.
-nonisolated struct ProgressSnapshot: Sendable, Equatable {
+nonisolated struct ProgressSnapshot: Codable, Sendable, Equatable {
     /// Plafond appliqué à toute quantité reçue du réseau.
     static let maximumQuantity = 9_999
 
@@ -75,6 +75,48 @@ nonisolated struct ProgressSnapshot: Sendable, Equatable {
     /// - Returns: La valeur bornée.
     static func clamp(_ value: Int, maximum: Int) -> Int {
         min(max(value, 0), maximum)
+    }
+
+    /// Décode un instantané en bornant toutes les valeurs.
+    ///
+    /// - Parameter decoder: Décodeur du flux reçu.
+    /// - Throws: L'erreur de décodage si un champ obligatoire manque.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            dust: try container.decode(Int.self, forKey: .dust),
+            rebirthLevel: try container.decode(Int.self, forKey: .rebirthLevel),
+            marketPurchases: try container.decode(Int.self, forKey: .marketPurchases),
+            marketSales: try container.decode(Int.self, forKey: .marketSales),
+            owned: try container.decode([String: Int].self, forKey: .owned),
+            marketStock: try container.decode([String: Int].self, forKey: .marketStock),
+            updatedAt: try container.decode(Date.self, forKey: .updatedAt)
+        )
+    }
+
+    /// Encode un instantané déjà borné.
+    ///
+    /// - Parameter encoder: Encodeur du flux sortant.
+    /// - Throws: L'erreur d'encodage si une valeur échoue.
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(dust, forKey: .dust)
+        try container.encode(rebirthLevel, forKey: .rebirthLevel)
+        try container.encode(marketPurchases, forKey: .marketPurchases)
+        try container.encode(marketSales, forKey: .marketSales)
+        try container.encode(owned, forKey: .owned)
+        try container.encode(marketStock, forKey: .marketStock)
+        try container.encode(updatedAt, forKey: .updatedAt)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case dust
+        case rebirthLevel
+        case marketPurchases
+        case marketSales
+        case owned
+        case marketStock
+        case updatedAt
     }
 
     /// Instantané vide, utilisé pour un compte qui n'a jamais joué.

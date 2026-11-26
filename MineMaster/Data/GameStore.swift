@@ -103,6 +103,10 @@ final class GameStore {
 
         reloadFromStore()
         guard syncOnBootstrap else {
+            if catalog.isEmpty {
+                apply(remote: [:])
+                reloadFromStore()
+            }
             isBootstrapped = true
             if catalog.isEmpty {
                 loadError = .decoding
