@@ -20,6 +20,7 @@ struct ProfileView: View {
                     VStack(spacing: Theme.spaceM) {
                         header
                         passport
+                        AccountSection()
                         titleCard
                         rebirthCard
                         categoryChart

@@ -30,6 +30,12 @@ final class GameStore {
     private(set) var marketSales = 0
     private(set) var rebirthLevel = 0
 
+    /// Appelée après chaque écriture locale, hors restauration distante.
+    @ObservationIgnored var onPersist: (() -> Void)?
+
+    @ObservationIgnored private var isApplyingRemote = false
+    @ObservationIgnored private var isBootstrapping = false
+
     init(
         container: ModelContainer,
         drawProvider: @escaping DrawProvider = GameStore.randomDraw,
@@ -84,16 +90,20 @@ final class GameStore {
 
     /// Démarre l'application : catalogue local, puis synchronisation distante.
     func bootstrap() async {
+        guard !isBootstrapped, !isBootstrapping else { return }
+        isBootstrapping = true
+        defer { isBootstrapping = false }
+
         reloadFromStore()
         apply(remote: [:])
         reloadFromStore()
-    isBootstrapped = true
-    guard !catalog.isEmpty else {
-        loadError = .decoding
-        return
-    }
-    ensureMarketSeeded()
-    await sync()
+        isBootstrapped = true
+        guard !catalog.isEmpty else {
+            loadError = .decoding
+            return
+        }
+        ensureMarketSeeded()
+        await sync()
         prefixImages()
     }
 
@@ -301,6 +311,75 @@ final class GameStore {
         reloadFromStore()
     }
 
+    /// Exporte la progression du compte vers un instantané synchronisable.
+    ///
+    /// - Parameter updatedAt: Date de référence de l'instantané.
+    /// - Returns: Poussière, collection, renaissance et stocks du marché.
+    func progressSnapshot(updatedAt: Date = .now) -> ProgressSnapshot {
+        ProgressSnapshot(
+            dust: dust,
+            rebirthLevel: rebirthLevel,
+            marketPurchases: marketPurchases,
+            marketSales: marketSales,
+            owned: owned,
+            marketStock: marketListings.mapValues(\.stock),
+            updatedAt: updatedAt
+        )
+    }
+
+    /// Remplace la progression locale par un instantané distant.
+    ///
+    /// Les identifiants inconnus du catalogue sont ignorés, les quantités sont
+    /// bornées et l'historique d'ouverture local n'est jamais modifié.
+    ///
+    /// - Parameter snapshot: Instantané validé par le synchroniseur.
+    /// - Returns: `true` si la progression a été appliquée.
+    @discardableResult
+    func applyRemote(_ snapshot: ProgressSnapshot) -> Bool {
+        guard !catalog.isEmpty else { return false }
+        let knownIDs = Set(catalog.map(\.id))
+
+        isApplyingRemote = true
+        defer { isApplyingRemote = false }
+
+        let existing = (try? context.fetch(FetchDescriptor<CollectionRecord>())) ?? []
+        var byID = Dictionary(existing.map { ($0.itemID, $0) }, uniquingKeysWith: { first, _ in first })
+
+        for (id, quantity) in snapshot.owned where knownIDs.contains(id) && quantity > 0 {
+            let quantity = min(quantity, ProgressSnapshot.maximumQuantity)
+            if let record = byID.removeValue(forKey: id) {
+                record.quantity = quantity
+                record.lastObtainedAt = .now
+            } else {
+                let record = CollectionRecord(itemID: id)
+                record.quantity = quantity
+                context.insert(record)
+            }
+        }
+        for stale in byID.values {
+            context.delete(stale)
+        }
+
+        for (id, stock) in snapshot.marketStock where knownIDs.contains(id) {
+            let stock = min(max(stock, 0), ProgressSnapshot.maximumQuantity)
+            if let record = marketListings[id] {
+                record.stock = stock
+            } else {
+                context.insert(MarketListingRecord(itemID: id, stock: stock))
+            }
+        }
+
+        let player = currentPlayer()
+        player.dust = snapshot.dust
+        player.rebirthLevel = snapshot.rebirthLevel
+        player.marketPurchases = snapshot.marketPurchases
+        player.marketSales = snapshot.marketSales
+
+        save()
+        reloadFromStore()
+        return true
+    }
+
     private func reloadFromStore() {
         let catalogRecords = (try? context.fetch(FetchDescriptor<CatalogItemRecord>())) ?? []
         catalog = catalogRecords
@@ -417,6 +496,8 @@ final class GameStore {
 
     private func save() {
         try? context.save()
+        guard !isApplyingRemote else { return }
+        onPersist?()
     }
 
     private static func randomBooster(_ catalog: [CatalogItem]) -> (Booster, BoosterKind) {

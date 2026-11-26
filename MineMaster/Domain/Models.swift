@@ -304,6 +304,21 @@ enum AppError: Error, Sendable, LocalizedError, Equatable {
     case notOwned
     case outOfStock
     case rebirthLocked
+    case authUnavailable
+    case authInvalidInput
+    case authInvalidCredentials
+    case authEmailInUse
+    case authWeakPassword
+    case authNetwork
+    case authTooManyRequests
+    case authProviderDisabled
+    case authGoogleNotConfigured
+    case authUserDisabled
+    case authAppNotAuthorized
+    case authCancelled
+    case authUnknown
+    case storageUnavailable
+    case syncRejected
 
     var errorDescription: String? {
         switch self {
@@ -317,6 +332,21 @@ enum AppError: Error, Sendable, LocalizedError, Equatable {
         case .notOwned: "Tu ne possèdes pas cet item."
         case .outOfStock: "Cet item n'est plus en vente."
         case .rebirthLocked: "Pas assez d'items pour renaître."
+        case .authUnavailable: "Authentification indisponible. Vérifie GoogleService-Info.plist."
+        case .authInvalidInput: "Vérifie l'email et le mot de passe."
+        case .authInvalidCredentials: "Email ou mot de passe incorrect."
+        case .authEmailInUse: "Un compte existe déjà avec cet email."
+        case .authWeakPassword: "Mot de passe trop court : 8 caractères minimum."
+        case .authNetwork: "Connexion impossible. Vérifie ton réseau."
+        case .authTooManyRequests: "Trop de tentatives. Réessaie dans un instant."
+        case .authProviderDisabled: "Ce fournisseur n'est pas activé dans la console Firebase."
+        case .authGoogleNotConfigured: "Google n'est pas encore configuré. Active le fournisseur et son URL scheme."
+        case .authUserDisabled: "Ce compte a été désactivé."
+        case .authAppNotAuthorized: "Application non autorisée par Firebase. Vérifie la clé API et le bundle."
+        case .authCancelled: "Connexion annulée."
+        case .authUnknown: "Connexion impossible pour le moment."
+        case .storageUnavailable: "Stockage local indisponible sur cet appareil."
+        case .syncRejected: "Synchronisation refusée par le serveur. Vérifie les règles Firestore."
         }
     }
 }
