@@ -107,7 +107,14 @@ final class ImageMemoryCache {
 /// Les requêtes identiques sont coalescées, les réponses sont validées avant mise en cache
 /// et le nombre de connexions simultanées est borné par `URLSession`.
 actor ImagePipeline {
-    static let shared = ImagePipeline()
+    static let shared: ImagePipeline = {
+        #if DEBUG
+        if UITestSupport.isEnabled {
+            return ImagePipeline(session: UITestSupport.makeImageSession())
+        }
+        #endif
+        return ImagePipeline()
+    }()
 
     private let cache = NSCache<NSString, NSData>()
     private var inFlight: [String: Task<Data, Error>] = [:]

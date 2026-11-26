@@ -94,6 +94,7 @@ struct CollectionView: View {
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .submitLabel(.search)
+                .accessibilityIdentifier("search-field")
             if !search.isEmpty {
                 Button {
                     search = ""
@@ -185,6 +186,7 @@ struct CollectionView: View {
             .opacity(count > 0 ? 1 : 0.55)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("item-\(item.id)")
         .accessibilityLabel("\(item.displayName), \(item.rarity.displayName), \(count) possédés")
     }
 }

@@ -67,6 +67,7 @@ struct ProfileView: View {
                 Button("Renaître", role: .destructive) {
                     try? store.rebirth()
                 }
+                .accessibilityIdentifier("confirm-rebirth")
             } message: {
                 Text("La collection et la poussière seront remises à zéro. Tes boosts de renaissance restent acquis.")
             }
@@ -260,6 +261,7 @@ struct ProfileView: View {
                 }
                 .buttonStyle(.glassProminent)
                 .tint(Theme.copper)
+                .accessibilityIdentifier("rebirth")
             } else {
                 ProgressView(value: progress)
                     .tint(Theme.copper)

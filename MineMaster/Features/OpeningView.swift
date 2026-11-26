@@ -155,6 +155,7 @@ struct OpeningView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .tag(position)
+                        .accessibilityIdentifier("card-\(position)")
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
