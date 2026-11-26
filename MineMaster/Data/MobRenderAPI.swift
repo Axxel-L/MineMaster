@@ -71,13 +71,46 @@ enum MobRenderAPI {
         "salmon": "https://minecraft.wiki/images/Salmon.gif",
         "pufferfish": "https://minecraft.wiki/images/Pufferfish_small.gif",
         "tropical_fish": "https://minecraft.wiki/images/Clownfish.png",
-        "parrot": "https://minecraft.wiki/images/Red_Parrot_JE1_BE1.png"
+        "parrot": "https://minecraft.wiki/images/Red_Parrot_JE1_BE1.png",
+        "illusioner": "https://minecraft.wiki/images/Illusioner_JE1.png",
+        "killer_bunny": "https://minecraft.wiki/images/Killer_Rabbit.png",
+        "skeleton_horse": "https://minecraft.wiki/images/Skeleton_Horse.png",
+        "zombie_horse": "https://minecraft.wiki/images/Zombie_Horse_JE1_BE1.png",
+        "mule": "https://minecraft.wiki/images/Mule_JE3.png",
+        "endermite": "https://minecraft.wiki/images/Endermite_JE1.png",
+        "cave_spider": "https://minecraft.wiki/images/Cave_Spider_JE3_BE3.png",
+        "silverfish": "https://minecraft.wiki/images/Silverfish_JE1_BE1.png",
+        "copper_golem": "https://minecraft.wiki/images/Copper_Golem_JE1_BE1.png",
+        "herobrine": "https://minecraft.wiki/images/Herobrine.png",
+        "moobloom": "https://minecraft.wiki/images/Moobloom_Mob_Vote_2023.png"
     ]
 
     /// Retourne le rendu d'une créature.
     ///
     /// - Parameter id: Identifiant du catalogue.
     /// - Returns: L'URL du rendu, ou `nil` pour les items non-créatures.
+    static func url(for id: String) -> URL? {
+        renders[id].flatMap(URL.init(string:))
+    }
+}
+
+/// Rendus wiki des objets historiques retirés du jeu.
+///
+/// Minecraft Wiki conserve les visuels des versions disparues que le CDN actuel
+/// n'héberge plus. Les URLs sont figées dans le binaire et restent soumises à
+/// l'allowlist de `ImagePolicy`.
+enum LegacyRenderAPI {
+    private static let renders: [String: String] = [
+        "horse_saddle": "https://minecraft.wiki/images/Horse_Saddle_JE1.png",
+        "camera": "https://minecraft.wiki/images/Camera-touch.png",
+        "nether_reactor_core": "https://minecraft.wiki/images/Nether_Reactor_Core_BE1.png",
+        "glowing_obsidian": "https://minecraft.wiki/images/Glowing_Obsidian_BE1.png"
+    ]
+
+    /// Retourne le rendu d'un objet historique.
+    ///
+    /// - Parameter id: Identifiant du catalogue.
+    /// - Returns: L'URL du rendu, ou `nil` pour les objets encore au catalogue.
     static func url(for id: String) -> URL? {
         renders[id].flatMap(URL.init(string:))
     }
