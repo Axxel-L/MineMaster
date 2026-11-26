@@ -1,0 +1,55 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /players/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && isValidProgress(request.resource.data);
+      allow delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+
+  function isOwner(uid) {
+    return request.auth != null && request.auth.uid == uid;
+  }
+
+  function isCounter(value, max) {
+    return value is int && value >= 0 && value <= max;
+  }
+
+  function isValidAmountMap(values) {
+    return values is map && values.keys().size() <= 2000;
+  }
+
+  function isValidProgress(data) {
+    return data.keys().hasOnly([
+        "dust",
+        "rebirthLevel",
+        "marketPurchases",
+        "marketSales",
+        "owned",
+        "marketStock",
+        "updatedAt"
+      ])
+      && data.keys().hasAll([
+        "dust",
+        "rebirthLevel",
+        "marketPurchases",
+        "marketSales",
+        "owned",
+        "marketStock",
+        "updatedAt"
+      ])
+      && isCounter(data.dust, 1000000000)
+      && isCounter(data.rebirthLevel, 1000)
+      && isCounter(data.marketPurchases, 1000000000)
+      && isCounter(data.marketSales, 1000000000)
+      && isValidAmountMap(data.owned)
+      && isValidAmountMap(data.marketStock)
+      && data.updatedAt is timestamp;
+  }
+}

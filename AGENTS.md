@@ -42,7 +42,10 @@ résultat faux.
 ## 2. Règles de code
 
 - Swift 6, concurrence stricte, isolation `MainActor` par défaut.
-- SwiftUI, SwiftData, `URLSession`. Aucune dépendance tierce.
+- SwiftUI, SwiftData, `URLSession`.
+- Dépendances tierces autorisées, et elles seules : `FirebaseCore`,
+  `FirebaseAuth`, `FirebaseFirestore` et `GoogleSignIn`, via Swift Package
+  Manager. Toute autre dépendance est refusée.
 - Pas de code mort, pas de duplication, pas d'abstraction sans usage réel.
 - Pas de `try?` qui masque une erreur métier. Une erreur attendue est modélisée
   par `AppError`, jamais avalée.
@@ -53,6 +56,8 @@ résultat faux.
 - Toute entrée externe est validée : schéma, hôte, chemin, type MIME, taille.
 - Aucun secret, jeton ou donnée personnelle dans le code, les logs ou le dépôt.
 - Réseau : HTTPS uniquement, allowlist d'hôtes, charges utiles bornées.
+  Les domaines Firebase (`*.googleapis.com`, `*.firebaseio.com`) sont atteints
+  uniquement par les SDK Firebase, jamais par un `URLSession` maison.
 - Toute image distante affiche un squelette de chargement avant décodage.
   Aucune zone d'image vide, même sans réponse du CDN.
 
@@ -237,6 +242,32 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 - Le boost est transmis au tirage ; la poussière d'un doublon suit le niveau.
 - Une renaissance remet le stock du marché à `1`.
 
+**Compte et synchronisation**
+
+- Aucun accès à la progression sans session authentifiée.
+- Chaque compte Firebase utilise son propre magasin SwiftData : deux comptes ne
+  partagent jamais collection, poussière ou stock.
+- Un identifiant de compte invalide (chemin, séparateur, longueur) ne produit
+  jamais d'URL de magasin.
+- `ProgressSnapshot` borne toutes les valeurs reçues : négatifs ramenés à zéro,
+  quantités plafonnées, identifiants hors catalogue ignorés.
+- Un document Firestore aux types invalides, aux cartes démesurées ou dont la
+  date manque est refusé.
+- Une modification locale en attente gagne sur la copie distante. Sinon la copie
+  distante la plus récente gagne, et une première connexion reprend le document
+  existant.
+- Aucune écriture distante n'est émise avant une lecture réussie du document :
+  sans cette vérification, une copie locale périmée écraserait la progression
+  d'un autre appareil.
+- Toute opération Firestore est bornée dans le temps ; une réponse tardive ne
+  peut ni reprendre deux fois la continuation ni modifier les marqueurs d'un
+  compte déjà suspendu.
+- Réinitialiser le stockage local efface les marqueurs de synchronisation avant
+  de supprimer le fichier : la reconnexion reprend le document distant au lieu
+  de l'écraser.
+- La restauration distante n'émet aucun nouvel envoi vers Firestore.
+- Les règles Firestore n'autorisent que `players/{uid}` du compte connecté.
+
 **Profil**
 
 - Les seuils de titres sont strictement croissants.
@@ -248,6 +279,12 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
 
 Le verrou d'ouverture vit dans `GameStore`. Les vues lisent `isOpening` ; elles
 ne portent jamais la règle métier.
+
+`AuthSession` dépend du SDK Firebase : aucun test unitaire ne l'appelle.
+`ProgressSync` accepte un `ProgressSync.Transport` injecté, ce qui couvre sans
+réseau la garde d'écriture, la révocation après lecture ratée et la suspension.
+La résolution des conflits et les instantanés sont testés directement. Les
+règles Firestore se vérifient dans la console, pas dans la cible de tests.
 
 Points restant à instrumenter avant d'ajouter les tests correspondants :
 

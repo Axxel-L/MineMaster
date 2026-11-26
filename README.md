@@ -11,7 +11,8 @@ Application iOS native de collection : ouvre des packs, découvre des items Mine
 - Swift 6 (mode langage complet, concurrence stricte, isolation `MainActor` par défaut)
 - SwiftUI + Liquid Glass natif (`glassEffect`, `GlassEffectContainer`, `.buttonStyle(.glass)`, `tabBarMinimizeBehavior`, transitions zoom)
 - SwiftData pour le catalogue, la collection et l'historique
-- `URLSession` + pipeline d'images maison (aucune dépendance tierce)
+- `URLSession` + pipeline d'images maison
+- Firebase (`FirebaseCore`, `FirebaseAuth`, `FirebaseFirestore`) et `GoogleSignIn` via Swift Package Manager
 - Cible : iOS 26.0, Xcode 26.6 ou plus récent (projet au format `project.pbxproj`)
 
 ## Lancer le projet
@@ -20,7 +21,9 @@ Application iOS native de collection : ouvre des packs, découvre des items Mine
 open MineMaster.xcodeproj
 ```
 
-Sélectionne un simulateur iPhone, puis `⌘R`. Aucune clé d'API ni configuration n'est nécessaire.
+Sélectionne un simulateur iPhone, puis `⌘R`. Le fichier `GoogleService-Info.plist`
+est déjà embarqué. Les fournisseurs (email, Google) et Firestore se configurent
+dans la console : voir [`docs/FIREBASE.md`](docs/FIREBASE.md).
 
 Build en ligne de commande :
 
@@ -31,6 +34,8 @@ xcodebuild -project MineMaster.xcodeproj -scheme MineMaster \
 
 ## Fonctionnalités
 
+- Compte obligatoire : email/mot de passe, Google Sign-In (actif une fois le fournisseur configuré), progression synchronisée avec Firestore par compte
+- Démarrage non bloquant : Firebase s'initialise derrière un skeleton de chargement
 - Pack mystère unique : rareté et type tirés avant la déchirure, type affiché sur le pack scellé, 5 cartes par pack, garanties par rareté
 - 5 raretés, 8 catégories, 254 items (blocs, outils, armes, armures, livres enchantés, créatures)
 - Types de packs : créatures, armes, armures, consommables, nourriture, blocs, outils
@@ -92,14 +97,18 @@ Les conventions et les invariants obligatoires sont décrits dans [`AGENTS.md`](
 - HTTPS uniquement, ATS par défaut, aucune exception
 - Allowlist d'hôtes et validation des chemins d'images
 - Payloads bornés (5 Mo métadonnées, 2 Mo images)
-- Aucune collecte, aucun tracking, aucun SDK tiers
+- Firebase Auth et Firestore uniquement : aucun analytics, aucun tracking
+- Règles Firestore limitées au document du compte connecté (`firebase/firestore.rules`)
+- Un magasin SwiftData par compte, isolé sur disque
 - `PrivacyInfo.xcprivacy` fourni
 - SVG embarqués uniquement (Heroicons)
 
 ## Limites connues
 
-- Pas de compte ni de synchronisation : la progression est locale
+- Le compte est obligatoire : aucun mode invité
+- Sign in with Apple désactivé tant que la capability payante n'est pas provisionnée
 - Économie non sécurisée côté serveur (projet pédagogique)
+- App Check non activé
 - Français uniquement pour l'instant, chaînes prêtes pour un String Catalog
 
 ## Licences
