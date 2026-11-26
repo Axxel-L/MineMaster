@@ -346,7 +346,7 @@ enum AppError: Error, Sendable, LocalizedError, Equatable {
         case .authCancelled: "Connexion annulée."
         case .authUnknown: "Connexion impossible pour le moment."
         case .storageUnavailable: "Stockage local indisponible sur cet appareil."
-        case .syncRejected: "Synchronisation refusée par le serveur. Vérifie les règles Firestore."
+        case .syncRejected: "Synchronisation refusée par Firestore. Vérifie que les règles sont publiées."
         }
     }
 }

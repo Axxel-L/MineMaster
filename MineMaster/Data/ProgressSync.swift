@@ -280,7 +280,7 @@ final class ProgressSync {
                 try await Self.bounded { try await transport.push(snapshot) }
             } else {
                 let document = self.document
-                try await Self.bounded { try await document.setData(snapshot.firestoreFields, merge: true) }
+                try await Self.bounded { try await document.setData(snapshot.firestoreFields) }
             }
             succeed(at: snapshot.updatedAt)
         } catch {

@@ -280,6 +280,9 @@ Les invariants suivants sont obligatoires et doivent rester couverts.
   de l'écraser.
 - La restauration distante n'émet aucun nouvel envoi vers Firestore.
 - Les règles Firestore n'autorisent que `players/{uid}` du compte connecté.
+- Chaque envoi remplace le document entier, sans fusion : un champ hors schéma
+  laissé par une ancienne version ferait échouer `hasOnly` et toutes les
+  écritures suivantes seraient refusées (`PERMISSION_DENIED`).
 
 **Profil**
 

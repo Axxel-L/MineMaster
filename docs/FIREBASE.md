@@ -92,9 +92,17 @@ abonnement payant.
 
 1. `Firestore Database` → `Create database` → mode **Native**, région proche
    (ex. `europe-west1`).
-2. Onglet `Rules` → colle le contenu de `firebase/firestore.rules` → **Publish**.
-   Aucun déploiement CLI n'est nécessaire.
+2. Publie les règles de `firebase/firestore.rules`. Deux méthodes équivalentes :
+   - Console : `Firestore Database` → `Rules` → colle le fichier → **Publish**.
+   - CLI : depuis la racine du dépôt, `firebase login` puis
+     `firebase deploy --only firestore:rules`. `firebase.json` pointe vers
+     `firebase/firestore.rules` et `.firebaserc` fixe le projet.
 3. Aucun index composite n'est requis.
+
+Tant que les règles ne sont pas publiées, la base refuse toute lecture et toute
+écriture avec le code 7 `PERMISSION_DENIED` : le profil affiche
+« Synchronisation refusée par Firestore » et aucune progression n'est
+sauvegardée en ligne.
 
 ### Modèle de données
 
@@ -127,8 +135,9 @@ reste local, il n'est pas synchronisé.
 
 ### Comportement de synchronisation
 
-- Écriture différée de 2 secondes après la dernière action locale, fusion
-  (`merge: true`) sur le document.
+- Écriture différée de 2 secondes après la dernière action locale. Chaque envoi
+  remplace le document entier (`setData` sans fusion) : un document qui garde un
+  ancien champ hors schéma serait rejeté par `hasOnly` à chaque écriture.
 - Au démarrage : lecture du document, puis
   - modification locale en attente → la copie locale est envoyée ;
   - document distant plus récent que la dernière écriture connue → la copie

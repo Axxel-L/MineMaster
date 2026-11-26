@@ -43,6 +43,21 @@ struct ProgressSnapshotTests {
         #expect(snapshot.marketSales == ProgressSnapshot.maximumCounter)
     }
 
+    @Test("L'instantané Firestore contient exactement les champs des règles")
+    func matchesRuleSchema() {
+        let snapshot = ProgressSnapshot.empty(updatedAt: Date(timeIntervalSince1970: 1_700_000_000))
+
+        #expect(Set(snapshot.firestoreFields.keys) == Set([
+            "dust",
+            "rebirthLevel",
+            "marketPurchases",
+            "marketSales",
+            "owned",
+            "marketStock",
+            "updatedAt"
+        ]))
+    }
+
     @Test("Un instantané survit à un aller-retour Firestore")
     func roundTripsThroughFirestore() throws {
         let date = Date(timeIntervalSince1970: 1_700_000_000.25)
