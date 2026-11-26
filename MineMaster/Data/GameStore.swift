@@ -328,9 +328,9 @@ final class GameStore {
         dust = 0
         rebirthLevel += 1
         persistPlayer(dust: 0, purchases: marketPurchases, sales: marketSales, rebirth: rebirthLevel)
-        save()
         isOpening = false
         reloadFromStore()
+        save()
     }
 
     /// Exporte la progression du compte vers un instantané synchronisable.
