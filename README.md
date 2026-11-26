@@ -1,10 +1,18 @@
 # MineMaster
 
+<<<<<<< HEAD
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-native-blue.svg?style=flat)
 ![iOS](https://img.shields.io/badge/iOS-26.0+-lightgrey.svg?style=flat)
 ![watchOS](https://img.shields.io/badge/watchOS-26.0+-lightgrey.svg?style=flat)
 ![Firebase](https://img.shields.io/badge/Firebase-auth+%2B+firestore-orange.svg?style=flat)
+=======
+![Swift](https://img.shields.io/badge/swift-%23F05138.svg?style=flat&logo=swift&logoColor=white)
+![SwiftUI](https://img.shields.io/badge/swiftui-%23F05138.svg?style=flat&logo=swift&logoColor=white)
+![iOS](https://img.shields.io/badge/ios-%23000000.svg?style=flat&logo=ios&logoColor=white)
+![watchOS](https://img.shields.io/badge/watchos-%23000000.svg?style=flat&logo=applewatch&logoColor=white)
+![Firebase](https://img.shields.io/badge/firebase-%23DD2C00.svg?style=flat&logo=firebase&logoColor=white)
+>>>>>>> 12d95e8 (docs: utiliser les badges du repo ileriayo/markdown-badges (style flat avec logos))
 ![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat)
 
 Application iOS éducative de collection : ouvre des packs, découvre des items Minecraft et complète ta collection. La poussière gagnée sur les doublons servira plus tard.
