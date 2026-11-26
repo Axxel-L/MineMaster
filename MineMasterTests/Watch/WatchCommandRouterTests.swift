@@ -153,6 +153,7 @@ struct WatchCommandRouterTests {
 
         #expect(store.isBootstrapped)
         #expect(store.catalog.count == 515)
+        #expect(store.marketOfferings.count == 515)
         #expect(store.loadError == nil)
     }
 }

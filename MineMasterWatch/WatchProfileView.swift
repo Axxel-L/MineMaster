@@ -28,7 +28,10 @@ struct WatchProfileView: View {
                 WatchInfoRow(title: "Poussière", value: "\(store.dust)", tint: Theme.accent)
                 WatchInfoRow(title: "Achats", value: "\(store.marketPurchases)")
                 WatchInfoRow(title: "Ventes", value: "\(store.marketSales)")
-                WatchInfoRow(title: "iPhone", value: link.isReachable ? "Connecté" : "Hors ligne")
+                WatchInfoRow(
+                    title: "Mode",
+                    value: link.isLocal ? "Local" : (link.isReachable ? "Connecté" : "Hors ligne")
+                )
             }
 
             Section("Communauté") {
@@ -42,14 +45,20 @@ struct WatchProfileView: View {
                     value: link.globalLoaded ? "\(link.globalTrades)" : "—",
                     tint: Theme.copper
                 )
-                Button {
-                    Task { await refreshCommunity() }
-                } label: {
-                    Label(isRefreshing ? "Actualisation…" : "Actualiser", systemImage: "arrow.clockwise")
-                        .font(.system(size: 9, weight: .semibold, design: .rounded))
+                if link.isLocal {
+                    Text("Indisponible en mode local")
+                        .font(.system(size: 8, weight: .medium, design: .rounded))
+                        .foregroundStyle(Theme.textSecondary)
+                } else {
+                    Button {
+                        Task { await refreshCommunity() }
+                    } label: {
+                        Label(isRefreshing ? "Actualisation…" : "Actualiser", systemImage: "arrow.clockwise")
+                            .font(.system(size: 9, weight: .semibold, design: .rounded))
+                    }
+                    .disabled(!link.canPlay || isRefreshing)
+                    .accessibilityIdentifier("watch-refresh-community")
                 }
-                .disabled(!link.canPlay || isRefreshing)
-                .accessibilityIdentifier("watch-refresh-community")
             }
 
             Section("Titre") {
@@ -134,7 +143,7 @@ struct WatchProfileView: View {
         }
         .navigationTitle("Profil")
         .task {
-            if link.canPlay, !link.globalLoaded {
+            if !link.isLocal, link.canPlay, !link.globalLoaded {
                 await refreshCommunity()
             }
         }

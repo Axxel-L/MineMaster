@@ -51,7 +51,12 @@ final class WatchLink {
         }
     }
 
-    /// Indique qu'une action peut être demandée à l'iPhone.
+    /// Indique que la montre joue sur son propre magasin.
+    var isLocal: Bool {
+        mode == .local
+    }
+
+    /// Indique qu'une action peut être demandée.
     var canPlay: Bool {
         mode == .local || (isActivated && isReachable && !isLocked)
     }
@@ -108,6 +113,11 @@ final class WatchLink {
 
     /// Applique l'état en attente une fois le catalogue local chargé.
     func applyPending() {
+        if mode == .local {
+            state = localState()
+            updateComplication()
+            return
+        }
         if isLocked {
             _ = store.applyRemote(.empty())
             updateComplication()
@@ -378,6 +388,7 @@ final class WatchLink {
                 state: localState()
             )
             self.state = opened.state
+            updateComplication()
             return .opened(opened, commandID: command.id)
         case .close:
             store.endOpening()
@@ -390,6 +401,7 @@ final class WatchLink {
                 try store.buy(item)
                 let snapshot = localState()
                 state = snapshot
+                updateComplication()
                 return .state(snapshot, commandID: command.id)
             } catch {
                 return .failure("Achat refusé.", commandID: command.id)
@@ -402,6 +414,7 @@ final class WatchLink {
                 try store.sell(id)
                 let snapshot = localState()
                 state = snapshot
+                updateComplication()
                 return .state(snapshot, commandID: command.id)
             } catch {
                 return .failure("Vente refusée.", commandID: command.id)
@@ -411,6 +424,7 @@ final class WatchLink {
                 try store.rebirth()
                 let snapshot = localState()
                 state = snapshot
+                updateComplication()
                 return .state(snapshot, commandID: command.id)
             } catch {
                 return .failure("Renaissance impossible.", commandID: command.id)

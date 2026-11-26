@@ -108,9 +108,11 @@ final class GameStore {
                 reloadFromStore()
             }
             isBootstrapped = true
-            if catalog.isEmpty {
+            guard !catalog.isEmpty else {
                 loadError = .decoding
+                return
             }
+            ensureMarketSeeded()
             return
         }
         apply(remote: [:])

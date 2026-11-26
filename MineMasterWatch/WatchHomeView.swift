@@ -143,9 +143,9 @@ struct WatchHomeView: View {
 
             HStack(spacing: 4) {
                 Circle()
-                    .fill(link.isReachable ? Theme.accent : Theme.copper)
+                    .fill(link.isLocal ? Theme.moss : (link.isReachable ? Theme.accent : Theme.copper))
                     .frame(width: 5, height: 5)
-                Text(link.isReachable ? "iPhone connecté" : "Lecture seule")
+                Text(link.isLocal ? "Mode local" : (link.isReachable ? "iPhone connecté" : "Lecture seule"))
                     .font(.system(size: 7, weight: .semibold, design: .rounded))
                     .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)

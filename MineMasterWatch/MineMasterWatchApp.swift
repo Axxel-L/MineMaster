@@ -20,7 +20,7 @@ struct MineMasterWatchApp: App {
             let container = try GameContainer.make()
             let store = GameStore(container: container, syncOnBootstrap: false)
             _store = State(initialValue: store)
-            _link = State(initialValue: WatchLink(store: store, mode: .live))
+            _link = State(initialValue: WatchLink(store: store, mode: .local))
         } catch {
             _store = State(initialValue: nil)
             _link = State(initialValue: nil)

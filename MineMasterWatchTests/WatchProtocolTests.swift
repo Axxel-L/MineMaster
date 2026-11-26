@@ -97,6 +97,8 @@ struct WatchProtocolTests {
 
         let opened = try #require(await link.open(plan))
 
+        #expect(link.isLocal)
+        #expect(link.canPlay)
         #expect(opened.cards.count == 5)
         #expect(link.totalOpened == 1)
         link.closeOpening()

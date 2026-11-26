@@ -122,14 +122,19 @@ struct WatchItemDetailView: View {
                     WatchInfoRow(title: "Tes tirages", value: "\(stats?.localPulls ?? store.pullCount(for: item))")
                     WatchInfoRow(
                         title: "Tirages monde",
-                        value: stats.map { "\($0.globalPulls)" } ?? "—",
+                        value: link.isLocal ? "—" : (stats.map { "\($0.globalPulls)" } ?? "—"),
                         tint: Theme.accent
                     )
                     WatchInfoRow(
                         title: "Échanges monde",
-                        value: stats.map { "\($0.globalTrades)" } ?? "—",
+                        value: link.isLocal ? "—" : (stats.map { "\($0.globalTrades)" } ?? "—"),
                         tint: Theme.copper
                     )
+                    if link.isLocal {
+                        Text("Communauté indisponible en local")
+                            .font(.system(size: 8, weight: .medium, design: .rounded))
+                            .foregroundStyle(Theme.textSecondary)
+                    }
                 }
                 .padding(8)
                 .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusS, style: .continuous))
