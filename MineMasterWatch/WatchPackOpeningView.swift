@@ -11,11 +11,13 @@ struct WatchOpeningSession: Identifiable {
 /// Pack scellé puis révélation carte par carte sur la montre.
 struct WatchPackOpeningView: View {
     @Environment(GameStore.self) private var store
+    @Environment(WatchLink.self) private var link
     @Environment(\.dismiss) private var dismiss
 
     @State private var plan: OpeningPlan?
     @State private var session: WatchOpeningSession?
     @State private var errorMessage: String?
+    @State private var isOpening = false
 
     init(plan: OpeningPlan? = nil) {
         _plan = State(initialValue: plan)
@@ -46,10 +48,15 @@ struct WatchPackOpeningView: View {
             }
             .task {
                 guard plan == nil else { return }
-                plan = store.planOpening()
+                await loadPlan()
+            }
+            .onChange(of: link.isLocked) { _, locked in
+                if locked {
+                    dismiss()
+                }
             }
             .onDisappear {
-                store.endOpening()
+                link.closeOpening()
             }
         }
     }
@@ -65,14 +72,18 @@ struct WatchPackOpeningView: View {
                     .minimumScaleFactor(0.7)
             }
             Button {
-                openPack()
+                Task { await openPack() }
             } label: {
-                Label("Ouvrir le pack", systemImage: "scissors")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .frame(maxWidth: .infinity, minHeight: 42)
+                Label(
+                    isOpening ? "Ouverture…" : "Ouvrir le pack",
+                    systemImage: isOpening ? "hourglass" : "scissors"
+                )
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .frame(maxWidth: .infinity, minHeight: 42)
             }
             .buttonStyle(.borderedProminent)
             .tint(plan?.kind.tint ?? Theme.copper)
+            .disabled(!link.canPlay || isOpening)
             .accessibilityIdentifier("watch-pack-tear")
             if let errorMessage {
                 Text(errorMessage)
@@ -80,21 +91,58 @@ struct WatchPackOpeningView: View {
                     .foregroundStyle(Theme.danger)
                     .multilineTextAlignment(.center)
             }
+            if !link.canPlay {
+                Text("Ouvre l'iPhone pour jouer.")
+                    .font(.system(size: 8, weight: .medium, design: .rounded))
+                    .foregroundStyle(Theme.textSecondary)
+            }
         }
         .padding(.horizontal, 8)
     }
 
-    private func openPack() {
-        guard let plan = plan ?? store.planOpening() else {
-            errorMessage = "Catalogue indisponible."
+    private func loadPlan() async {
+        guard link.canPlay else {
+            errorMessage = "Ouvre l'iPhone pour jouer."
             return
         }
-        let results = store.open(plan.booster, kind: plan.kind)
-        guard !results.isEmpty else {
-            errorMessage = "Ouverture impossible."
+        plan = await link.plan()
+        if plan == nil {
+            errorMessage = link.lastError ?? "Pack indisponible."
+        }
+    }
+
+    private func openPack() async {
+        guard !isOpening else { return }
+        isOpening = true
+        defer { isOpening = false }
+        if plan == nil {
+            await loadPlan()
+        }
+        guard let plan else { return }
+        guard let opened = await link.open(plan) else {
+            errorMessage = link.lastError ?? "Ouverture impossible."
             return
         }
-        session = WatchOpeningSession(booster: plan.booster, kind: plan.kind, results: results)
+        guard let session = makeSession(opened) else {
+            errorMessage = "Cartes indisponibles sur la montre."
+            return
+        }
+        errorMessage = nil
+        self.session = session
+    }
+
+    private func makeSession(_ opened: WatchOpenResult) -> WatchOpeningSession? {
+        let byID = Dictionary(uniqueKeysWithValues: store.catalog.map { ($0.id, $0) })
+        let results = opened.cards.compactMap { card in
+            byID[card.itemID].map { DrawResult(item: $0, dust: card.dust, isNew: card.isNew) }
+        }
+        guard results.count == opened.cards.count,
+              !results.isEmpty,
+              let booster = opened.plan.booster,
+              let kind = opened.plan.kind else {
+            return nil
+        }
+        return WatchOpeningSession(booster: booster, kind: kind, results: results)
     }
 }
 

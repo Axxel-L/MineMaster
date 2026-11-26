@@ -52,6 +52,7 @@ enum UITestSupport {
 
         for item in fixtures {
             container.mainContext.insert(CatalogItemRecord(item: item))
+            container.mainContext.insert(MarketListingRecord(itemID: item.id, stock: 1))
         }
         if isRebirthReady {
             for index in 0..<Rebirth.minimumUniqueItems {

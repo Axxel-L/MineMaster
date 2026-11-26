@@ -3,10 +3,13 @@ import SwiftUI
 /// Accueil compact : pack mystère, progression et raccourcis.
 struct WatchHomeView: View {
     @Environment(GameStore.self) private var store
+    @Environment(WatchLink.self) private var link
 
     @State private var plan: OpeningPlan?
     @State private var showPack = false
     @State private var showHelp = false
+    @State private var isLoadingPlan = false
+    @State private var errorMessage: String?
 
     var body: some View {
         ScrollView {
@@ -14,6 +17,18 @@ struct WatchHomeView: View {
                 header
                 packCard
                 progressCard
+                NavigationLink {
+                    WatchMarketView()
+                } label: {
+                    WatchDestinationRow(
+                        icon: "cart.fill",
+                        title: "Marché",
+                        value: "\(availableOffers) offres",
+                        tint: Theme.copper
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("watch-market-link")
                 NavigationLink {
                     WatchCollectionView()
                 } label: {
@@ -33,12 +48,18 @@ struct WatchHomeView: View {
                         icon: "chart.bar.fill",
                         title: "Profil",
                         value: store.explorerTitle.displayName,
-                        tint: Theme.copper
+                        tint: Theme.accent
                     )
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("watch-profile-link")
-                if store.isOffline {
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.system(size: 8, weight: .medium, design: .rounded))
+                        .foregroundStyle(Theme.danger)
+                        .multilineTextAlignment(.center)
+                }
+                if !link.canPlay {
                     offlineBanner
                 }
             }
@@ -47,7 +68,17 @@ struct WatchHomeView: View {
         }
         .scrollIndicators(.hidden)
         .navigationTitle("MineMaster")
-        .sheet(isPresented: $showPack) {
+        .task {
+            await loadPlan()
+        }
+        .onChange(of: link.isReachable) { _, reachable in
+            guard reachable, plan == nil else { return }
+            Task { await loadPlan() }
+        }
+        .sheet(isPresented: $showPack, onDismiss: {
+            plan = nil
+            Task { await loadPlan() }
+        }) {
             WatchPackOpeningView(plan: plan)
         }
         .sheet(isPresented: $showHelp) {
@@ -55,6 +86,10 @@ struct WatchHomeView: View {
                 showHelp = false
             }
         }
+    }
+
+    private var availableOffers: Int {
+        store.marketOfferings.filter { $0.stock > 0 }.count
     }
 
     private var header: some View {
@@ -83,7 +118,7 @@ struct WatchHomeView: View {
     private var packCard: some View {
         VStack(spacing: 8) {
             Button {
-                presentPack()
+                Task { await presentPack() }
             } label: {
                 WatchBoosterArt(booster: plan?.booster ?? .rare, kind: plan?.kind)
                     .accessibilityIdentifier("watch-pack-art")
@@ -92,16 +127,29 @@ struct WatchHomeView: View {
             .accessibilityHint("Prépare et ouvre le pack")
 
             Button {
-                presentPack()
+                Task { await presentPack() }
             } label: {
-                Label("Ouvrir le pack", systemImage: "shippingbox.fill")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .frame(maxWidth: .infinity, minHeight: 42)
+                Label(
+                    isLoadingPlan ? "Préparation…" : "Ouvrir le pack",
+                    systemImage: isLoadingPlan ? "hourglass" : "shippingbox.fill"
+                )
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .frame(maxWidth: .infinity, minHeight: 42)
             }
             .buttonStyle(.borderedProminent)
             .tint(Theme.copper)
-            .disabled(store.isOpening || store.catalog.isEmpty)
+            .disabled(!link.canPlay || isLoadingPlan || store.catalog.isEmpty)
             .accessibilityIdentifier("watch-open-pack")
+
+            HStack(spacing: 4) {
+                Circle()
+                    .fill(link.isReachable ? Theme.accent : Theme.copper)
+                    .frame(width: 5, height: 5)
+                Text(link.isReachable ? "iPhone connecté" : "Lecture seule")
+                    .font(.system(size: 7, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Theme.textSecondary)
+                    .lineLimit(1)
+            }
         }
         .padding(10)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusM, style: .continuous))
@@ -130,7 +178,7 @@ struct WatchHomeView: View {
                     .font(.system(size: 9, weight: .medium, design: .rounded))
                     .foregroundStyle(Theme.textSecondary)
                 Spacer()
-                Text("\(store.totalOpened) packs")
+                Text("\(link.totalOpened) packs")
                     .font(.system(size: 9, weight: .medium, design: .rounded))
                     .foregroundStyle(Theme.textSecondary)
             }
@@ -144,7 +192,7 @@ struct WatchHomeView: View {
     }
 
     private var offlineBanner: some View {
-        Label("Hors ligne", systemImage: "wifi.slash")
+        Label("Lecture seule : ouvre l'iPhone", systemImage: "iphone.slash")
             .font(.system(size: 9, weight: .semibold, design: .rounded))
             .foregroundStyle(Theme.textSecondary)
             .padding(.horizontal, 10)
@@ -153,8 +201,26 @@ struct WatchHomeView: View {
             .frame(maxWidth: .infinity)
     }
 
-    private func presentPack() {
-        plan = store.planOpening()
+    private func loadPlan() async {
+        guard link.canPlay, !store.catalog.isEmpty, !isLoadingPlan else { return }
+        isLoadingPlan = true
+        plan = await link.plan()
+        isLoadingPlan = false
+    }
+
+    private func presentPack() async {
+        guard link.canPlay else {
+            errorMessage = "Ouvre l'iPhone pour jouer."
+            return
+        }
+        if plan == nil {
+            await loadPlan()
+        }
+        guard plan != nil else {
+            errorMessage = link.lastError ?? "Pack indisponible."
+            return
+        }
+        errorMessage = nil
         showPack = true
     }
 }

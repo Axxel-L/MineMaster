@@ -88,8 +88,11 @@ struct WatchItemDetailView: View {
     let item: CatalogItem
 
     @Environment(GameStore.self) private var store
+    @Environment(WatchLink.self) private var link
 
+    @State private var stats: WatchItemStats?
     @State private var errorMessage: String?
+    @State private var isWorking = false
 
     private var count: Int { store.ownedCount(for: item) }
     private var offer: MarketOffer? { store.marketOffer(for: item.id) }
@@ -108,7 +111,6 @@ struct WatchItemDetailView: View {
                 VStack(spacing: 5) {
                     WatchInfoRow(title: "Catégorie", value: item.category.displayName)
                     WatchInfoRow(title: "Possédés", value: "\(count)")
-                    WatchInfoRow(title: "Tirages", value: "\(store.pullCount(for: item))")
                     WatchInfoRow(title: "Achat", value: "\(MarketPrice.buy(for: item.rarity))", tint: Theme.accent)
                     WatchInfoRow(title: "Vente", value: "\(MarketPrice.sell(for: item.rarity))", tint: Theme.copper)
                     WatchInfoRow(title: "Stock", value: "\(offer?.stock ?? 0)")
@@ -116,29 +118,54 @@ struct WatchItemDetailView: View {
                 .padding(8)
                 .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusS, style: .continuous))
 
+                VStack(spacing: 5) {
+                    WatchInfoRow(title: "Tes tirages", value: "\(stats?.localPulls ?? store.pullCount(for: item))")
+                    WatchInfoRow(
+                        title: "Tirages monde",
+                        value: stats.map { "\($0.globalPulls)" } ?? "—",
+                        tint: Theme.accent
+                    )
+                    WatchInfoRow(
+                        title: "Échanges monde",
+                        value: stats.map { "\($0.globalTrades)" } ?? "—",
+                        tint: Theme.copper
+                    )
+                }
+                .padding(8)
+                .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.radiusS, style: .continuous))
+                .accessibilityIdentifier("watch-community-stats")
+
                 if (offer?.stock ?? 0) > 0 {
                     Button {
-                        transact { try store.buy(item) }
+                        Task { await buy() }
                     } label: {
                         Label("Acheter · \(MarketPrice.buy(for: item.rarity))", systemImage: "cart.fill")
                             .font(.system(size: 10, weight: .bold, design: .rounded))
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(affordable ? Theme.accent : Theme.textSecondary)
-                    .disabled(!affordable)
+                    .disabled(!affordable || !link.canPlay || isWorking)
                     .accessibilityIdentifier("watch-buy")
                 }
 
                 if count > 0 {
                     Button {
-                        transact { try store.sell(item.id) }
+                        Task { await sell() }
                     } label: {
                         Label("Vendre · +\(MarketPrice.sell(for: item.rarity))", systemImage: "cart.badge.plus")
                             .font(.system(size: 10, weight: .bold, design: .rounded))
                     }
                     .buttonStyle(.bordered)
                     .tint(Theme.danger)
+                    .disabled(!link.canPlay || isWorking)
                     .accessibilityIdentifier("watch-sell")
+                }
+
+                if !link.canPlay {
+                    Text("Lecture seule : ouvre l'iPhone pour échanger.")
+                        .font(.system(size: 8, weight: .medium, design: .rounded))
+                        .foregroundStyle(Theme.textSecondary)
+                        .multilineTextAlignment(.center)
                 }
 
                 if let errorMessage {
@@ -152,16 +179,33 @@ struct WatchItemDetailView: View {
             .padding(.bottom, 8)
         }
         .navigationTitle("Détail")
+        .task {
+            await refreshStats()
+        }
     }
 
-    private func transact(_ action: () throws -> Void) {
-        do {
-            try action()
-            errorMessage = nil
-        } catch let error as AppError {
-            errorMessage = error.errorDescription ?? "Transaction échouée."
-        } catch {
-            errorMessage = "Transaction échouée."
+    private func buy() async {
+        isWorking = true
+        defer { isWorking = false }
+        errorMessage = await link.buy(item)
+        if errorMessage == nil {
+            await refreshStats()
+        }
+    }
+
+    private func sell() async {
+        isWorking = true
+        defer { isWorking = false }
+        errorMessage = await link.sell(item.id)
+        if errorMessage == nil {
+            await refreshStats()
+        }
+    }
+
+    private func refreshStats() async {
+        guard link.canPlay else { return }
+        if let updated = await link.itemStats(item.id) {
+            stats = updated
         }
     }
 }

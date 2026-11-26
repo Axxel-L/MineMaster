@@ -3,8 +3,11 @@ import SwiftUI
 /// Profil compact : progression, titre, renaissance et crédits.
 struct WatchProfileView: View {
     @Environment(GameStore.self) private var store
+    @Environment(WatchLink.self) private var link
 
     @State private var confirmRebirth = false
+    @State private var isRefreshing = false
+    @State private var errorMessage: String?
 
     var body: some View {
         List {
@@ -21,10 +24,32 @@ struct WatchProfileView: View {
                 .padding(.vertical, 4)
 
                 WatchInfoRow(title: "Items uniques", value: "\(store.uniqueCount) / \(store.catalog.count)")
-                WatchInfoRow(title: "Ouvertures", value: "\(store.totalOpened)")
+                WatchInfoRow(title: "Ouvertures", value: "\(link.totalOpened)")
                 WatchInfoRow(title: "Poussière", value: "\(store.dust)", tint: Theme.accent)
                 WatchInfoRow(title: "Achats", value: "\(store.marketPurchases)")
                 WatchInfoRow(title: "Ventes", value: "\(store.marketSales)")
+                WatchInfoRow(title: "iPhone", value: link.isReachable ? "Connecté" : "Hors ligne")
+            }
+
+            Section("Communauté") {
+                WatchInfoRow(
+                    title: "Tirages",
+                    value: link.globalLoaded ? "\(link.globalPulls)" : "—",
+                    tint: Theme.accent
+                )
+                WatchInfoRow(
+                    title: "Échanges",
+                    value: link.globalLoaded ? "\(link.globalTrades)" : "—",
+                    tint: Theme.copper
+                )
+                Button {
+                    Task { await refreshCommunity() }
+                } label: {
+                    Label(isRefreshing ? "Actualisation…" : "Actualiser", systemImage: "arrow.clockwise")
+                        .font(.system(size: 9, weight: .semibold, design: .rounded))
+                }
+                .disabled(!link.canPlay || isRefreshing)
+                .accessibilityIdentifier("watch-refresh-community")
             }
 
             Section("Titre") {
@@ -74,9 +99,15 @@ struct WatchProfileView: View {
                             .font(.system(size: 10, weight: .bold, design: .rounded))
                     }
                     .tint(Theme.copper)
+                    .disabled(!link.canPlay)
                     .accessibilityIdentifier("watch-rebirth")
                 } else {
                     Text("Encore \(Rebirth.remaining(uniqueCount: store.uniqueCount)) items différents")
+                        .font(.system(size: 8, weight: .medium, design: .rounded))
+                        .foregroundStyle(Theme.textSecondary)
+                }
+                if !link.canPlay {
+                    Text("Lecture seule : ouvre l'iPhone pour renaître.")
                         .font(.system(size: 8, weight: .medium, design: .rounded))
                         .foregroundStyle(Theme.textSecondary)
                 }
@@ -94,20 +125,41 @@ struct WatchProfileView: View {
                     value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
                 )
             }
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.system(size: 8, weight: .medium, design: .rounded))
+                    .foregroundStyle(Theme.danger)
+            }
         }
         .navigationTitle("Profil")
+        .task {
+            if link.canPlay, !link.globalLoaded {
+                await refreshCommunity()
+            }
+        }
         .confirmationDialog(
             "Renaître ?",
             isPresented: $confirmRebirth,
             titleVisibility: .visible
         ) {
             Button("Renaître", role: .destructive) {
-                try? store.rebirth()
+                Task { await rebirth() }
             }
             .accessibilityIdentifier("watch-confirm-rebirth")
         } message: {
             Text("Collection et poussière remises à zéro. Les boosts restent acquis.")
         }
+    }
+
+    private func refreshCommunity() async {
+        isRefreshing = true
+        defer { isRefreshing = false }
+        errorMessage = await link.refreshCommunity()
+    }
+
+    private func rebirth() async {
+        errorMessage = await link.rebirth()
     }
 }
 

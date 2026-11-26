@@ -27,6 +27,19 @@ final class WatchNavigationUITests: WatchUITestCase {
     }
 
     @MainActor
+    func testMarcheAfficheLesOffresEtLesModes() {
+        let app = launchApp()
+
+        let market = app.buttons["watch-market-link"]
+        XCTAssertTrue(market.waitForExistence(timeout: 15))
+        market.tap()
+
+        XCTAssertTrue(app.buttons["watch-market-dirt"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["watch-market-buy"].exists)
+        XCTAssertTrue(app.buttons["watch-market-sell"].exists)
+    }
+
+    @MainActor
     func testTutorielSePasseALaPremiereOuverture() {
         let app = launchApp(hasSeenTutorial: false)
 

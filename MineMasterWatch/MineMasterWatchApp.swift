@@ -5,27 +5,34 @@ import SwiftUI
 @main
 struct MineMasterWatchApp: App {
     @State private var store: GameStore?
+    @State private var link: WatchLink?
 
     init() {
         #if DEBUG
         if UITestSupport.isEnabled, let store = UITestSupport.makeStore() {
             _store = State(initialValue: store)
+            _link = State(initialValue: WatchLink(store: store, mode: .local))
             return
         }
         #endif
 
-        if let container = try? GameContainer.make() {
-            _store = State(initialValue: GameStore(container: container))
-        } else {
+        do {
+            let container = try GameContainer.make()
+            let store = GameStore(container: container, syncOnBootstrap: false)
+            _store = State(initialValue: store)
+            _link = State(initialValue: WatchLink(store: store, mode: .live))
+        } catch {
             _store = State(initialValue: nil)
+            _link = State(initialValue: nil)
         }
     }
 
     var body: some Scene {
         WindowGroup {
-            if let store {
+            if let store, let link {
                 WatchRootView()
                     .environment(store)
+                    .environment(link)
                     .preferredColorScheme(.dark)
             } else {
                 WatchStorageErrorView()
