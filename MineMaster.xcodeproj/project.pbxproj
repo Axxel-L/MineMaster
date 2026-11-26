@@ -7,11 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D20000000000000000000006 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D20000000000000000000003 /* FirebaseAuth */; };
-		D20000000000000000000007 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = D20000000000000000000004 /* FirebaseCore */; };
-		D20000000000000000000008 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = D20000000000000000000005 /* GoogleSignIn */; };
-		D2000000000000000000000C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = D2000000000000000000000E /* FirebaseFirestore */; };
 		B30000000000000000000002 /* MineMasterWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* MineMasterWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B6000000000000000000000C /* MineMasterWatchWidgets.appex in Embed Watch Widgets */ = {isa = PBXBuildFile; fileRef = B60000000000000000000002 /* MineMasterWatchWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C20000000000000000000001 /* MineMaster/Domain/Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000001 /* MineMaster/Domain/Models.swift */; };
 		C20000000000000000000002 /* MineMaster/Domain/LootEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000002 /* MineMaster/Domain/LootEngine.swift */; };
 		C20000000000000000000003 /* MineMaster/Domain/Rebirth.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000003 /* MineMaster/Domain/Rebirth.swift */; };
@@ -26,13 +23,12 @@
 		C20000000000000000000012 /* MineMaster/Design/Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000012 /* MineMaster/Design/Theme.swift */; };
 		C20000000000000000000013 /* MineMaster/App/UITestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000013 /* MineMaster/App/UITestSupport.swift */; };
 		C20000000000000000000014 /* MineMaster/Data/ProgressSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000014 /* MineMaster/Data/ProgressSnapshot.swift */; };
-		C20000000000000000000015 /* MineMaster/Watch/WatchProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000015 /* MineMaster/Watch/WatchProtocol.swift */; };
-		C20000000000000000000016 /* MineMaster/Watch/WatchSessionRelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000016 /* MineMaster/Watch/WatchSessionRelay.swift */; };
-		C20000000000000000000017 /* MineMaster/Watch/ComplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000017 /* MineMaster/Watch/ComplicationState.swift */; };
 		C40000000000000000000001 /* MineMaster/Resources/ItemCatalog.json in Resources */ = {isa = PBXBuildFile; fileRef = C30000000000000000000001 /* MineMaster/Resources/ItemCatalog.json */; };
 		C40000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C30000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy */; };
-		B6000000000000000000000C /* MineMasterWatchWidgets.appex in Embed Watch Widgets */ = {isa = PBXBuildFile; fileRef = B60000000000000000000002 /* MineMasterWatchWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		B6000000000000000000000E /* MineMaster/Watch/ComplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000017 /* MineMaster/Watch/ComplicationState.swift */; };
+		D20000000000000000000006 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D20000000000000000000003 /* FirebaseAuth */; };
+		D20000000000000000000007 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = D20000000000000000000004 /* FirebaseCore */; };
+		D20000000000000000000008 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = D20000000000000000000005 /* GoogleSignIn */; };
+		D2000000000000000000000C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = D2000000000000000000000E /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -127,9 +123,6 @@
 		C10000000000000000000012 /* MineMaster/Design/Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Design/Theme.swift; sourceTree = SOURCE_ROOT; };
 		C10000000000000000000013 /* MineMaster/App/UITestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/App/UITestSupport.swift; sourceTree = SOURCE_ROOT; };
 		C10000000000000000000014 /* MineMaster/Data/ProgressSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Data/ProgressSnapshot.swift; sourceTree = SOURCE_ROOT; };
-		C10000000000000000000015 /* MineMaster/Watch/WatchProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Watch/WatchProtocol.swift; sourceTree = SOURCE_ROOT; };
-		C10000000000000000000016 /* MineMaster/Watch/WatchSessionRelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Watch/WatchSessionRelay.swift; sourceTree = SOURCE_ROOT; };
-		C10000000000000000000017 /* MineMaster/Watch/ComplicationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Watch/ComplicationState.swift; sourceTree = SOURCE_ROOT; };
 		C30000000000000000000001 /* MineMaster/Resources/ItemCatalog.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MineMaster/Resources/ItemCatalog.json; sourceTree = SOURCE_ROOT; };
 		C30000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = MineMaster/Resources/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -142,6 +135,8 @@
 		B10000000000000000000012 /* MineMasterWatchTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MineMasterWatchTests; sourceTree = "<group>"; };
 		B20000000000000000000003 /* MineMasterWatchUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MineMasterWatchUITests; sourceTree = "<group>"; };
 		B60000000000000000000003 /* MineMasterWatchWidgets */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MineMasterWatchWidgets; sourceTree = "<group>"; };
+		B70000000000000000000001 /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Shared; sourceTree = "<group>"; };
+		B70000000000000000000002 /* SharedComplication */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = SharedComplication; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,9 +213,6 @@
 				C10000000000000000000012 /* MineMaster/Design/Theme.swift */,
 				C10000000000000000000013 /* MineMaster/App/UITestSupport.swift */,
 				C10000000000000000000014 /* MineMaster/Data/ProgressSnapshot.swift */,
-				C10000000000000000000015 /* MineMaster/Watch/WatchProtocol.swift */,
-				C10000000000000000000016 /* MineMaster/Watch/WatchSessionRelay.swift */,
-				C10000000000000000000017 /* MineMaster/Watch/ComplicationState.swift */,
 				C30000000000000000000001 /* MineMaster/Resources/ItemCatalog.json */,
 				C30000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy */,
 			);
@@ -237,6 +229,8 @@
 				B10000000000000000000012 /* MineMasterWatchTests */,
 				B20000000000000000000003 /* MineMasterWatchUITests */,
 				B60000000000000000000003 /* MineMasterWatchWidgets */,
+				B70000000000000000000001 /* Shared */,
+				B70000000000000000000002 /* SharedComplication */,
 				A10000000000000000000003 /* Products */,
 				5A43BDAC30B0AB220044A2D3 /* Recovered References */,
 			);
@@ -275,6 +269,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				A10000000000000000000005 /* MineMaster */,
+				B70000000000000000000001 /* Shared */,
 			);
 			name = MineMaster;
 			packageProductDependencies = (
@@ -349,6 +344,8 @@
 			);
 			fileSystemSynchronizedGroups = (
 				B10000000000000000000003 /* MineMasterWatch */,
+				B70000000000000000000001 /* Shared */,
+				B70000000000000000000002 /* SharedComplication */,
 			);
 			name = MineMasterWatch;
 			packageProductDependencies = (
@@ -417,6 +414,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				B60000000000000000000003 /* MineMasterWatchWidgets */,
+				B70000000000000000000002 /* SharedComplication */,
 			);
 			name = MineMasterWatchWidgets;
 			packageProductDependencies = (
@@ -586,9 +584,6 @@
 				C20000000000000000000012 /* MineMaster/Design/Theme.swift in Sources */,
 				C20000000000000000000013 /* MineMaster/App/UITestSupport.swift in Sources */,
 				C20000000000000000000014 /* MineMaster/Data/ProgressSnapshot.swift in Sources */,
-				C20000000000000000000015 /* MineMaster/Watch/WatchProtocol.swift in Sources */,
-				C20000000000000000000016 /* MineMaster/Watch/WatchSessionRelay.swift in Sources */,
-				C20000000000000000000017 /* MineMaster/Watch/ComplicationState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -610,7 +605,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B6000000000000000000000E /* MineMaster/Watch/ComplicationState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -962,13 +956,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MineMasterWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6CR9YQH87Z;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = MineMaster;
-				CODE_SIGN_ENTITLEMENTS = MineMasterWatch.entitlements;
 				INFOPLIST_KEY_WKApplication = YES;
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.minemaster.iut-st-die";
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
@@ -994,13 +988,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MineMasterWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 6CR9YQH87Z;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = MineMaster;
-				CODE_SIGN_ENTITLEMENTS = MineMasterWatch.entitlements;
 				INFOPLIST_KEY_WKApplication = YES;
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.minemaster.iut-st-die";
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
