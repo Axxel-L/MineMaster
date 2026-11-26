@@ -6,7 +6,7 @@ import Testing
 struct OpeningLockTests {
     @Test("Quatre appuis rapides produisent une seule ouverture de cinq cartes")
     func appuisRapides() throws {
-        let fixture = try makeStore(items: Fixtures.items(5), draw: { _, pool in pool })
+        let fixture = try makeStore(items: Fixtures.items(5), draw: { _, pool, _ in pool })
 
         let attempts = (0..<4).map { _ in fixture.store.open(.common) }
 
@@ -19,7 +19,7 @@ struct OpeningLockTests {
 
     @Test("Tant que la session n'est pas fermée, aucun autre booster ne s'ouvre")
     func refusePendantLaSession() throws {
-        let fixture = try makeStore(items: Fixtures.items(5), draw: { _, pool in pool })
+        let fixture = try makeStore(items: Fixtures.items(5), draw: { _, pool, _ in pool })
 
         let first = fixture.store.open(.common)
         let dustAfterFirst = fixture.store.dust
@@ -34,7 +34,7 @@ struct OpeningLockTests {
 
     @Test("Après la fermeture de la session, l'ouverture suivante réussit")
     func reussitApresFermeture() throws {
-        let fixture = try makeStore(items: Fixtures.items(10), draw: { _, pool in Array(pool.prefix(5)) })
+        let fixture = try makeStore(items: Fixtures.items(10), draw: { _, pool, _ in Array(pool.prefix(5)) })
 
         _ = fixture.store.open(.common)
         fixture.store.endOpening()
