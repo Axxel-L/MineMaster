@@ -2,15 +2,17 @@ import SwiftUI
 
 struct RootTabView: View {
     @Environment(GameStore.self) private var store
+    @Environment(AppRoute.self) private var route
     @AppStorage("hasSeenTutorial") private var hasSeenTutorial = false
 
-    @State private var selection = "packs"
     @State private var showTutorial = false
 
     var body: some View {
+        @Bindable var route = route
+
         ZStack {
             if store.isBootstrapped {
-                TabView(selection: $selection) {
+                TabView(selection: $route.selectedTab) {
                     BoostersView()
                         .tabItem {
                             Label {

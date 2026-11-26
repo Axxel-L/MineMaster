@@ -352,12 +352,19 @@ final class WatchLink {
             WidgetCenter.shared.reloadAllTimelines()
             return
         }
+        let title = store.explorerTitle
         ComplicationStore.save(
             ComplicationState(
                 progress: store.progress,
                 dust: store.dust,
-                title: store.explorerTitle.displayName,
+                title: title.displayName,
                 nextTitle: store.nextExplorerTitle?.displayName,
+                uniqueCount: store.uniqueCount,
+                totalItems: store.catalog.count,
+                totalOpened: store.totalOpened,
+                rebirthLevel: store.rebirthLevel,
+                titleRank: ExplorerTitle.allCases.firstIndex(of: title) ?? 0,
+                titleCount: ExplorerTitle.allCases.count,
                 updatedAt: .now
             )
         )

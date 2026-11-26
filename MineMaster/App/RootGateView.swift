@@ -8,6 +8,7 @@ import SwiftUI
 /// fois le catalogue local prêt.
 struct RootGateView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(AppRoute.self) private var route
 
     @State private var session = AuthSession()
     @State private var store: GameStore?
@@ -49,7 +50,13 @@ struct RootGateView: View {
             await session.start()
         }
         .task(id: LoadKey(accountID: session.account?.id, attempt: attempt)) { await prepare() }
-        .onOpenURL { GIDSignIn.sharedInstance.handle($0) }
+        .onOpenURL { url in
+            if url.scheme?.lowercased() == AppRoute.scheme {
+                route.handle(url)
+            } else {
+                GIDSignIn.sharedInstance.handle(url)
+            }
+        }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active else { return }
             sync?.retry()
@@ -70,6 +77,7 @@ struct RootGateView: View {
                 store = nil
                 globalStats = nil
                 watchBridge.lock()
+                WidgetStatePublisher.clear()
                 ProgressSync.clearMarkers(uid: id)
                 try? AppPersistence.resetStore(for: id)
                 attempt += 1
@@ -110,6 +118,7 @@ struct RootGateView: View {
             globalStats = nil
             storageError = nil
             watchBridge.lock()
+            WidgetStatePublisher.clear()
             return
         }
         if store != nil, sync?.accountID == account.id, storageError == nil { return }
@@ -123,6 +132,7 @@ struct RootGateView: View {
         store = nil
         globalStats = nil
         storageError = nil
+        WidgetStatePublisher.clear()
 
         do {
             let container = try AppPersistence.container(for: account.id)
@@ -141,9 +151,11 @@ struct RootGateView: View {
                 }
             )
             let accountGlobal = GlobalStatsSync()
-            accountStore.onPersist = { [weak accountSync, weak watchBridge] in
+            accountStore.onPersist = { [weak accountStore, weak accountSync, weak watchBridge] in
                 accountSync?.markDirty()
                 watchBridge?.schedulePush()
+                guard let accountStore else { return }
+                WidgetStatePublisher.publish(from: accountStore)
             }
             accountStore.onPulls = { [weak accountGlobal] ids in
                 accountGlobal?.recordPulls(ids)
@@ -157,6 +169,7 @@ struct RootGateView: View {
             watchBridge.attach(store: accountStore, stats: accountGlobal)
 
             await accountSync.restore()
+            WidgetStatePublisher.publish(from: accountStore)
             Task {
                 await accountGlobal.refresh()
                 watchBridge.schedulePush()
@@ -165,9 +178,11 @@ struct RootGateView: View {
         } catch let error as AppError {
             storageError = error
             watchBridge.lock()
+            WidgetStatePublisher.clear()
         } catch {
             storageError = .storageUnavailable
             watchBridge.lock()
+            WidgetStatePublisher.clear()
         }
     }
 }

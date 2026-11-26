@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct MineMasterApp: App {
     @State private var store: GameStore?
+    @State private var route = AppRoute()
 
     init() {
         #if DEBUG
@@ -18,6 +19,7 @@ struct MineMasterApp: App {
             if let store {
                 RootTabView()
                     .environment(store)
+                    .environment(route)
                     .environment(AuthSession())
                     .environment(
                         ProgressSync(
@@ -36,6 +38,7 @@ struct MineMasterApp: App {
                     .preferredColorScheme(.dark)
             } else {
                 RootGateView()
+                    .environment(route)
                     .preferredColorScheme(.dark)
             }
         }

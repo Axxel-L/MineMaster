@@ -14,6 +14,16 @@
 				<string>com.googleusercontent.apps.44361496603-sg2is9advudglekuorka7uijt1n2mrrd</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.minemaster.iut-st-die.deeplink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>minemaster</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>
