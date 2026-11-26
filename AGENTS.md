@@ -64,8 +64,9 @@ résultat faux.
   bornée à l'iPhone et applique l'état reçu. Aucune vue watchOS n'appelle
   directement `open`, `buy`, `sell` ou `rebirth`.
 - Les fichiers partagés entre iOS, watchOS et WidgetKit vivent dans `Shared/`
-  et `SharedComplication/`, rattachés par groupes synchronisés aux cibles
-  concernées. Aucune référence de fichier manuelle ne doit les lier.
+  et `SharedComplication/`, hors de tout groupe synchronisé. Ils sont référencés
+  explicitement dans les phases Sources des cibles concernées, sans jamais
+  dépendre de la synchronisation d'une autre cible.
 
 ### Commentaires
 

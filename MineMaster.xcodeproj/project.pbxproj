@@ -23,6 +23,12 @@
 		C20000000000000000000012 /* MineMaster/Design/Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000012 /* MineMaster/Design/Theme.swift */; };
 		C20000000000000000000013 /* MineMaster/App/UITestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000013 /* MineMaster/App/UITestSupport.swift */; };
 		C20000000000000000000014 /* MineMaster/Data/ProgressSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000014 /* MineMaster/Data/ProgressSnapshot.swift */; };
+		A30000000000000000000001 /* WatchProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000015 /* WatchProtocol.swift */; };
+		A30000000000000000000002 /* WatchSessionRelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000016 /* WatchSessionRelay.swift */; };
+		C20000000000000000000015 /* WatchProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000015 /* WatchProtocol.swift */; };
+		C20000000000000000000016 /* WatchSessionRelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000016 /* WatchSessionRelay.swift */; };
+		C20000000000000000000017 /* ComplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000017 /* ComplicationState.swift */; };
+		B6000000000000000000000E /* ComplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000000000000000000017 /* ComplicationState.swift */; };
 		C40000000000000000000001 /* MineMaster/Resources/ItemCatalog.json in Resources */ = {isa = PBXBuildFile; fileRef = C30000000000000000000001 /* MineMaster/Resources/ItemCatalog.json */; };
 		C40000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C30000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy */; };
 		D20000000000000000000006 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D20000000000000000000003 /* FirebaseAuth */; };
@@ -123,6 +129,9 @@
 		C10000000000000000000012 /* MineMaster/Design/Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Design/Theme.swift; sourceTree = SOURCE_ROOT; };
 		C10000000000000000000013 /* MineMaster/App/UITestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/App/UITestSupport.swift; sourceTree = SOURCE_ROOT; };
 		C10000000000000000000014 /* MineMaster/Data/ProgressSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MineMaster/Data/ProgressSnapshot.swift; sourceTree = SOURCE_ROOT; };
+		C10000000000000000000015 /* WatchProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchProtocol.swift; sourceTree = "<group>"; };
+		C10000000000000000000016 /* WatchSessionRelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionRelay.swift; sourceTree = "<group>"; };
+		C10000000000000000000017 /* ComplicationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationState.swift; sourceTree = "<group>"; };
 		C30000000000000000000001 /* MineMaster/Resources/ItemCatalog.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MineMaster/Resources/ItemCatalog.json; sourceTree = SOURCE_ROOT; };
 		C30000000000000000000002 /* MineMaster/Resources/PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = MineMaster/Resources/PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -135,8 +144,6 @@
 		B10000000000000000000012 /* MineMasterWatchTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MineMasterWatchTests; sourceTree = "<group>"; };
 		B20000000000000000000003 /* MineMasterWatchUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MineMasterWatchUITests; sourceTree = "<group>"; };
 		B60000000000000000000003 /* MineMasterWatchWidgets */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = MineMasterWatchWidgets; sourceTree = "<group>"; };
-		B70000000000000000000001 /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Shared; sourceTree = "<group>"; };
-		B70000000000000000000002 /* SharedComplication */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = SharedComplication; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -229,11 +236,28 @@
 				B10000000000000000000012 /* MineMasterWatchTests */,
 				B20000000000000000000003 /* MineMasterWatchUITests */,
 				B60000000000000000000003 /* MineMasterWatchWidgets */,
-				B70000000000000000000001 /* Shared */,
-				B70000000000000000000002 /* SharedComplication */,
+				B70000000000000000000010 /* Shared */,
+				B70000000000000000000011 /* SharedComplication */,
 				A10000000000000000000003 /* Products */,
 				5A43BDAC30B0AB220044A2D3 /* Recovered References */,
 			);
+			sourceTree = "<group>";
+		};
+		B70000000000000000000010 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				C10000000000000000000015 /* WatchProtocol.swift */,
+				C10000000000000000000016 /* WatchSessionRelay.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		B70000000000000000000011 /* SharedComplication */ = {
+			isa = PBXGroup;
+			children = (
+				C10000000000000000000017 /* ComplicationState.swift */,
+			);
+			path = SharedComplication;
 			sourceTree = "<group>";
 		};
 		A10000000000000000000003 /* Products */ = {
@@ -269,7 +293,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				A10000000000000000000005 /* MineMaster */,
-				B70000000000000000000001 /* Shared */,
 			);
 			name = MineMaster;
 			packageProductDependencies = (
@@ -344,8 +367,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				B10000000000000000000003 /* MineMasterWatch */,
-				B70000000000000000000001 /* Shared */,
-				B70000000000000000000002 /* SharedComplication */,
 			);
 			name = MineMasterWatch;
 			packageProductDependencies = (
@@ -414,7 +435,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				B60000000000000000000003 /* MineMasterWatchWidgets */,
-				B70000000000000000000002 /* SharedComplication */,
 			);
 			name = MineMasterWatchWidgets;
 			packageProductDependencies = (
@@ -549,6 +569,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A30000000000000000000001 /* WatchProtocol.swift in Sources */,
+				A30000000000000000000002 /* WatchSessionRelay.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -584,6 +606,9 @@
 				C20000000000000000000012 /* MineMaster/Design/Theme.swift in Sources */,
 				C20000000000000000000013 /* MineMaster/App/UITestSupport.swift in Sources */,
 				C20000000000000000000014 /* MineMaster/Data/ProgressSnapshot.swift in Sources */,
+				C20000000000000000000015 /* WatchProtocol.swift in Sources */,
+				C20000000000000000000016 /* WatchSessionRelay.swift in Sources */,
+				C20000000000000000000017 /* ComplicationState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -605,6 +630,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B6000000000000000000000E /* ComplicationState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
