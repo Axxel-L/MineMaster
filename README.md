@@ -3,7 +3,7 @@
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg?style=flat)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-native-blue.svg?style=flat)
 ![iOS](https://img.shields.io/badge/iOS-26.0+-lightgrey.svg?style=flat)
-![watchOS](https://img.shields.io/badge/watchOS-target-coming%20soon-yellow.svg?style=flat)
+![watchOS](https://img.shields.io/badge/watchOS-26.0+-lightgrey.svg?style=flat)
 ![Firebase](https://img.shields.io/badge/Firebase-auth+%2B+firestore-orange.svg?style=flat)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat)
 
@@ -19,9 +19,16 @@ Projet non commercial, libre de droits. Tout le monde peut le réutiliser.
 
 *Les captures seront rafraîchies prochainement.*
 
-## Apple Watch 👉 à venir
+## Apple Watch
 
-Une cible `MineMasterWatch` existe déjà dans le projet Xcode (avec ses schémas et ses tests), mais l'interface actuelle est trop moche pour être montrée. On la refait proprement après la version iOS.
+La cible `MineMasterWatch` est un miroir compact de l'iPhone, avec son schéma et ses tests. L'iPhone reste l'unique source de vérité : la montre lui envoie chaque action et applique l'état reçu. Hors connexion, elle reste en lecture seule sur le dernier état synchronisé, et une déconnexion verrouille son cache.
+
+- Ouverture de packs, collection, marché dédié, profil et renaissance
+- Statistiques communautaires par item
+- Complication WidgetKit : progression, poussière, titre courant et prochain titre
+- Aucun second compte : la montre ne crée jamais de progression locale
+
+Les fichiers partagés vivent dans `Shared/` et `SharedComplication/` et sont référencés explicitement par les cibles iOS, watchOS et WidgetKit.
 
 ## Fonctionnalités
 
@@ -62,7 +69,7 @@ Une cible `MineMasterWatch` existe déjà dans le projet Xcode (avec ses schéma
 - **SwiftData** — catalogue, collection et historique
 - **URLSession** — pipeline d'images maison avec cache mémoire et disque
 - **Firebase** — `FirebaseCore`, `FirebaseAuth`, `FirebaseFirestore` et `GoogleSignIn` via Swift Package Manager
-- Cible : iOS 26.0, Xcode 26.6 ou plus récent (projet au format `project.pbxproj`)
+- Cibles : iOS 26.0 et watchOS 26.0, Xcode 26.0 ou plus récent (projet au format `project.pbxproj`)
 
 ## Lancer le projet
 
@@ -90,10 +97,15 @@ xcodebuild -project MineMaster.xcodeproj -scheme MineMasterWatch \
 
 - `MineMasterTests` : tests unitaires Swift Testing, conteneur SwiftData en mémoire, sessions réseau de test.
 - `MineMasterUITests` : parcours XCTest pilotés par l'interface, aucun accès réseau.
+- `MineMasterWatchTests` : protocole WatchConnectivity, bornes d'état et lien local déterministe.
+- `MineMasterWatchUITests` : navigation, marché et ouverture sur watchOS.
 
 ```bash
 xcodebuild test -project MineMaster.xcodeproj -scheme MineMaster \
   -destination 'platform=iOS Simulator,name=<simulateur installé>'
+
+xcodebuild test -project MineMaster.xcodeproj -scheme MineMasterWatch \
+  -destination 'platform=watchOS Simulator,name=<montre installée>'
 ```
 
 Les conventions et invariants sont décrits dans [`AGENTS.md`](AGENTS.md).
