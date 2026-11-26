@@ -80,9 +80,11 @@ MineMaster/
 ├─ Data/           API, SwiftData, GameStore, pipeline d'images
 ├─ Design/         thème, composants, skeletons
 ├─ Features/       boosters, ouverture, collection, profil
-├─ Watch/          protocole WatchConnectivity, pont iPhone, complication
+├─ Watch/          pont iPhone et routeur de commandes
 └─ Resources/      catalogue embarqué, manifeste de confidentialité
 
+Shared/                  protocole WatchConnectivity partagé iOS/watchOS
+SharedComplication/      état borné partagé avec la complication
 MineMasterWatch/         app watchOS, miroir compact de la progression
 MineMasterWatchWidgets/  extension WidgetKit de la complication
 ```
@@ -93,6 +95,7 @@ MineMasterWatchWidgets/  extension WidgetKit de la complication
 - Le catalogue distant est fusionné avec les définitions locales, puis persisté.
 - `WatchCommandRouter` exécute les commandes de la montre côté iPhone, de façon idempotente.
 - `WatchLink` ne mute jamais la progression de la montre : il demande l'action à l'iPhone et applique l'état reçu.
+- `Shared/` et `SharedComplication/` sont rattachés par groupes synchronisés aux cibles iOS, watchOS et WidgetKit, sans référence de fichier manuelle.
 
 ## Tests
 

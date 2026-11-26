@@ -63,8 +63,9 @@ résultat faux.
 - La montre ne mute jamais la progression locale : elle envoie une commande
   bornée à l'iPhone et applique l'état reçu. Aucune vue watchOS n'appelle
   directement `open`, `buy`, `sell` ou `rebirth`.
-- Les fichiers partagés entre iOS et watchOS sont listés explicitement dans la
-  phase Sources de la cible `MineMasterWatch`.
+- Les fichiers partagés entre iOS, watchOS et WidgetKit vivent dans `Shared/`
+  et `SharedComplication/`, rattachés par groupes synchronisés aux cibles
+  concernées. Aucune référence de fichier manuelle ne doit les lier.
 
 ### Commentaires
 
@@ -168,6 +169,13 @@ MineMasterUITests/
 ├─ OpeningFlowUITests.swift
 ├─ CollectionUITests.swift
 └─ ProfileUITests.swift
+
+Shared/
+├─ WatchProtocol.swift    paquets, commandes et bornes
+└─ WatchSessionRelay.swift relais WCSession sans état
+
+SharedComplication/
+└─ ComplicationState.swift état borné partagé avec WidgetKit
 
 MineMasterWatch/
 ├─ WatchLink.swift        lien iPhone, commandes et cache de lecture
