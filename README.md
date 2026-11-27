@@ -36,9 +36,11 @@ Application iOS et Apple Watch, éducative et non commerciale. La montre est aut
 <a id="apercu"></a>
 ## <img src="https://api.iconify.design/heroicons/eye.svg?color=%23d97706&width=20" width="20" height="20" alt="" /> Aperçu
 
-| Boosters | Ouverture | Collection | Profil |
-|---|---|---|---|
-| ![Écran Boosters](docs/screenshots/boosters.png) | ![Écran Ouverture](docs/screenshots/ouverture.png) | ![Écran Collection](docs/screenshots/collection.png) | ![Écran Profil](docs/screenshots/profil.png) |
+| Boosters | Ouverture | Collection |
+|---|---|---|
+| ![Écran Boosters](docs/screenshots/boosters.png) | ![Écran Ouverture](docs/screenshots/ouverture.png) | ![Écran Collection](docs/screenshots/collection.png) |
+| **Profil** | **Marché** | **Fiche d'objet** |
+| ![Écran Profil](docs/screenshots/profil.png) | ![Écran Marché](docs/screenshots/marche.png) | ![Fiche d'un objet](docs/screenshots/fiche.png) |
 
 | <img src="https://api.iconify.design/heroicons/cube.svg?color=%23d97706&width=18" width="18" height="18" alt="" /> 515 items | <img src="https://api.iconify.design/heroicons/swatch.svg?color=%23d97706&width=18" width="18" height="18" alt="" /> 8 catégories | <img src="https://api.iconify.design/heroicons/sparkles.svg?color=%23d97706&width=18" width="18" height="18" alt="" /> 5 raretés | <img src="https://api.iconify.design/heroicons/device-phone-mobile.svg?color=%23d97706&width=18" width="18" height="18" alt="" /> iOS + watchOS |
 |:---:|:---:|:---:|:---:|
@@ -136,6 +138,10 @@ Application iOS et Apple Watch, éducative et non commerciale. La montre est aut
 La cible `MineMasterWidgets` est une extension WidgetKit séparée. Elle lit un
 état borné écrit par l'application dans le groupe d'applications
 `group.com.minemaster.iut-st-die`.
+
+| Progression | Carrière | Pack mystère |
+|---|---|---|
+| ![Widget Progression](docs/screenshots/widget-progression.png) | ![Widget Carrière](docs/screenshots/widget-carriere.png) | ![Widget Pack mystère](docs/screenshots/widget-pack.png) |
 
 - Trois widgets : progression, carrière et accès rapide au pack.
 - Les données se limitent à la progression, aux compteurs, au titre et à la
