@@ -4,19 +4,71 @@ Instructions obligatoires pour toute IA ou agent qui travaille sur ce dépôt.
 Elles priment sur les habitudes générales de l'outil. Le non-respect d'une règle
 bloquante doit être signalé avant toute modification.
 
+## Démarrage agent (obligatoire)
+
+À la première ouverture du dépôt, rendre l'environnement opérationnel avant de
+lire ou modifier du code métier.
+
+1. Se placer à la racine, le dossier qui contient `MineMaster.xcodeproj` :
+
+   ```bash
+   cd "$(git rev-parse --show-toplevel)"
+   ```
+
+2. Vérifier Xcode. `xcode-select -p` doit pointer vers
+   `Xcode.app/Contents/Developer`. Sinon, préfixer les commandes avec
+   `DEVELOPER_DIR` :
+
+   ```bash
+   export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+   xcodebuild -version
+   ```
+
+3. Installer les dépendances et compiler pour iPhone :
+
+   ```bash
+   ./scripts/agent-bootstrap.sh
+   ```
+
+   Le script résout Swift Package Manager et build la cible `MineMaster` pour
+   `generic/platform=iOS Simulator`. Pour un simulateur précis, passer
+   `DESTINATION='platform=iOS Simulator,name=iPhone 18 Pro'`.
+
+4. Lancer les tests avant de livrer :
+
+   ```bash
+   xcodebuild test -project MineMaster.xcodeproj \
+     -scheme MineMaster \
+     -destination 'platform=iOS Simulator,name=iPhone 18 Pro'
+   ```
+
+La procédure détaillée, les commandes d'installation sur simulateur, les
+captures d'écran et le dépannage sont dans
+[`docs/AGENT_BOOTSTRAP.md`](docs/AGENT_BOOTSTRAP.md).
+
+Un simulateur Apple Watch n'est pas nécessaire pour build, tester ou capturer
+l'iPhone. Ne pas installer de runtime watchOS sans demande explicite. Ne pas
+déployer les règles Firestore et ne pas créer de compte Firebase de test sans
+accord explicite.
+
 ## 0. Lecture obligatoire
 
 Avant de répondre ou de modifier quoi que ce soit :
 
-1. Lire et appliquer `.kilo/skills/caveman/SKILL.md` à chaque réponse.
-   La voix caveman est le mode de communication par défaut, sans exception,
-   jusqu'à ce que l'utilisateur écrive « stop caveman » ou « normal mode ».
-2. Lire et appliquer `.kilo/skills/swiftui-design-skill/SKILL.md` avant toute
-   création ou refonte d'interface, puis respecter `docs/DESIGN_SYSTEM.md`.
-3. Lire `README.md` pour la stack et l'architecture.
-4. Lire `docs/CAHIER_DES_CHARGES.md` si la demande touche une fonctionnalité,
-   une règle de jeu, la sécurité ou les données.
-5. Lire les fichiers concernés avant de les modifier.
+1. Lire et appliquer [`.kilo/skills/caveman/SKILL.md`](.kilo/skills/caveman/SKILL.md)
+   à chaque réponse. La voix caveman est le mode de communication par défaut,
+   sans exception, jusqu'à ce que l'utilisateur écrive « stop caveman » ou
+   « normal mode ».
+2. Lire et appliquer
+   [`.kilo/skills/swiftui-design-skill/SKILL.md`](.kilo/skills/swiftui-design-skill/SKILL.md)
+   avant toute création ou refonte d'interface, puis respecter
+   [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md).
+3. Lire [`README.md`](README.md) pour la stack et l'architecture.
+4. Lire [`docs/CAHIER_DES_CHARGES.md`](docs/CAHIER_DES_CHARGES.md) si la demande
+   touche une fonctionnalité, une règle de jeu, la sécurité ou les données.
+5. Lire [`docs/FIREBASE.md`](docs/FIREBASE.md) avant toute modification de
+   l'authentification, de la synchronisation ou des règles Firestore.
+6. Lire les fichiers concernés avant de les modifier.
 
 Deux publics, deux documents :
 
@@ -24,6 +76,17 @@ Deux publics, deux documents :
   les commentaires de documentation Swift (`///`).
 - Documentation projet : pour les IA et agents. Dans `AGENTS.md`, `README.md`
   et `docs/`. Elle décrit les règles, les invariants et les procédures.
+
+Carte documentaire :
+
+| Sujet | Document |
+|---|---|
+| Installation, build iPhone, simulateurs, dépannage | [`docs/AGENT_BOOTSTRAP.md`](docs/AGENT_BOOTSTRAP.md) |
+| Règles de jeu, sécurité, données | [`docs/CAHIER_DES_CHARGES.md`](docs/CAHIER_DES_CHARGES.md) |
+| Design, couleurs, composants | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) |
+| Auth, Firestore, Google Sign-In | [`docs/FIREBASE.md`](docs/FIREBASE.md) |
+| Fonctionnalités, architecture, captures | [`README.md`](README.md) |
+| Règles de code, tests, Git, terminé | `AGENTS.md` (ce fichier) |
 
 ## 1. Priorités
 
@@ -419,9 +482,12 @@ Points restant à instrumenter avant d'ajouter les tests correspondants :
 
 ## 5. Definition of done
 
+- `./scripts/agent-bootstrap.sh` passe depuis la racine du dépôt.
 - Le code compile et les tests passent.
 - Les nouveaux comportements ont leurs tests.
 - La documentation d'API est à jour et en français.
+- Les liens de [`README.md`](README.md) et de ce fichier pointent vers des
+  documents existants ; les captures de `docs/screenshots/` sont à jour.
 - Aucun commentaire libre ajouté.
 - Aucun secret, aucune dépendance tierce, aucun accès réseau non validé.
 - Le commit respecte la convention et ne contient que l'intention annoncée.

@@ -235,6 +235,16 @@ MineMaster/
 
 **Prérequis :** macOS avec Xcode 26 ou plus récent, un simulateur iPhone, et un simulateur Apple Watch pour la cible watchOS.
 
+Pour un agent ou une IA, le chemin le plus court depuis la racine du dépôt :
+
+```bash
+./scripts/agent-bootstrap.sh
+```
+
+Le script sélectionne Xcode, résout les dépendances Swift Package Manager et
+compile la cible iPhone. La procédure détaillée, les commandes de lancement sur
+simulateur et le dépannage sont dans [`docs/AGENT_BOOTSTRAP.md`](docs/AGENT_BOOTSTRAP.md).
+
 1. Ouvre le projet :
 
    ```bash
@@ -296,6 +306,7 @@ Les tests utilisent un générateur aléatoire injecté, une session réseau de 
 | [`docs/CAHIER_DES_CHARGES.md`](docs/CAHIER_DES_CHARGES.md) | Règles de jeu, sécurité, données et invariants |
 | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | Couleurs, typographie, espacements et composants |
 | [`docs/FIREBASE.md`](docs/FIREBASE.md) | Auth, Firestore, configuration Google Sign-In |
+| [`docs/AGENT_BOOTSTRAP.md`](docs/AGENT_BOOTSTRAP.md) | Installation des dépendances, build iPhone, simulateurs et dépannage |
 | [`AGENTS.md`](AGENTS.md) | Règles de code, tests, Git et définition de terminé |
 
 ---
